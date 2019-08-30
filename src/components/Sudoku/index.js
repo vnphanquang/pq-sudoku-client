@@ -13,6 +13,10 @@ class Sudoku extends Component {
     this.conflictCells = [];
     // TODO: separate lastSelectedCell ??
     this.selectedCells = [null];
+    // this.selection = {
+    //   type: 'single',
+    
+    // }
     this.cells = this.initGrid();
     this.state = {
       isCompleted: false,
@@ -99,7 +103,7 @@ class Sudoku extends Component {
   }
 
   handleKeyPress(e, targetCell) {
-    let {ctrlKey, key} = e
+    let {ctrlKey, shiftkey, key} = e
     if (VALUES.has(key)) {
       if (this.pencilMode()) {
         targetCell.setState((st) => {
@@ -142,6 +146,9 @@ class Sudoku extends Component {
         case 'y':
           //TODO: implement redo
           break;
+        case 'g':
+          e.preventDefault();
+          this.selectSubgrid(targetCell.props.subgrid);
         default:
           break;
       }
@@ -149,15 +156,25 @@ class Sudoku extends Component {
   }
 
   handleClick({ctrlKey, shiftKey}, targetCell) {
-    if (this.selectedCells.length === 1) {
-      this.singleSelectCell(targetCell);
+    if (ctrlKey) {
+      console.log('ctrl+click');
     } else {
-      this.selectedCells.forEach(cell => {
-        this.clearCellStyle(cell);
-      })
-      this.litRelatives(targetCell);
-      this.spotMatchedCellsAndConflicts(targetCell);
-      this.selectCell(targetCell);
+      if (this.selectedCells.length === 1) {
+        if (shiftKey) {
+          console.log('shift+click');
+        } else {
+          this.singleSelectCell(targetCell);
+        }
+      } else {
+        this.selectedCells.forEach(cell => {
+          this.clearCellStyle(cell);
+        })
+        this.litRelatives(targetCell);
+        this.spotMatchedCellsAndConflicts(targetCell);
+        this.selectedCells = [];
+        this.selectCell(targetCell);
+        targetCell.input.focus();
+      }
     }
   }
 
@@ -178,7 +195,9 @@ class Sudoku extends Component {
       }
       this.litRelatives(targetCell);
       this.spotMatchedCellsAndConflicts(targetCell);
+      this.selectedCells = [];
       this.selectCell(targetCell);
+      targetCell.input.focus();
     } else {
       targetCell.input.focus();
     }
@@ -190,8 +209,29 @@ class Sudoku extends Component {
 
   selectCell(targetCell) {
     this.setCellStyle(targetCell, STYLE_STATES.SELECTED);
-    this.selectedCells = [targetCell]
-    targetCell.input.focus();
+    // this.selectedCells = [targetCell]
+    // targetCell.input.focus();
+    this.selectedCells.push(targetCell);
+  }
+
+  selectSubgrid(subgrid) {
+    let lastSelectedCell = this.selectedCells[0];
+    if (this.selectedCells > 1) {
+      this.selectedCells.forEach(cell => {
+        this.clearCellStyle(cell);
+      })
+    } else if (lastSelectedCell !== null) {
+      this.clearCellStyle(lastSelectedCell);
+      this.unlitRelatives(lastSelectedCell);
+      let lastSelectedValue = this.getCellValue(lastSelectedCell);
+      if (lastSelectedValue !== '') {
+        this.uncheckConflicts();
+        this.unspotMatchedCells(lastSelectedValue);
+      }
+    }
+    this.selectedCells = [];
+    this.getCellsBySubgrid(subgrid).forEach(cell => this.selectCell(cell));
+    this.selectedCells[0].input.focus();
   }
 
   selectDir(targetIndex, direction) {
@@ -220,8 +260,7 @@ class Sudoku extends Component {
     let cell;
     for (coor[cursor] = 0; coor[cursor] < GRID_SIZE; coor[cursor]++) {
       cell = this.getCell(coor.row, coor.col);
-      this.setCellStyle(cell, STYLE_STATES.SELECTED);
-      this.selectedCells.push(cell);
+      this.selectCell(cell);
     }
     this.selectedCells[0].input.focus();
   }
@@ -300,14 +339,14 @@ class Sudoku extends Component {
   }
 
   litRelativeSubgrid(targetCell) {
-    let cells = this.getCellsBySubgrid(targetCell.props.row, targetCell.props.col);
+    let cells = this.getCellsBySubgrid(targetCell.props.subgrid);
     cells.forEach((cell) => {
       this.setCellStyle(cell, STYLE_STATES.LIT);
     })
   }
 
   unlitRelativeSubgrid(targetCell) {
-    let cells = this.getCellsBySubgrid(targetCell.props.row, targetCell.props.col);
+    let cells = this.getCellsBySubgrid(targetCell.props.subgrid);
     cells.forEach((cell) => {
       this.clearCellStyle(cell);
     })
@@ -331,7 +370,7 @@ class Sudoku extends Component {
   }
 
   checkConflicts(targetCell, targetValue) {
-    let {row, col} = targetCell.props;
+    let {row, col, subgrid} = targetCell.props;
     let isConflicting;
     let isSelf;
     let matchedCells = this.getCellsByValue(targetValue);
@@ -339,7 +378,7 @@ class Sudoku extends Component {
     let otherMatches = [];
     targetValue = (targetValue !== undefined) ? targetValue : this.getCellValue(targetCell);
     matchedCells.forEach((cell) => {
-      isConflicting = (cell.props.row === row) || (cell.props.col === col);
+      isConflicting = (cell.props.row === row) || (cell.props.col === col || cell.props.subgrid === subgrid);
       isSelf = cell.isSameCell(targetCell);
       if (!isSelf) {
         if (isConflicting) conflicts.push(cell);
@@ -352,17 +391,19 @@ class Sudoku extends Component {
   }
 
   uncheckConflicts(relativeCell) {
-    let cell, row, col;
+    let cell, row, col, subgroup;
     if (relativeCell !== undefined) {
       row = relativeCell.props.row;
       col = relativeCell.props.col;
+      subgroup = relativeCell.props.subgrid;
     } else {
-      row = -1;
-      col = -1;
+      row = null;
+      col = null;
+      subgroup = null;
     }
     while (this.conflictCells.length !== 0) {
       cell = this.conflictCells.pop();
-      if (cell.props.row === row || cell.props.col === col) {
+      if (cell.props.row === row || cell.props.col === col || cell.props.subgrid === subgroup) {
         this.setCellStyle(cell, STYLE_STATES.LIT);
       } else {
         this.clearCellStyle(cell);
@@ -425,12 +466,12 @@ class Sudoku extends Component {
     this.getCellsByValue(targetValue).push(targetCell);
   }
 
-  getCellsBySubgrid(row, col) {
-    return this.subgridMap.get(Sudoku.getSubgridNumber(row, col));
+  getCellsBySubgrid(subgrid) {
+    return this.subgridMap.get(subgrid);
   }
   
   setSubgridMapping(targetCell) {
-    this.getCellsBySubgrid(targetCell.props.row, targetCell.props.col).push(targetCell);
+    this.getCellsBySubgrid(targetCell.props.subgrid).push(targetCell);
   }
 
   static getSubgridNumber(row, col) {
@@ -440,6 +481,7 @@ class Sudoku extends Component {
   togglePencilMode() {
     this.setState((st) => ({pencilMode: !st.pencilMode}));
   }
+
   pencilMode() {
     return this.state.pencilMode;
   }
