@@ -9,7 +9,8 @@ class Cell extends Component {
     super(props)
     this.input = null;
     this.state = {
-      cellValue: this.props.getGameValue(this.props.row, this.props.col),
+      // cellValue: this.props.getGameValue(this.props.row, this.props.col),
+      cellValue: '',
       pencils: PencilMap(),
       styleState: null
     }
@@ -92,7 +93,7 @@ function getBgColor(styleState) {
       return 'rgb(153, 153, 153)';
     case STYLE_STATES.CONFLICTING:
       return 'rgb(255, 117, 117)';
-    case STYLE_STATES.FOCUSED:
+    case STYLE_STATES.SELECTED:
       return 'rgb(168, 168, 255)';
     default:
       return 'white'

@@ -1,5 +1,5 @@
 export const STYLE_STATES = {
-  FOCUSED: 'focused',
+  SELECTED: 'selected',
   CONFLICTING: 'conflicting',
   SPOTTED: 'spotted',
   LIT: 'lit'

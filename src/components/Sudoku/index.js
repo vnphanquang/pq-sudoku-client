@@ -11,9 +11,9 @@ class Sudoku extends Component {
     this.cellValueMap = ValueMap();
     this.subgridMap = SubgridMap();
     this.conflictCells = [];
-    // this.focusedCell = null;
-    this.focusedCells = [null];
-    this.cells = this.initGrid('blank');
+    // TODO: separate lastSelectedCell ??
+    this.selectedCells = [null];
+    this.cells = this.initGrid();
     this.state = {
       isCompleted: false,
       pencilMode: false,
@@ -21,34 +21,31 @@ class Sudoku extends Component {
 
     // Input & Navigation
     this.handleKeyPress = this.handleKeyPress.bind(this);
-    this.handleCellValueInput = this.handleCellValueInput.bind(this);
     this.handleClick = this.handleClick.bind(this);
-    this.keyNavigate = this.keyNavigate.bind(this);
-    this.updateCellMaps = this.updateCellMaps.bind(this);
+    this.mapCellRef = this.mapCellRef.bind(this);
     
     // JSON handling
     // this.getJSONValues = this.getJSONValues.bind(this);
     // this.setValuesFromJSON = this.setValuesFromJSON.bind(this);
     
     // Play Mode Specifics
-    this.getGameValue = this.getGameValue.bind(this);
+    // this.getGameValue = this.getGameValue.bind(this);
     // this.checkGameCompletion = this.checkGameCompletion.bind(this);
-    this.togglePencilMode = this.togglePencilMode.bind(this);
-    this.pencilMode = this.pencilMode.bind(this);
   }
 
-  initGrid(flag) {
+  initGrid() {
     let cells = [];
-    let cellRow, cell, gameValue, row, col;
+    let cellRow, cell, row, col;
+    // let gameValue;
     for (row = 0; row < GRID_SIZE; row++) {
       cellRow = [];
       for (col = 0; col < GRID_SIZE; col++) {
-        if (flag === 'random') {
-          gameValue = `${Math.floor(Math.random() * GRID_SIZE) + 1}`;
-        } else if (flag === 'blank') {
-          gameValue = ''
-        }
-        cell = {node: null, gameValue};
+        // if (flag === 'random') {
+        //   gameValue = `${Math.floor(Math.random() * GRID_SIZE) + 1}`;
+        // } else if (flag === 'blank') {
+        //   gameValue = ''
+        // }
+        cell = null;
         cellRow.push(cell);
       }
       cells.push(cellRow);
@@ -56,30 +53,49 @@ class Sudoku extends Component {
     return cells;
   }
 
-  updateCellMaps(targetCell) {
+  mapCellRef(targetCell) {
     let {row, col} = targetCell.props;
-    let targetValue = this.getGameValue(row, col);
-    this.cells[row][col].node = targetCell;
-    if (targetValue !== '') {
-      this.setCellValueMapping(targetCell, targetValue);
-    }
+    // let targetValue = this.getGameValue(row, col);
+    this.cells[row][col] = targetCell;
+    // if (targetValue !== '') {
+    //   this.setCellValueMapping(targetCell, targetValue);
+    // }
     this.setSubgridMapping(targetCell);
   }
 
-  handleCellValueInput(targetCell) {
-    let {row, col} = targetCell.props;
-    let newValue = this.getCellValue(targetCell);
-    let oldValue = this.getGameValue(row, col);
-    if (oldValue !== '') {
-      this.removeCellValueMapping(targetCell, oldValue);
-      this.uncheckConflicts();
-      this.unspotMatchedCells(oldValue);
-    }
-    this.setGameValue(row, col, newValue);
-    if (newValue !== '') {
-      this.setCellValueMapping(targetCell, newValue);
-      this.spotMatchedCellsAndConflicts(targetCell);
-    }
+  // updateCellValue(targetCell) {
+  //   let {row, col} = targetCell.props;
+  //   let newValue = this.getCellValue(targetCell);
+  //   let oldValue = this.getGameValue(row, col);
+  //   if (oldValue !== '') {
+  //     this.removeCellValueMapping(targetCell, oldValue);
+  //     this.uncheckConflicts();
+  //     this.unspotMatchedCells(oldValue);
+  //   }
+  //   this.setGameValue(row, col, newValue);
+  //   if (newValue !== '') {
+  //     this.setCellValueMapping(targetCell, newValue);
+  //     this.spotMatchedCellsAndConflicts(targetCell);
+  //   }
+  // }
+
+  updateCellValue(targetCell, newValue) {
+    let oldValue = this.getCellValue(targetCell);
+    targetCell.setState({cellValue: newValue}, () => {
+      if (oldValue !== '') {
+        this.removeCellValueMapping(targetCell, oldValue);
+        if (this.selectedCells.length === 1) {
+          this.unspotMatchedCells(oldValue);
+          this.uncheckConflicts(targetCell);
+        }
+      }  
+      if (newValue !== '') {
+        this.setCellValueMapping(targetCell, newValue);
+        if (this.selectedCells.length === 1) {
+          this.spotMatchedCellsAndConflicts(targetCell);
+        }
+      }
+    });  
   }
 
   handleKeyPress(e, targetCell) {
@@ -90,21 +106,30 @@ class Sudoku extends Component {
           st.cellValue = '';
           st.pencils.set(key, !st.pencils.get(key));
           return st;
-        }, () => this.handleCellValueInput(targetCell))
+        })
       } else {
-        if (VALUES.get(key) !== targetCell.state.cellValue) {
-          targetCell.setState({cellValue: VALUES.get(key), pencils: PencilMap()}, () => this.handleCellValueInput(targetCell));
-        } else {
-          targetCell.setState({cellValue: ''}, () => this.handleCellValueInput(targetCell));    
-        }
+        let inputValue = VALUES.get(key);
+        this.selectedCells.forEach(cell => {
+          if (inputValue !== cell.state.cellValue) {
+            this.updateCellValue(cell, inputValue); 
+            // cell.setState({cellValue: VALUES.get(key), pencils: PencilMap()});
+          } else {
+            this.updateCellValue(cell, '');
+          }
+        })
+
       }
     } else if (KEYS_STROKES.ARROWS.includes(key)) {
       this.keyNavigate(e);
     } else if (KEYS_STROKES.DELETES.includes(key)) {
-      if (targetCell.state.cellValue !== '') {
-        targetCell.setState({cellValue: ''}, () => this.handleCellValueInput(targetCell));
-      } else {
+      if (this.pencilMode()) {
         targetCell.setState({pencils: PencilMap()});
+      } else {
+        this.selectedCells.forEach(cell => {
+          if (cell.state.cellValue !== '') {
+            this.updateCellValue(cell, '');
+          }
+        })
       }
     } else if (ctrlKey) {
       switch(key) {
@@ -123,33 +148,88 @@ class Sudoku extends Component {
     }
   }
 
-  handleClick(e, targetCell) {
-    let lastFocusedCell = this.focusedCells[0];
-    if (!targetCell.isSameCell(lastFocusedCell)) {
-      if (lastFocusedCell !== null) {
-        this.clearStyleState(lastFocusedCell);
-        this.unlitRelatives(lastFocusedCell);
-        let lastFocusedValue = this.getCellValue(lastFocusedCell);
+  handleClick({ctrlKey, shiftKey}, targetCell) {
+    if (this.selectedCells.length === 1) {
+      this.singleSelectCell(targetCell);
+    } else {
+      this.selectedCells.forEach(cell => {
+        this.clearCellStyle(cell);
+      })
+      this.litRelatives(targetCell);
+      this.spotMatchedCellsAndConflicts(targetCell);
+      this.selectCell(targetCell);
+    }
+  }
+
+  singleSelectCell(targetCell) {
+    let lastSelectedCell = this.selectedCells[0];
+    if (!targetCell.isSameCell(lastSelectedCell)) {
+      if (lastSelectedCell !== null) {
+        this.clearCellStyle(lastSelectedCell);
+        this.unlitRelatives(lastSelectedCell);
+        let lastSelectedValue = this.getCellValue(lastSelectedCell);
         let targetValue = this.getCellValue(targetCell);
-        if (lastFocusedValue !== '') {
-          this.uncheckConflicts();
-          if (targetValue !== lastFocusedValue) {
-            this.unspotMatchedCells(lastFocusedValue);
+        if (lastSelectedValue !== '') {
+          this.uncheckConflicts(targetCell);
+          if (targetValue !== lastSelectedValue) {
+            this.unspotMatchedCells(lastSelectedValue);
           }
         }
       }
       this.litRelatives(targetCell);
       this.spotMatchedCellsAndConflicts(targetCell);
-      this.focusCell(targetCell);
+      this.selectCell(targetCell);
     } else {
       targetCell.input.focus();
     }
   }
 
+  // multiSelectCell(targetCell) {
+
+  // }
+
+  selectCell(targetCell) {
+    this.setCellStyle(targetCell, STYLE_STATES.SELECTED);
+    this.selectedCells = [targetCell]
+    targetCell.input.focus();
+  }
+
+  selectDir(targetIndex, direction) {
+    // TODO: Check conflicts within col/row
+    let lastSelectedCell = this.selectedCells[0];
+    if (this.selectedCells > 1) {
+      this.selectedCells.forEach(cell => {
+        this.clearCellStyle(cell);
+      })
+    } else if (lastSelectedCell !== null) {
+      this.clearCellStyle(lastSelectedCell);
+      this.unlitRelatives(lastSelectedCell);
+      let lastSelectedValue = this.getCellValue(lastSelectedCell);
+      if (lastSelectedValue !== '') {
+        this.uncheckConflicts();
+        this.unspotMatchedCells(lastSelectedValue);
+      }
+    }
+    this.selectedCells = [];
+
+    let coor = {
+      row: targetIndex,
+      col: targetIndex
+    }
+    let cursor = (direction === DIRECTION.ROW) ? DIRECTION.COL : DIRECTION.ROW;
+    let cell;
+    for (coor[cursor] = 0; coor[cursor] < GRID_SIZE; coor[cursor]++) {
+      cell = this.getCell(coor.row, coor.col);
+      this.setCellStyle(cell, STYLE_STATES.SELECTED);
+      this.selectedCells.push(cell);
+    }
+    this.selectedCells[0].input.focus();
+  }
+
   keyNavigate(e) {
     let {key} = e
     let targetCell = null;
-    let {row, col} = this.focusedCells[0].props;
+    let {row, col} = this.selectedCells[0].props;
 
     switch(key) {
       case 'ArrowUp': 
@@ -182,7 +262,7 @@ class Sudoku extends Component {
     this.litRelativeDir(targetCell, DIRECTION.ROW);
     this.litRelativeDir(targetCell, DIRECTION.COL);
     this.litRelativeSubgrid(targetCell);
-    this.clearStyleState(targetCell);
+    this.clearCellStyle(targetCell);
   }
 
   unlitRelatives(targetCell) {
@@ -201,7 +281,7 @@ class Sudoku extends Component {
     let cell;
     for (coor[cursor] = 0; coor[cursor] < GRID_SIZE; coor[cursor]++) {
       cell = this.getCell(coor.row, coor.col);
-      this.litCell(cell); 
+      this.setCellStyle(cell, STYLE_STATES.LIT);
     }
   }
 
@@ -215,40 +295,36 @@ class Sudoku extends Component {
     let cell;
     for (coor[cursor] = 0; coor[cursor] < GRID_SIZE; coor[cursor]++) {
       cell = this.getCell(coor.row, coor.col);
-      this.clearStyleState(cell); 
+      this.clearCellStyle(cell); 
     }
   }
 
   litRelativeSubgrid(targetCell) {
-    let cells = this.getCellsFromSubgrid(targetCell.props.row, targetCell.props.col);
+    let cells = this.getCellsBySubgrid(targetCell.props.row, targetCell.props.col);
     cells.forEach((cell) => {
-      this.litCell(cell);
+      this.setCellStyle(cell, STYLE_STATES.LIT);
     })
   }
 
   unlitRelativeSubgrid(targetCell) {
-    let cells = this.getCellsFromSubgrid(targetCell.props.row, targetCell.props.col);
+    let cells = this.getCellsBySubgrid(targetCell.props.row, targetCell.props.col);
     cells.forEach((cell) => {
-      this.clearStyleState(cell);
+      this.clearCellStyle(cell);
     })
-  }
-
-  litCell(targetCell) {
-    targetCell.setState({styleState: STYLE_STATES.LIT});
   }
 
   spotMatchedCellsAndConflicts(targetCell) {
     let targetValue = this.getCellValue(targetCell);
     if (targetValue !== '') {
-      let cells = this.getCellsFromCellValue(targetValue);
+      let cells = this.getCellsByValue(targetValue);
       if (cells.length !== 0) {
         let {conflicts, otherMatches} = this.checkConflicts(targetCell, targetValue);
         if (conflicts !== null) {
           this.conflictCells = conflicts;
-          conflicts.forEach((cell) => cell.setState({styleState: STYLE_STATES.CONFLICTING}));
+          conflicts.forEach((cell) => this.setCellStyle(cell, STYLE_STATES.CONFLICTING));
         }
         if (otherMatches !== null) {
-          otherMatches.forEach((cell) => cell.setState({styleState: STYLE_STATES.SPOTTED}));
+          otherMatches.forEach((cell) => this.setCellStyle(cell, STYLE_STATES.SPOTTED));
         }
       }
     }
@@ -258,7 +334,7 @@ class Sudoku extends Component {
     let {row, col} = targetCell.props;
     let isConflicting;
     let isSelf;
-    let matchedCells = this.getCellsFromCellValue(targetValue);
+    let matchedCells = this.getCellsByValue(targetValue);
     let conflicts = [];
     let otherMatches = [];
     targetValue = (targetValue !== undefined) ? targetValue : this.getCellValue(targetCell);
@@ -275,59 +351,69 @@ class Sudoku extends Component {
     return {conflicts, otherMatches};
   }
 
-  uncheckConflicts() {
-    let cell;
+  uncheckConflicts(relativeCell) {
+    let cell, row, col;
+    if (relativeCell !== undefined) {
+      row = relativeCell.props.row;
+      col = relativeCell.props.col;
+    } else {
+      row = -1;
+      col = -1;
+    }
     while (this.conflictCells.length !== 0) {
       cell = this.conflictCells.pop();
-      this.clearStyleState(cell);
+      if (cell.props.row === row || cell.props.col === col) {
+        this.setCellStyle(cell, STYLE_STATES.LIT);
+      } else {
+        this.clearCellStyle(cell);
+      }
     }
   }
 
   unspotMatchedCells(targetValue) {
-    this.getCellsFromCellValue(targetValue).forEach((cell) => {
-      this.clearStyleState(cell);
+    this.getCellsByValue(targetValue).forEach((cell) => {
+      this.clearCellStyle(cell);
     })
   }
 
-  focusCell(targetCell) {
-    targetCell.setState({styleState: STYLE_STATES.FOCUSED});
-    this.focusedCells[0] = targetCell;
-    targetCell.input.focus();
+  setCellStyle(targetCell, styleState) {
+    // if (targetCell.state.styleState !== styleState)
+    targetCell.setState({styleState});
   }
 
-  clearStyleState(targetCell) {
+  clearCellStyle(targetCell) {
     targetCell.setState({styleState: null})
   }
 
-  getGameValue(row, col) {
-    return this.cells[row][col].gameValue;
-  }
+  // getGameValue(row, col) {
+  //   return this.cells[row][col].gameValue;
+  // }
 
-  setGameValue(row, col, targetValue) {
-    this.cells[row][col].gameValue = targetValue;
+  // setGameValue(row, col, targetValue) {
+  //   this.cells[row][col].gameValue = targetValue;
+  // }
+
+  // isCorrectValue(targetCell) {
+  //   let cellValue = this.getCellValue(targetCell);
+  //   let gameValue = this.getGameValue(targetCell.props.row, targetCell.props.col);
+  //   return cellValue === gameValue;
+  // }
+
+  getCell(row, col) {
+    return this.cells[row][col];
   }
 
   getCellValue(targetCell) {
     return targetCell.state.cellValue;
   }
-  
-  isCorrectValue(targetCell) {
-    let cellValue = this.getCellValue(targetCell);
-    let gameValue = this.getGameValue(targetCell.props.row, targetCell.props.col);
-    return cellValue === gameValue;
-  }
 
-  getCell(row, col) {
-    return this.cells[row][col].node;
-  }
-
-  getCellsFromCellValue(targetValue) {
+  getCellsByValue(targetValue) {
     return this.cellValueMap.get(`${targetValue}`)
   }
 
   removeCellValueMapping(targetCell, targetValue) {
     let isSelf;
-    let cells = this.getCellsFromCellValue(targetValue);
+    let cells = this.getCellsByValue(targetValue);
     cells = cells.filter((cell) => {
       isSelf = cell.isSameCell(targetCell);
       return !isSelf;
@@ -336,15 +422,15 @@ class Sudoku extends Component {
   }
 
   setCellValueMapping(targetCell, targetValue) {
-    this.getCellsFromCellValue(targetValue).push(targetCell);
+    this.getCellsByValue(targetValue).push(targetCell);
   }
 
-  getCellsFromSubgrid(row, col) {
+  getCellsBySubgrid(row, col) {
     return this.subgridMap.get(Sudoku.getSubgridNumber(row, col));
   }
   
   setSubgridMapping(targetCell) {
-    this.getCellsFromSubgrid(targetCell.props.row, targetCell.props.col).push(targetCell);
+    this.getCellsBySubgrid(targetCell.props.row, targetCell.props.col).push(targetCell);
   }
 
   static getSubgridNumber(row, col) {
@@ -367,12 +453,12 @@ class Sudoku extends Component {
     for (let row = 0; row < GRID_SIZE; row++) {
       rowIndices.push(
         // TODO: implementselectRow & selectCol
-        <div key={row+1} onClick={() => this.selectRow(row)}>
+        <div key={row+1} onClick={() => this.selectDir(row, DIRECTION.ROW)}>
           <p>{row + 1}</p>
         </div>
       )
       colIndices.push(
-        <div key={row+1} onClick={() => this.selectCol(row)}>
+        <div key={row+1} onClick={() => this.selectDir(row, DIRECTION.COL)}>
           <p>{row + 1}</p>
         </div>
       )
@@ -380,14 +466,14 @@ class Sudoku extends Component {
         subgrid = Sudoku.getSubgridNumber(row, col);
         cells.push(
           <Cell 
-            ref={this.updateCellMaps} 
+            ref={this.mapCellRef} 
             key={`${row}-${col}`} 
             row={row} col={col} 
             subgrid={subgrid}
             // handleCellValueInput={this.handleCellValueInput} 
             handleClick={this.handleClick} 
             // navigate={this.navigate}
-            getGameValue={this.getGameValue}
+            // getGameValue={this.getGameValue}
             // pencilMode={this.pencilMode}
             handleKeyPress={this.handleKeyPress}
           />
