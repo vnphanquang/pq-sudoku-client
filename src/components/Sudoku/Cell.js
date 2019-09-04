@@ -12,7 +12,8 @@ class Cell extends Component {
       // cellValue: this.props.getGameValue(this.props.row, this.props.col),
       cellValue: '',
       pencils: PencilMap(),
-      styleState: null
+      styleState: null,
+      focused: false
     }
     this.inputRef = this.inputRef.bind(this);
     this.handleClick = this.handleClick.bind(this);
@@ -26,7 +27,10 @@ class Cell extends Component {
       this.props.col === otherCell.props.col
     )
   }
-  
+  isSelected() {
+    return this.state.styleState === STYLE_STATES.SELECTED;
+  }
+
   inputRef(node) {
     this.input = node;
   }
@@ -48,6 +52,7 @@ class Cell extends Component {
         styleState={this.state.styleState}
         onClick={this.handleClick}
         onKeyDown={this.handleKeyPress}
+        focused={this.state.focused}
       >
         <PencilLayer pencils={this.state.pencils} />
         <input
@@ -60,8 +65,8 @@ class Cell extends Component {
   }
 }
 
-const StyledCell = styled(({styleState, row, col, ...other}) => <div {...other} />)({
-  backgroundColor: ({styleState}) => getBgColor(styleState),
+const StyledCell = styled(({focused, styleState, row, col, ...other}) => <div {...other} />)({
+  backgroundColor: ({focused, styleState}) => getBgColor(focused, styleState),
   borderColor: '#212121',
   borderStyle: 'solid',
   borderWidth: ({row, col}) => getBorderWidth(row, col),
@@ -85,7 +90,7 @@ const StyledCell = styled(({styleState, row, col, ...other}) => <div {...other} 
   }
 })
 
-function getBgColor(styleState) {
+function getBgColor(focused, styleState) {
   switch(styleState) {
     case STYLE_STATES.LIT:
       return 'rgb(216, 216, 216)';
@@ -94,7 +99,8 @@ function getBgColor(styleState) {
     case STYLE_STATES.CONFLICTING:
       return 'rgb(255, 117, 117)';
     case STYLE_STATES.SELECTED:
-      return 'rgb(168, 168, 255)';
+      if (focused) return 'rgb(100, 255, 255)';
+      else         return 'rgb(168, 168, 255)';
     default:
       return 'white'
   }

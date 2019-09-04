@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
-import {PencilMap, VALUES, KEYS_STROKES, DIRECTION, STYLE_STATES, SUBGRID_NUMBERS, GRID_SIZE, SubgridMap, ValueMap} from './utils';
-// import IOHandler from './IOHandler';
+import {PencilMap, SELECTION, VALUES, KEYS_STROKES, DIRECTION, STYLE_STATES, SUBGRID_NUMBERS, GRID_SIZE, SubgridMap, ValueMap} from './utils';
 import Cell from './Cell';
 import {styled} from '@material-ui/styles'
 
@@ -11,17 +10,18 @@ class Sudoku extends Component {
     this.cellValueMap = ValueMap();
     this.subgridMap = SubgridMap();
     this.conflictCells = [];
-    // TODO: separate lastSelectedCell ??
     this.selectedCells = [null];
-    // this.selection = {
-    //   type: 'single',
-    
-    // }
-    this.cells = this.initGrid();
-    this.state = {
-      isCompleted: false,
-      pencilMode: false,
+    this.selection = {
+      type: SELECTION.TYPES.SINGLE,
+      position: null,
+      cells: [null],
+      focus: null
     }
+    this.cells = this.initGrid();
+    // this.state = {
+    //   isCompleted: false,
+    // }
+    this.pencilMode = false;
 
     // Input & Navigation
     this.handleKeyPress = this.handleKeyPress.bind(this);
@@ -67,45 +67,33 @@ class Sudoku extends Component {
     this.setSubgridMapping(targetCell);
   }
 
-  // updateCellValue(targetCell) {
-  //   let {row, col} = targetCell.props;
-  //   let newValue = this.getCellValue(targetCell);
-  //   let oldValue = this.getGameValue(row, col);
-  //   if (oldValue !== '') {
-  //     this.removeCellValueMapping(targetCell, oldValue);
-  //     this.uncheckConflicts();
-  //     this.unspotMatchedCells(oldValue);
-  //   }
-  //   this.setGameValue(row, col, newValue);
-  //   if (newValue !== '') {
-  //     this.setCellValueMapping(targetCell, newValue);
-  //     this.spotMatchedCellsAndConflicts(targetCell);
-  //   }
-  // }
-
   updateCellValue(targetCell, newValue) {
     let oldValue = this.getCellValue(targetCell);
-    targetCell.setState({cellValue: newValue}, () => {
-      if (oldValue !== '') {
-        this.removeCellValueMapping(targetCell, oldValue);
-        if (this.selectedCells.length === 1) {
-          this.unspotMatchedCells(oldValue);
-          this.uncheckConflicts(targetCell);
+    if (newValue !== oldValue) {
+      targetCell.setState({cellValue: newValue}, () => {
+        if (oldValue !== '') {
+          this.removeCellValueMapping(targetCell, oldValue);
+          // if (this.selectedCells.length === 1) {
+          if (this.selection.type === SELECTION.TYPES.SINGLE) {
+            this.unspotMatchedCells(oldValue);
+            this.uncheckConflicts(targetCell);
+          }
+        }  
+        if (newValue !== '') {
+          this.setCellValueMapping(targetCell, newValue);
+          // if (this.selectedCells.length === 1) {
+          if (this.selection.type === SELECTION.TYPES.SINGLE) {
+            this.spotMatchedCellsAndConflicts(targetCell);
+          }
         }
-      }  
-      if (newValue !== '') {
-        this.setCellValueMapping(targetCell, newValue);
-        if (this.selectedCells.length === 1) {
-          this.spotMatchedCellsAndConflicts(targetCell);
-        }
-      }
-    });  
+      });  
+    }
   }
 
   handleKeyPress(e, targetCell) {
     let {ctrlKey, shiftkey, key} = e
     if (VALUES.has(key)) {
-      if (this.pencilMode()) {
+      if (this.pencilMode) {
         targetCell.setState((st) => {
           st.cellValue = '';
           st.pencils.set(key, !st.pencils.get(key));
@@ -113,7 +101,7 @@ class Sudoku extends Component {
         })
       } else {
         let inputValue = VALUES.get(key);
-        this.selectedCells.forEach(cell => {
+        this.selection.cells.forEach(cell => {
           if (inputValue !== cell.state.cellValue) {
             this.updateCellValue(cell, inputValue); 
             // cell.setState({cellValue: VALUES.get(key), pencils: PencilMap()});
@@ -126,10 +114,10 @@ class Sudoku extends Component {
     } else if (KEYS_STROKES.ARROWS.includes(key)) {
       this.keyNavigate(e);
     } else if (KEYS_STROKES.DELETES.includes(key)) {
-      if (this.pencilMode()) {
+      if (this.pencilMode) {
         targetCell.setState({pencils: PencilMap()});
       } else {
-        this.selectedCells.forEach(cell => {
+        this.selection.cells.forEach(cell => {
           if (cell.state.cellValue !== '') {
             this.updateCellValue(cell, '');
           }
@@ -138,7 +126,8 @@ class Sudoku extends Component {
     } else if (ctrlKey) {
       switch(key) {
         case 'a':
-          //TODO: implement selectAllCells
+          e.preventDefault();
+          this.selectAll();
           break;
         case 'z':
           //TODO: implement undo
@@ -149,6 +138,7 @@ class Sudoku extends Component {
         case 'g':
           e.preventDefault();
           this.selectSubgrid(targetCell.props.subgrid);
+          break;
         default:
           break;
       }
@@ -156,119 +146,235 @@ class Sudoku extends Component {
   }
 
   handleClick({ctrlKey, shiftKey}, targetCell) {
-    if (ctrlKey) {
-      console.log('ctrl+click');
-    } else {
-      if (this.selectedCells.length === 1) {
-        if (shiftKey) {
-          console.log('shift+click');
-        } else {
+    let lastSelectedCell = this.selection.focus;
+    if (this.selection.type === SELECTION.TYPES.SINGLE) {
+      if (ctrlKey && lastSelectedCell !== null && !targetCell.isSameCell(lastSelectedCell)) {
+        this.clearSelection();
+        this.selectCell(lastSelectedCell);
+        this.selection.type = SELECTION.TYPES.MULTI;
+        this.selectCell(targetCell);
+        this.focusCell(targetCell);
+        targetCell.input.focus();
+      } else if (shiftKey && lastSelectedCell !== null && !targetCell.isSameCell(lastSelectedCell)) {
+        this.clearSelection();
+        this.selection.type = SELECTION.TYPES.MULTI;
+        this.shiftSelectCell(lastSelectedCell, targetCell);
+        lastSelectedCell.input.focus();
+      } else {
+        if (!targetCell.isSameCell(lastSelectedCell)) {
+          if (lastSelectedCell !== null) {
+            this.clearCellStyle(lastSelectedCell);
+            this.unlitRelatives(lastSelectedCell);
+            let lastSelectedValue = this.getCellValue(lastSelectedCell);
+            let targetValue = this.getCellValue(targetCell);
+            if (lastSelectedValue !== '') {
+              this.uncheckConflicts(targetCell);
+              if (targetValue !== lastSelectedValue) {
+                this.unspotMatchedCells(lastSelectedValue);
+              }
+            }
+          }
           this.singleSelectCell(targetCell);
         }
+      }
+    } else if (this.selection.type === SELECTION.TYPES.MULTI) {
+      if (ctrlKey) {
+        if (targetCell.isSelected()) {
+          this.unselectCell(targetCell);
+        } else {
+          this.selectCell(targetCell);
+          this.focusCell(targetCell);
+          targetCell.input.focus();
+        }
+      } else if (shiftKey &&  !targetCell.isSameCell(lastSelectedCell)) {
+        this.clearSelection();
+        this.shiftSelectCell(lastSelectedCell, targetCell);
+        lastSelectedCell.input.focus();
       } else {
-        this.selectedCells.forEach(cell => {
+        this.selection.cells.forEach(cell => {
           this.clearCellStyle(cell);
         })
-        this.litRelatives(targetCell);
-        this.spotMatchedCellsAndConflicts(targetCell);
-        this.selectedCells = [];
-        this.selectCell(targetCell);
-        targetCell.input.focus();
+        this.singleSelectCell(targetCell);  
       }
-    }
-  }
-
-  singleSelectCell(targetCell) {
-    let lastSelectedCell = this.selectedCells[0];
-    if (!targetCell.isSameCell(lastSelectedCell)) {
-      if (lastSelectedCell !== null) {
-        this.clearCellStyle(lastSelectedCell);
-        this.unlitRelatives(lastSelectedCell);
-        let lastSelectedValue = this.getCellValue(lastSelectedCell);
-        let targetValue = this.getCellValue(targetCell);
-        if (lastSelectedValue !== '') {
-          this.uncheckConflicts(targetCell);
-          if (targetValue !== lastSelectedValue) {
-            this.unspotMatchedCells(lastSelectedValue);
-          }
-        }
-      }
-      this.litRelatives(targetCell);
-      this.spotMatchedCellsAndConflicts(targetCell);
-      this.selectedCells = [];
-      this.selectCell(targetCell);
-      targetCell.input.focus();
     } else {
-      targetCell.input.focus();
+      this.selection.cells.forEach(cell => {
+        this.clearCellStyle(cell);
+      })
+      this.singleSelectCell(targetCell);
     }
   }
+// TODO: Selection methods ==> return false/true or selected/unselected cells
+  singleSelectCell(targetCell) {
+    this.litRelatives(targetCell);
+    this.spotMatchedCellsAndConflicts(targetCell);
+    this.selection.cells = [];
+    this.selection.type = SELECTION.TYPES.SINGLE;
+    this.selection.position = null;
+    this.selectCell(targetCell);
+    this.focusCell(targetCell);
+    targetCell.input.focus();
+  }
 
-  // multiSelectCell(targetCell) {
-
-  // }
+  shiftSelectCell(originCell, targetCell) {
+    let {row: originRow, col: originCol} = originCell.props;
+    let {row: targetRow, col: targetCol} = targetCell.props;
+    let rowIncrement = (originRow <= targetRow) ? 1 : -1;
+    let colIncrement = (originCol <= targetCol) ? 1 : -1;
+    targetRow += rowIncrement;
+    targetCol += colIncrement;
+    for (let row = originRow; row !== targetRow; row += rowIncrement) {
+      for (let col = originCol; col !== targetCol; col += colIncrement) {
+        this.selectCell(this.getCell(row, col));
+      }
+    }
+  }
 
   selectCell(targetCell) {
     this.setCellStyle(targetCell, STYLE_STATES.SELECTED);
-    // this.selectedCells = [targetCell]
-    // targetCell.input.focus();
-    this.selectedCells.push(targetCell);
+    this.selection.cells.push(targetCell);
+  }
+
+  unselectCell(targetCell) {
+    let selectedCells = this.selection.cells;
+    this.clearCellStyle(targetCell);
+    selectedCells.splice(selectedCells.indexOf(targetCell), 1)
+    if (selectedCells.length === 0) {
+      this.selection.type = SELECTION.TYPES.SINGLE;
+      this.selection.cells = [null];
+      this.selection.position = null;
+      this.selection.focus = null;
+    } else {
+      let lastSelected = selectedCells[selectedCells.length - 1];
+      this.focusCell(lastSelected);
+      lastSelected.input.focus();
+    }
   }
 
   selectSubgrid(subgrid) {
-    let lastSelectedCell = this.selectedCells[0];
-    if (this.selectedCells > 1) {
-      this.selectedCells.forEach(cell => {
-        this.clearCellStyle(cell);
-      })
-    } else if (lastSelectedCell !== null) {
-      this.clearCellStyle(lastSelectedCell);
-      this.unlitRelatives(lastSelectedCell);
-      let lastSelectedValue = this.getCellValue(lastSelectedCell);
-      if (lastSelectedValue !== '') {
-        this.uncheckConflicts();
-        this.unspotMatchedCells(lastSelectedValue);
-      }
+    if (this.selection.type !== SELECTION.TYPES.SUBGRID) {
+      if (this.selection.position !== subgrid) {
+        this.clearSelection();
+        this.selection.type = SELECTION.TYPES.SUBGRID;
+        this.selection.position = subgrid;
+        this.getCellsBySubgrid(subgrid).forEach(cell => this.selectCell(cell));
+        this.selection.focus.input.focus();
+      } 
+    } else {
+      this.handleClick({ctrlKey: false, shiftKey: false}, this.selection.focus);
     }
-    this.selectedCells = [];
-    this.getCellsBySubgrid(subgrid).forEach(cell => this.selectCell(cell));
-    this.selectedCells[0].input.focus();
+  }
+
+  handleIndexClick({shiftKey, ctrlKey}, targetIndex, direction) {
+    if (this.selection.type !== direction){
+      this.clearSelection();
+      this.selection.type = SELECTION.TYPES[direction.toUpperCase()];
+      this.selection.position = targetIndex;
+      this.selectDir(targetIndex, direction);
+    } else if (ctrlKey) {
+      let row = targetIndex;
+        let col = targetIndex;
+        if (direction === DIRECTION.ROW) {
+          col = 0;
+        } else {
+          row = 0;
+        }
+        if (!this.getCell(row, col).isSelected()) {
+          this.selectDir(targetIndex, direction);
+          this.selection.position = targetIndex;
+        } else {
+          this.unselectDir(targetIndex, direction);
+        }
+    } else if (shiftKey) {
+      this.clearSelection();
+      let increment = (targetIndex > this.selection.position) ? 1 : -1
+      targetIndex += increment;
+      let i = this.selection.position; 
+      do {
+        this.selectDir(i, direction);
+        i += increment;
+      } while (i !== targetIndex);
+      this.selection.position = targetIndex - increment;
+    } else {
+      this.clearSelection();
+      this.selection.position = targetIndex;
+      this.selectDir(targetIndex, direction);
+    }
   }
 
   selectDir(targetIndex, direction) {
-    // TODO: Check conflicts within col/row
-    let lastSelectedCell = this.selectedCells[0];
-    if (this.selectedCells > 1) {
-      this.selectedCells.forEach(cell => {
-        this.clearCellStyle(cell);
-      })
-    } else if (lastSelectedCell !== null) {
-      this.clearCellStyle(lastSelectedCell);
-      this.unlitRelatives(lastSelectedCell);
-      let lastSelectedValue = this.getCellValue(lastSelectedCell);
-      if (lastSelectedValue !== '') {
-        this.uncheckConflicts();
-        this.unspotMatchedCells(lastSelectedValue);
-      }
-    }
-    this.selectedCells = [];
-
     let coor = {
       row: targetIndex,
       col: targetIndex
     }
     let cursor = (direction === DIRECTION.ROW) ? DIRECTION.COL : DIRECTION.ROW;
-    let cell;
     for (coor[cursor] = 0; coor[cursor] < GRID_SIZE; coor[cursor]++) {
-      cell = this.getCell(coor.row, coor.col);
-      this.selectCell(cell);
+      this.selectCell(this.getCell(coor.row, coor.col));
     }
-    this.selectedCells[0].input.focus();
+    let selectedCell = this.selection.focus;
+    selectedCell = (selectedCell !== null) ? selectedCell : this.selection.cells[0];
+    selectedCell.input.focus();
+  }
+
+  unselectDir(targetIndex, direction) {
+    if (this.selection.type !== direction) return false;
+    let cursor = (direction === DIRECTION.ROW) ? DIRECTION.ROW : DIRECTION.COL;
+    let selectedCells = this.selection.cells;
+    for (let i = 0; i < selectedCells.length; i += GRID_SIZE) {
+      if (selectedCells[i].props[cursor] === targetIndex) {
+        selectedCells.splice(i, GRID_SIZE).forEach(cell => {
+          this.clearCellStyle(cell);
+        });
+        if (selectedCells.length === 0) {
+          if (this.selection.focus !== null) {
+            this.handleClick({ctrlKey: false, shiftKey: false}, this.selection.focus);
+          } else {
+            this.selection.type = SELECTION.TYPES.SINGLE;
+            this.selection.cells = [null];
+            this.selection.position = null;
+          }
+        }
+        return true;
+      }
+    }
+    return false;
+  }
+
+  selectAll() {
+    this.clearSelection();
+    this.selection.type = SELECTION.TYPES.MULTI;
+    this.selection.position = null;
+    for (let row = 0; row < GRID_SIZE; row++) {
+      for (let col = 0; col < GRID_SIZE; col++) {
+        this.selectCell(this.getCell(row, col));
+      }
+    }
+    this.selection.focus.input.focus();
+  }
+
+  clearSelection() {
+    let lastSelectedCell = this.selection.focus;
+    if (this.selection.type !== SELECTION.TYPES.SINGLE) {
+      this.selection.cells.forEach(cell => {
+        this.clearCellStyle(cell);
+      })
+    } else if (lastSelectedCell !== null) {
+      this.unlitRelatives(lastSelectedCell);
+      let lastSelectedValue = this.getCellValue(lastSelectedCell);
+      if (lastSelectedValue !== '') {
+        this.uncheckConflicts();
+        this.unspotMatchedCells(lastSelectedValue);
+      }
+    }
+    this.selection.cells = [];
+    // this.selection.type = SELECTION.TYPES.SINGLE;
+    // this.selection.position = null;
   }
 
   keyNavigate(e) {
-    let {key} = e
+    let {key, ctrlKey, shiftKey} = e
     let targetCell = null;
-    let {row, col} = this.selectedCells[0].props;
+    let lastSelectedCell = this.selection.focus;
+    let {row, col} = lastSelectedCell.props;
 
     switch(key) {
       case 'ArrowUp': 
@@ -294,7 +400,18 @@ class Sudoku extends Component {
       default:
         throw new Error(`Unknown KeyDown (${key}) at (${row},${col})`);
     }
-    if (targetCell !== null) this.handleClick(e, targetCell);
+    if (targetCell !== null) {
+      let isMultiSelection = this.selection.type === SELECTION.TYPES.MULTI;
+      if ((ctrlKey || shiftKey) && isMultiSelection) {
+        if (!targetCell.isSelected()) {
+          this.selectCell(targetCell);
+        }
+        this.focusCell(targetCell)
+        targetCell.input.focus();
+      } else {
+        this.handleClick({ctrlKey, shiftKey}, targetCell);
+      }
+    }
   }
 
   litRelatives(targetCell) {
@@ -417,6 +534,14 @@ class Sudoku extends Component {
     })
   }
 
+  focusCell(targetCell) {
+    if (this.selection.focus !== null) {
+      this.selection.focus.setState({focused: false});
+    }
+    this.selection.focus = targetCell;
+    targetCell.setState({focused: true});
+  }
+
   setCellStyle(targetCell, styleState) {
     // if (targetCell.state.styleState !== styleState)
     targetCell.setState({styleState});
@@ -479,11 +604,7 @@ class Sudoku extends Component {
   }
 
   togglePencilMode() {
-    this.setState((st) => ({pencilMode: !st.pencilMode}));
-  }
-
-  pencilMode() {
-    return this.state.pencilMode;
+    this.pencilMode = !this.pencilMode;
   }
 
   render() {
@@ -494,13 +615,12 @@ class Sudoku extends Component {
     let subgrid;
     for (let row = 0; row < GRID_SIZE; row++) {
       rowIndices.push(
-        // TODO: implementselectRow & selectCol
-        <div key={row+1} onClick={() => this.selectDir(row, DIRECTION.ROW)}>
+        <div key={row+1} onClick={(e) => this.handleIndexClick(e, row, DIRECTION.ROW)}>
           <p>{row + 1}</p>
         </div>
       )
       colIndices.push(
-        <div key={row+1} onClick={() => this.selectDir(row, DIRECTION.COL)}>
+        <div key={row+1} onClick={(e) => this.handleIndexClick(e, row, DIRECTION.COL)}>
           <p>{row + 1}</p>
         </div>
       )
@@ -531,18 +651,6 @@ class Sudoku extends Component {
       </StyleSudokuContainer>
     )
 
-    // return (
-    //   <div className={`Sudoku ${this.props.inactive ? 'inactive' : ''}`} disabled>
-    //     <h1>{this.props.name}</h1>
-    //     <h1>{this.state.isCompleted ? 'CONGRATULATIONS. YOU DID IT!' : 'GOOD LUCK!'}</h1>
-    //     <div className="Sudoku-grid">{renderedCells}</div>
-
-    //     <IOHandler save={this.getJSONValues} load={this.setValuesFromJSON}/>
-
-    //     <button onClick={this.checkGameCompletion}>Check Game</button>
-    //     <button onClick={this.togglePencilMode}>Pencil: {`${this.state.pencilMode}`}</button>
-    //   </div>
-    // )
   }
 }
 

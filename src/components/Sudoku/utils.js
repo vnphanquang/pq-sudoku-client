@@ -1,3 +1,13 @@
+export const SELECTION = {
+  TYPES: {
+    SINGLE: 'single',
+    MULTI: 'multiple',
+    SUBGRID: 'subgrid',
+    ROW: DIRECTION.ROW,
+    COL: DIRECTION.COL,
+  }
+}
+
 export const STYLE_STATES = {
   SELECTED: 'selected',
   CONFLICTING: 'conflicting',
