@@ -1,6 +1,7 @@
 import React from 'react'
 import Sudoku from './Sudoku'
 import {makeStyles} from '@material-ui/styles'
+import {CssBaseline} from '@material-ui/core'
 
 const useStyles = makeStyles({
   root: {
@@ -18,6 +19,7 @@ function App() {
   const classes = useStyles();
   return (
     <div className={classes.root}>
+      <CssBaseline />
       <Sudoku />
     </div>
   )
