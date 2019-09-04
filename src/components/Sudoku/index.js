@@ -608,7 +608,7 @@ class Sudoku extends Component {
   }
 
   render() {
-    console.log('Sudoko rerendered!');
+    console.log('Sudoku rerendered!');
     let cells = [];
     let rowIndices = [];
     let colIndices = [];

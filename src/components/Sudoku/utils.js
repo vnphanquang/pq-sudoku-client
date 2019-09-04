@@ -1,3 +1,8 @@
+export const DIRECTION = {
+  ROW: 'row',
+  COL: 'col'
+};
+
 export const SELECTION = {
   TYPES: {
     SINGLE: 'single',
@@ -15,10 +20,6 @@ export const STYLE_STATES = {
   LIT: 'lit'
 }
 
-export const DIRECTION = {
-  ROW: 'row',
-  COL: 'col'
-};
 export const SUBGRID_NUMBERS = [
   [0, 1, 2],
   [3, 4, 5],
