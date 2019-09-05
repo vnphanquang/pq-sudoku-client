@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import {PencilMap, SELECTION, VALUES, KEYS_STROKES, DIRECTION, STYLE_STATES, SUBGRID_NUMBERS, GRID_SIZE, SubgridMap, ValueMap} from './utils';
+import {PencilMap, SELECTION, VALUES, KEYS_STROKES, DIRECTION, STYLE_STATES, SUBGRID_NUMBERS, GRID_SIZE, SubgridMap, ValueMap} from '../utils';
 import Cell from './Cell';
 import {styled} from '@material-ui/styles'
 
@@ -650,40 +650,6 @@ class Sudoku extends Component {
 
   render() {
     console.log('Sudoku rerendered!');
-    // let cells = [];
-    // let rowIndices = [];
-    // let colIndices = [];
-    // let subgrid;
-    // for (let row = 0; row < GRID_SIZE; row++) {
-    //   rowIndices.push(
-    //     <div key={row+1} onClick={(e) => this.handleIndexClick(e, row, DIRECTION.ROW)}>
-    //       <p>{row + 1}</p>
-    //     </div>
-    //   )
-    //   colIndices.push(
-    //     <div key={row+1} onClick={(e) => this.handleIndexClick(e, row, DIRECTION.COL)}>
-    //       <p>{row + 1}</p>
-    //     </div>
-    //   )
-    //   for (let col = 0; col < GRID_SIZE; col++) {
-    //     subgrid = Sudoku.getSubgridNumber(row, col);
-    //     cells.push(
-    //       <Cell 
-    //         ref={this.mapCellRef} 
-    //         key={`${row}-${col}`} 
-    //         row={row} col={col} 
-    //         subgrid={subgrid}
-    //         // handleCellValueInput={this.handleCellValueInput} 
-    //         handleClick={this.handleClick} 
-    //         // navigate={this.navigate}
-    //         // getGameValue={this.getGameValue}
-    //         // pencilMode={this.pencilMode}
-    //         handleKeyPress={this.handleKeyPress}
-    //       />
-    //     );
-    //   }
-    // }
-
     return (
       <StyleSudokuContainer>
         <StyledColIndices>{this.nodes.colIndices}</StyledColIndices>
@@ -739,7 +705,8 @@ const StyleSudokuContainer = styled(({...other}) => <div {...other} />)({
   height: '600px'
 })
 
-const StyledSudokuGrid = styled(({...other}) => <div {...other} />)({
+const StyledSudokuGrid = styled(({...other}) => <div {...other} />)(
+  ({theme}) => ({
   gridArea: 'sudoku-grid',
   display: 'grid',
   justifyContent: 'center',
@@ -749,7 +716,8 @@ const StyledSudokuGrid = styled(({...other}) => <div {...other} />)({
   backgroundColor: '#212121',
   border: '4px solid',
   borderRadius: '3px',
-})
+  })
+)
 
 
 export default Sudoku;

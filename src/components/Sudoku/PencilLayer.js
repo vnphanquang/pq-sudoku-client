@@ -1,5 +1,5 @@
 import React from 'react';
-import {VALUES} from './utils';
+import {VALUES} from '../utils';
 import {makeStyles} from '@material-ui/styles';
 
 const useStyles = makeStyles({

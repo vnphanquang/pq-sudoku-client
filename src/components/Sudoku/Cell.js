@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types'
 import PencilLayer from './PencilLayer'
-import {STYLE_STATES, PencilMap} from './utils';
+import {STYLE_STATES, PencilMap} from '../utils';
 import {styled} from '@material-ui/styles';
 
 class Cell extends Component {
@@ -76,42 +76,45 @@ Cell.propTypes = {
   handleKeyPress: PropTypes.func.isRequired
 }
 
-const StyledCell = styled(({focused, styleState, row, col, ...other}) => <div {...other} />)({
-  backgroundColor: ({focused, styleState}) => getBgColor(focused, styleState),
-  borderColor: '#212121',
-  borderStyle: 'solid',
-  borderWidth: ({row, col}) => getBorderWidth(row, col),
-  position: 'relative',
-  cursor: 'pointer',
-  '&:hover': {
-    backgroundColor: 'rgb(218, 255, 214)'
-  },
-  '& input': {
-    margin: '0',
-    padding: '0',
-    border: 'none',
-    width: '100%',
-    height: '100%',
-    textAlign: 'center',
-    fontSize: '1.5rem',
-    backgroundColor: 'transparent'
-  },
-  '& input:focus': {
-    outline: 'none'
-  }
-})
+const StyledCell = styled(({focused, styleState, row, col, ...other}) => <div {...other} />)(
+  ({theme, row, col, focused, styleState}) => ({
+    backgroundColor: getBgColor(focused, styleState, theme.cell),
+    borderColor: '#212121',
+    borderStyle: 'solid',
+    borderWidth: getBorderWidth(row, col),
+    position: 'relative',
+    cursor: 'pointer',
+    '&:hover': {
+      backgroundColor: theme.cell.hoverBg
+    },
+    '& input': {
+      margin: '0',
+      padding: '0',
+      border: 'none',
+      width: '100%',
+      height: '100%',
+      textAlign: 'center',
+      fontSize: '1.5rem',
+      backgroundColor: 'transparent'
+    },
+    '& input:focus': {
+      outline: 'none'
+    }
+  }),
+  {withTheme: true}
+)
 
-function getBgColor(focused, styleState) {
+function getBgColor(focused, styleState, cell) {
   switch(styleState) {
     case STYLE_STATES.LIT:
-      return 'rgb(216, 216, 216)';
+      return cell.litBg;
     case STYLE_STATES.SPOTTED:
-      return 'rgb(153, 153, 153)';
+      return cell.spottedBg;
     case STYLE_STATES.CONFLICTING:
-      return 'rgb(255, 117, 117)';
+      return cell.conflictingBg;
     case STYLE_STATES.SELECTED:
-      if (focused) return 'rgb(100, 255, 255)';
-      else         return 'rgb(168, 168, 255)';
+      if (focused) return cell.focusedBg;
+      else         return cell.selectedBg;
     default:
       return 'white'
   }
