@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import PropTypes from 'prop-types'
 import PencilLayer from './PencilLayer'
 import {STYLE_STATES, PencilMap} from './utils';
 import {styled} from '@material-ui/styles';
@@ -63,6 +64,16 @@ class Cell extends Component {
       </StyledCell>
     )
   }
+}
+
+Cell.propTypes = {
+  // ref: PropTypes.func.isRequired,
+  // key: PropTypes.string.isRequired,
+  row: PropTypes.number.isRequired,
+  col: PropTypes.number.isRequired,
+  subgrid: PropTypes.number.isRequired,
+  handleClick: PropTypes.func.isRequired,
+  handleKeyPress: PropTypes.func.isRequired
 }
 
 const StyledCell = styled(({focused, styleState, row, col, ...other}) => <div {...other} />)({

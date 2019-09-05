@@ -17,7 +17,6 @@ class Sudoku extends Component {
       cells: [null],
       focus: null
     }
-    this.cells = this.initGrid();
     // this.state = {
     //   isCompleted: false,
     // }
@@ -35,15 +34,34 @@ class Sudoku extends Component {
     // Play Mode Specifics
     // this.getGameValue = this.getGameValue.bind(this);
     // this.checkGameCompletion = this.checkGameCompletion.bind(this);
+
+
+    let {cells, nodes} = this.initGrid();
+    this.cells = cells;
+    this.nodes =  nodes;
   }
 
   initGrid() {
     let cells = [];
-    let cellRow, cell, row, col;
+    let cellRow, cell;
+    let cellNodes = [];
+    let rowIndexNodes = [];
+    let colIndexNodes = [];
+    let subgrid
     // let gameValue;
-    for (row = 0; row < GRID_SIZE; row++) {
+    for (let row = 0; row < GRID_SIZE; row++) {
       cellRow = [];
-      for (col = 0; col < GRID_SIZE; col++) {
+      rowIndexNodes.push(
+        <div key={row+1} onClick={(e) => this.handleIndexClick(e, row, DIRECTION.ROW)}>
+          <p>{row + 1}</p>
+      </div>
+      )
+      colIndexNodes.push(
+        <div key={row+1} onClick={(e) => this.handleIndexClick(e, row, DIRECTION.COL)}>
+          <p>{row + 1}</p>
+        </div>
+      )
+      for (let col = 0; col < GRID_SIZE; col++) {
         // if (flag === 'random') {
         //   gameValue = `${Math.floor(Math.random() * GRID_SIZE) + 1}`;
         // } else if (flag === 'blank') {
@@ -51,10 +69,33 @@ class Sudoku extends Component {
         // }
         cell = null;
         cellRow.push(cell);
+        subgrid = Sudoku.getSubgridNumber(row, col);
+        cellNodes.push(
+          <Cell 
+            ref={this.mapCellRef} 
+            key={`${row}-${col}`} 
+            row={row} col={col} 
+            subgrid={subgrid}
+            // handleCellValueInput={this.handleCellValueInput} 
+            handleClick={this.handleClick} 
+            // navigate={this.navigate}
+            // getGameValue={this.getGameValue}
+            // pencilMode={this.pencilMode}
+            handleKeyPress={this.handleKeyPress}
+          />
+        );
       }
       cells.push(cellRow);
     }
-    return cells;
+
+    return {
+      cells,
+      nodes: {
+        cells: cellNodes,
+        rowIndices: rowIndexNodes,
+        colIndices: colIndexNodes
+      }
+    };
   }
 
   mapCellRef(targetCell) {
@@ -609,45 +650,45 @@ class Sudoku extends Component {
 
   render() {
     console.log('Sudoku rerendered!');
-    let cells = [];
-    let rowIndices = [];
-    let colIndices = [];
-    let subgrid;
-    for (let row = 0; row < GRID_SIZE; row++) {
-      rowIndices.push(
-        <div key={row+1} onClick={(e) => this.handleIndexClick(e, row, DIRECTION.ROW)}>
-          <p>{row + 1}</p>
-        </div>
-      )
-      colIndices.push(
-        <div key={row+1} onClick={(e) => this.handleIndexClick(e, row, DIRECTION.COL)}>
-          <p>{row + 1}</p>
-        </div>
-      )
-      for (let col = 0; col < GRID_SIZE; col++) {
-        subgrid = Sudoku.getSubgridNumber(row, col);
-        cells.push(
-          <Cell 
-            ref={this.mapCellRef} 
-            key={`${row}-${col}`} 
-            row={row} col={col} 
-            subgrid={subgrid}
-            // handleCellValueInput={this.handleCellValueInput} 
-            handleClick={this.handleClick} 
-            // navigate={this.navigate}
-            // getGameValue={this.getGameValue}
-            // pencilMode={this.pencilMode}
-            handleKeyPress={this.handleKeyPress}
-          />
-        );
-      }
-    }
+    // let cells = [];
+    // let rowIndices = [];
+    // let colIndices = [];
+    // let subgrid;
+    // for (let row = 0; row < GRID_SIZE; row++) {
+    //   rowIndices.push(
+    //     <div key={row+1} onClick={(e) => this.handleIndexClick(e, row, DIRECTION.ROW)}>
+    //       <p>{row + 1}</p>
+    //     </div>
+    //   )
+    //   colIndices.push(
+    //     <div key={row+1} onClick={(e) => this.handleIndexClick(e, row, DIRECTION.COL)}>
+    //       <p>{row + 1}</p>
+    //     </div>
+    //   )
+    //   for (let col = 0; col < GRID_SIZE; col++) {
+    //     subgrid = Sudoku.getSubgridNumber(row, col);
+    //     cells.push(
+    //       <Cell 
+    //         ref={this.mapCellRef} 
+    //         key={`${row}-${col}`} 
+    //         row={row} col={col} 
+    //         subgrid={subgrid}
+    //         // handleCellValueInput={this.handleCellValueInput} 
+    //         handleClick={this.handleClick} 
+    //         // navigate={this.navigate}
+    //         // getGameValue={this.getGameValue}
+    //         // pencilMode={this.pencilMode}
+    //         handleKeyPress={this.handleKeyPress}
+    //       />
+    //     );
+    //   }
+    // }
 
     return (
       <StyleSudokuContainer>
-        <StyledColIndices>{colIndices}</StyledColIndices>
-        <StyledRowIndices>{rowIndices}</StyledRowIndices>
-        <StyledSudokuGrid>{cells}</StyledSudokuGrid>
+        <StyledColIndices>{this.nodes.colIndices}</StyledColIndices>
+        <StyledRowIndices>{this.nodes.rowIndices}</StyledRowIndices>
+        <StyledSudokuGrid>{this.nodes.cells}</StyledSudokuGrid>
       </StyleSudokuContainer>
     )
 
