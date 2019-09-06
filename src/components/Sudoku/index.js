@@ -87,7 +87,6 @@ class Sudoku extends Component {
       }
       cells.push(cellRow);
     }
-    console.log(cellNodes);
     return {
       cells,
       nodes: {
@@ -132,7 +131,7 @@ class Sudoku extends Component {
   }
 
   handleKeyPress(e, targetCell) {
-    let {ctrlKey, shiftkey, key} = e
+    let {ctrlKey, shiftkey, altKey, key} = e
     if (VALUES.has(key)) {
       if (this.pencilMode) {
         targetCell.setState((st) => {
@@ -179,6 +178,14 @@ class Sudoku extends Component {
         case 'g':
           e.preventDefault();
           this.selectSubgrid(targetCell.props.subgrid);
+          break;
+        case 'r':
+          e.preventDefault();
+          this.handleIndexClick({shiftKey: false, ctrlKey: false}, targetCell.props.row, DIRECTION.ROW);
+          break;
+        case 'f':
+          e.preventDefault();
+          this.handleIndexClick({shiftKey: false, ctrlKey: false}, targetCell.props.col, DIRECTION.COL);
           break;
         default:
           break;
@@ -295,13 +302,11 @@ class Sudoku extends Component {
 
   selectSubgrid(subgrid) {
     if (this.selection.type !== SELECTION.TYPES.SUBGRID) {
-      if (this.selection.position !== subgrid) {
-        this.clearSelection();
-        this.selection.type = SELECTION.TYPES.SUBGRID;
-        this.selection.position = subgrid;
-        this.getCellsBySubgrid(subgrid).forEach(cell => this.selectCell(cell));
-        this.selection.focus.input.focus();
-      } 
+      this.clearSelection();
+      this.selection.type = SELECTION.TYPES.SUBGRID;
+      this.selection.position = subgrid;
+      this.getCellsBySubgrid(subgrid).forEach(cell => this.selectCell(cell));
+      this.selection.focus.input.focus();
     } else {
       this.handleClick({ctrlKey: false, shiftKey: false}, this.selection.focus);
     }
