@@ -1,7 +1,7 @@
-import React, {useCallback} from 'react';
+import React, {useCallback, useEffect} from 'react';
 import clsx from 'clsx';
 import {useSelector, useDispatch} from 'react-redux';
-import {ToggleDrawer} from '../redux/actions'
+import {DrawerToggle} from '../redux/actions'
 
 import {makeStyles} from '@material-ui/styles';
 import AppBar from '@material-ui/core/AppBar';
@@ -14,30 +14,39 @@ import MenuIcon from '@material-ui/icons/Menu';
 import {APPBAR_HEIGHT} from './utils'
 
 function SudokuAppBar() {
-  const drawerOpen = useSelector(state => state.navigation.drawerOpen);
-  const dispatch = useDispatch();
-  const toggleDrawer = useCallback(
-    () => dispatch(ToggleDrawer()),
-    [dispatch]
-  );
-
   const classes = useStyles();
   return (
     <AppBar className={classes.root}>
       <Toolbar disableGutters>
-        <IconButton
-          aria-label="Toggle drawer"
-          onClick={toggleDrawer}
-          className={classes.drawerBtn}
-        >
-          {drawerOpen ? <ArrowUp/> : <MenuIcon/>}
-        </IconButton>
-
+        <DrawerIcon className={classes.drawerBtn} />
         <Typography variant="h5" className={classes.brand}>
           Sudoku PQ
         </Typography>
       </Toolbar>
     </AppBar>
+  )
+}
+
+function DrawerIcon(props) {
+  const drawerOpen = useSelector(state => state.drawerOpen);
+  const dispatch = useDispatch();
+  const toggleDrawer = useCallback(
+    () => dispatch(DrawerToggle()),
+    [dispatch]
+  );
+
+  useEffect(() => {
+    console.log('DrawerIcon rendered');
+  })
+
+  return (
+    <IconButton
+      aria-label="Toggle drawer"
+      onClick={toggleDrawer}
+      {...props}
+    >
+      {drawerOpen ? <ArrowUp/> : <MenuIcon/>}
+    </IconButton>
   )
 }
 

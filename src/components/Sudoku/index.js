@@ -87,7 +87,7 @@ class Sudoku extends Component {
       }
       cells.push(cellRow);
     }
-
+    console.log(cellNodes);
     return {
       cells,
       nodes: {
@@ -216,6 +216,8 @@ class Sudoku extends Component {
             }
           }
           this.singleSelectCell(targetCell);
+        } else {
+          lastSelectedCell.input.focus();
         }
       }
     } else if (this.selection.type === SELECTION.TYPES.MULTI) {
@@ -583,6 +585,10 @@ class Sudoku extends Component {
     targetCell.setState({focused: true});
   }
 
+  refocus() {
+    this.selection.focus.input.focus();
+  }
+
   setCellStyle(targetCell, styleState) {
     // if (targetCell.state.styleState !== styleState)
     targetCell.setState({styleState});
@@ -649,7 +655,7 @@ class Sudoku extends Component {
   }
 
   render() {
-    console.log('Sudoku rerendered!');
+    console.log('Sudoku rendered!');
     return (
       <StyleSudokuContainer>
         <StyledColIndices>{this.nodes.colIndices}</StyledColIndices>

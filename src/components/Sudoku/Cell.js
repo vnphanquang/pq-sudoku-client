@@ -45,7 +45,7 @@ class Cell extends Component {
   }
 
   render() {
-    console.log('Cell rerendered');
+    console.log('Cell rendered');
     return (
       <StyledCell
         row={this.props.row}

@@ -1,6 +1,6 @@
-import React, {useCallback} from 'react';
+import React, {useCallback, useEffect} from 'react';
 import {useSelector, useDispatch} from 'react-redux';
-import {ToggleDrawer} from '../redux/actions'
+import {DrawerToggle, TabAddition} from '../redux/actions'
 
 import clsx from 'clsx';
 
@@ -28,14 +28,22 @@ import FeedbackIcon from '@material-ui/icons/Feedback';
 import SourceIcon from '@material-ui/icons/Code';
 
 function SudokuDrawer() {
-  const drawerOpen = useSelector(state => state.navigation.drawerOpen);
+  const classes = useStyles();
+  const drawerOpen = useSelector(state => state.drawerOpen);
   const dispatch = useDispatch();
   const toggleDrawer = useCallback(
-    () => dispatch(ToggleDrawer()),
+    () => dispatch(DrawerToggle()),
     [dispatch]
   );
 
-  const classes = useStyles();
+  const addTab = useCallback(
+    () => dispatch(TabAddition('testing')),
+    [dispatch]
+  )
+  useEffect(() => {
+    console.log('SudokuDrawer rendered');
+  })
+
   return (
     <Drawer
       variant="permanent"
@@ -44,7 +52,7 @@ function SudokuDrawer() {
       classes={{paper: clsx(classes.drawerPaper, !drawerOpen && classes.drawerPaperClose)}}
     >
       <List>
-        <ListItem button className={classes.drawerItem}>
+        <ListItem button className={classes.drawerItem} onClick={addTab}>
           <ListItemIcon><AddIcon /></ListItemIcon>
           <ListItemText primary={DRAWER_LABELS.NEW} />
         </ListItem>
