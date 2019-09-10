@@ -1,4 +1,4 @@
-import React, {useCallback, useEffect} from 'react';
+import React, {useCallback} from 'react';
 import {useSelector, useDispatch} from 'react-redux';
 import {DrawerToggle, TabAddition} from '../redux/actions'
 
@@ -28,21 +28,22 @@ import FeedbackIcon from '@material-ui/icons/Feedback';
 import SourceIcon from '@material-ui/icons/Code';
 
 function SudokuDrawer() {
+  // console.log('SudokuDrawer rendered');
+
   const classes = useStyles();
-  const drawerOpen = useSelector(state => state.drawerOpen);
+  const drawerOpen = useSelector(state => state.navigation.drawerOpen);
   const dispatch = useDispatch();
+  
   const toggleDrawer = useCallback(
     () => dispatch(DrawerToggle()),
     [dispatch]
   );
 
   const addTab = useCallback(
-    () => dispatch(TabAddition('testing')),
+    //TODO: implement add dialog - name & options (modal)
+    () => dispatch(TabAddition({name: `Testing ${Math.random() * 10}`})),
     [dispatch]
   )
-  useEffect(() => {
-    console.log('SudokuDrawer rendered');
-  })
 
   return (
     <Drawer
@@ -137,4 +138,4 @@ const useStyles = makeStyles(theme => ({
   },
 }))
 
-export default SudokuDrawer;
+export default React.memo(SudokuDrawer);

@@ -18,6 +18,8 @@ const useStyles = makeStyles({
 })
 
 function PencilLayer(props) {
+  // console.log('PencilLayer inside');
+
   const classes = useStyles();
   let pencils = [];
   for (let i = 1; i <= VALUES.size; i++) {
@@ -38,4 +40,4 @@ function PencilLayer(props) {
   )
 }
 
-export default PencilLayer
+export default PencilLayer;

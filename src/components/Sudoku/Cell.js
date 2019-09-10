@@ -1,10 +1,20 @@
-import React, { Component } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types'
 import PencilLayer from './PencilLayer'
 import {STYLE_STATES, PencilMap} from '../utils';
 import {styled} from '@material-ui/styles';
 
-class Cell extends Component {
+class Cell extends React.PureComponent {
+  
+  static propTypes = {
+    // ref: PropTypes.func.isRequired,
+    // key: PropTypes.string.isRequired,
+    row: PropTypes.number.isRequired,
+    col: PropTypes.number.isRequired,
+    subgrid: PropTypes.number.isRequired,
+    handleCellSelection: PropTypes.func.isRequired,
+    handleKeyPress: PropTypes.func.isRequired
+  }
 
   constructor(props) {
     super(props)
@@ -37,7 +47,7 @@ class Cell extends Component {
   }
 
   handleClick(e) {
-    this.props.handleClick(e, this);
+    this.props.handleCellSelection(e, this);
   }
   
   handleKeyPress(e) {
@@ -45,7 +55,7 @@ class Cell extends Component {
   }
 
   render() {
-    console.log('Cell rendered');
+    // console.log('Cell rendered');
     return (
       <StyledCell
         row={this.props.row}
@@ -57,24 +67,15 @@ class Cell extends Component {
       >
         <PencilLayer pencils={this.state.pencils} />
         <input
+          type="button"
           ref={this.inputRef}
           value={this.state.cellValue}
-          readOnly
         />
       </StyledCell>
     )
   }
 }
 
-Cell.propTypes = {
-  // ref: PropTypes.func.isRequired,
-  // key: PropTypes.string.isRequired,
-  row: PropTypes.number.isRequired,
-  col: PropTypes.number.isRequired,
-  subgrid: PropTypes.number.isRequired,
-  handleClick: PropTypes.func.isRequired,
-  handleKeyPress: PropTypes.func.isRequired
-}
 
 const StyledCell = styled(({focused, styleState, row, col, ...other}) => <div {...other} />)(
   ({theme, row, col, focused, styleState}) => ({
@@ -94,7 +95,7 @@ const StyledCell = styled(({focused, styleState, row, col, ...other}) => <div {.
       width: '100%',
       height: '100%',
       textAlign: 'center',
-      fontSize: '1.5rem',
+      fontSize: '1.2rem',
       backgroundColor: 'transparent'
     },
     '& input:focus': {
