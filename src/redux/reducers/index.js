@@ -1,5 +1,5 @@
 import {combineReducers} from 'redux';
-import { TOGGLE_DRAWER, ADD_TAB, CHANGE_TAB, REMOVE_TAB } from '../actions';
+import { TOGGLE_DRAWER, ADD_TAB, CHANGE_TAB, REMOVE_TAB, DIALOG_ACTIONS } from '../actions';
 import uuidv1 from 'uuid/v1';
 import { PassThrough } from 'stream';
 import { nextTick } from 'q';
@@ -15,6 +15,18 @@ function navigation(state = navigationInitState, action) {
       };
     default:
       return state;
+  }
+}
+
+
+const dialogInitState = null;
+
+function dialog(state = dialogInitState, {type}) {
+  if (DIALOG_ACTIONS.includes(type)) {
+    return type;
+  } else {
+    // FIXME: or return state?
+    return null;
   }
 }
 
@@ -55,7 +67,8 @@ function tabs(state = tabsInitState, {type, payload}) {
 
 const rootReducer = combineReducers({
   navigation,
-  tabs
+  tabs,
+  dialog
 })
 
 export default rootReducer;

@@ -8,6 +8,7 @@ import {createMuiTheme, makeStyles} from '@material-ui/core/styles';
 import SudokuAppBar from './SudokuAppBar';
 import SudokuDrawer from './SudokuDrawer';
 import Sudoku from './Sudoku';
+import Dialog from './Dialog'
 import {APPBAR_HEIGHT, COLLAPSED_DRAWER_WIDTH} from './utils';
 
 function App() {
@@ -22,6 +23,7 @@ function App() {
         <div className={classes.sudokuWrapper}>
           <Sudoku/>
         </div>
+        <Dialog></Dialog>
       </ThemeProvider>
     </React.Fragment>
   )

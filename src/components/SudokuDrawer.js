@@ -1,6 +1,6 @@
-import React, {useCallback} from 'react';
+import React from 'react';
 import {useSelector, useDispatch} from 'react-redux';
-import {DrawerToggle, TabAddition} from '../redux/actions'
+import {DrawerToggle, DialogTabAddition} from '../redux/actions';
 
 import clsx from 'clsx';
 
@@ -20,6 +20,7 @@ import Link from '@material-ui/core/Link';
 
 import AddIcon from '@material-ui/icons/AddCircle';
 import FolderOpenIcon from '@material-ui/icons/FolderOpen';
+import SaveIcon from '@material-ui/icons/Save';
 import SaveAltIcon from '@material-ui/icons/SaveAlt'
 import SettingsIcon from '@material-ui/icons/Settings';
 import HelpIcon from '@material-ui/icons/Help';
@@ -34,14 +35,13 @@ function SudokuDrawer() {
   const drawerOpen = useSelector(state => state.navigation.drawerOpen);
   const dispatch = useDispatch();
   
-  const toggleDrawer = useCallback(
+  const toggleDrawer = React.useCallback(
     () => dispatch(DrawerToggle()),
     [dispatch]
   );
 
-  const addTab = useCallback(
-    //TODO: implement add dialog - name & options (modal)
-    () => dispatch(TabAddition({name: `Testing ${Math.random() * 10}`})),
+  const dialogAddTab = React.useCallback(
+    () => dispatch(DialogTabAddition()),
     [dispatch]
   )
 
@@ -53,17 +53,21 @@ function SudokuDrawer() {
       classes={{paper: clsx(classes.drawerPaper, !drawerOpen && classes.drawerPaperClose)}}
     >
       <List>
-        <ListItem button className={classes.drawerItem} onClick={addTab}>
+        <ListItem button className={classes.drawerItem} onClick={dialogAddTab}>
           <ListItemIcon><AddIcon /></ListItemIcon>
           <ListItemText primary={DRAWER_LABELS.NEW} />
         </ListItem>
         <ListItem button className={classes.drawerItem}>
-          <ListItemIcon><SaveAltIcon /></ListItemIcon>
-          <ListItemText primary={DRAWER_LABELS.EXPORT} />
+          <ListItemIcon><SaveIcon /></ListItemIcon>
+          <ListItemText primary={DRAWER_LABELS.SAVE} />
         </ListItem>
         <ListItem button className={classes.drawerItem}>
           <ListItemIcon><FolderOpenIcon /></ListItemIcon>
           <ListItemText primary={DRAWER_LABELS.LOAD} />
+        </ListItem>
+        <ListItem button className={classes.drawerItem}>
+          <ListItemIcon><SaveAltIcon /></ListItemIcon>
+          <ListItemText primary={DRAWER_LABELS.EXPORT} />
         </ListItem>
         <ListItem button className={classes.drawerItem}>
           <ListItemIcon><SettingsIcon /></ListItemIcon>

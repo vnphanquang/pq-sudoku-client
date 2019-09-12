@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react';
+import React from 'react';
 import clsx from 'clsx';
 import { useSelector, useDispatch } from 'react-redux';
 import { DrawerToggle, TabChange, TabRemoval } from '../redux/actions'
@@ -16,6 +16,7 @@ import CloseIcon from '@material-ui/icons/Close';
 import GridIcon from '@material-ui/icons/GridOn';
 
 import { APPBAR_HEIGHT } from './utils'
+import { flexbox } from '@material-ui/system';
 
 function SudokuAppBar() {
   // console.log('DrawerIcon rendered');
@@ -33,7 +34,6 @@ function SudokuAppBar() {
   )
 }
 
-
 function SudokuTabs() {
   console.log('Sudoku Tabs rendered');
 
@@ -46,7 +46,7 @@ function SudokuTabs() {
 
   //TODO: confirmation message && autosave?
   //TODO: implement removeTab at inactive indices
-  const removeTab = useCallback(
+  const removeTab = React.useCallback(
     (e, index) => dispatch(TabRemoval(index)),
     [dispatch]
   )
@@ -57,6 +57,7 @@ function SudokuTabs() {
       onChange={changeTab}
       variant="scrollable"
       className={classes.tabs}
+      //FIXME: scroll buttons appear when tab closes!
       scrollButtons="on"
       aria-label="sudoku tabs"
     >
@@ -80,19 +81,19 @@ function SudokuTab({ name, onClick, index, selected, ...others }) {
     {...others}
     selected={selected}
     value={index}
-    className={selected ? classes.tabSelected : classes.tab}
-      label={(
-        <div>
-          <Typography variant="button" display="inline">
-            {`${name.substring(0, 8)}...`}
+    // className={selected ? classes.tabSelected : classes.tab}
+    label={(
+        <div className={classes.tabLabel}>
+          <Typography className={classes.tabName} variant="button" display="inline">
+            {name.length > 8 ? `${name.substring(0, 8)}...` : name}
           </Typography>
           { selected &&
-            <IconButton component='div' onClick={(e) => onClick(e, index)} className={classes.tabCloseBtn}>
+            <IconButton className={classes.tabCloseBtn} component='div' onClick={(e) => onClick(e, index)}>
               <CloseIcon />
             </IconButton>
           }
         </div>
-      )}
+    )}
     />
   )
 }
@@ -100,7 +101,7 @@ function SudokuTab({ name, onClick, index, selected, ...others }) {
 function DrawerIcon(props) {
   const drawerOpen = useSelector(state => state.navigation.drawerOpen);
   const dispatch = useDispatch();
-  const toggleDrawer = useCallback(
+  const toggleDrawer = React.useCallback(
     () => dispatch(DrawerToggle()),
     [dispatch]
   );
@@ -119,28 +120,42 @@ function DrawerIcon(props) {
 const useStyles = makeStyles(theme => ({
   tabs: {
     marginLeft: '20px',
+    marginTop: '20px',
     // alignItems: 'end'
   },
+
   tab: {
 
   },
+
   tabSelected: {
     // backgroundColor: 'white'
   },
+
+  tabLabel: {
+    display: 'flex',
+    justifyContent: 'stretch',
+    alignItems: 'center'
+  },
+
+  tabName: {
+    textTransform: 'none'
+  },
+
   tabCloseBtn: {
     padding: 0,
-    marginTop: 12,
-    marginBottom: 12,
-    marginLeft: 12
+    marginLeft: 12,
   },
 
   root: {
     zIndex: theme.zIndex.drawer,
     height: APPBAR_HEIGHT
   },
+
   brand: {
     whiteSpace: 'nowrap'
   },
+
   drawerBtn: {
     marginLeft: 12,
     marginRight: 12
