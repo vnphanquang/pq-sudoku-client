@@ -18,12 +18,11 @@ function navigation(state = navigationInitState, action) {
   }
 }
 
+const dialogInitState = null
 
-const dialogInitState = null;
-
-function dialog(state = dialogInitState, {type}) {
-  if (DIALOG_ACTIONS.includes(type)) {
-    return type;
+function dialog(state = dialogInitState, action) {
+  if (DIALOG_ACTIONS.includes(action.type)) {
+    return action.type;
   } else {
     // FIXME: or return state?
     return null;

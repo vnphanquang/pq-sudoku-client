@@ -19,6 +19,7 @@ function TabAdditionDialog({onSubmit, onCancel}) {
     <React.Fragment>
       <Dialog
         classes={{paper: classes.paper}}
+        onClose={onCancel}
         open
       >
         <DialogTitle>New Tab</DialogTitle>

@@ -10,6 +10,13 @@ class Sudoku extends React.Component {
     super(props)
     this.activeGrid = null;
     this.updateGridRef = this.updateGridRef.bind(this);
+    this.getActiveCellValues = this.getActiveCellValues.bind(this);
+  }
+
+  componentDidMount() {
+    window.sudoku = {
+      getCellValues: this.getActiveCellValues
+    }
   }
 
   componentDidUpdate() {

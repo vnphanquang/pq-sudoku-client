@@ -1,6 +1,6 @@
 import React from 'react';
 import {useSelector, useDispatch} from 'react-redux';
-import {DrawerToggle, DialogTabAddition} from '../redux/actions';
+import {DrawerToggle, DialogTabAddition, DialogExport} from '../redux/actions';
 
 import clsx from 'clsx';
 
@@ -45,6 +45,11 @@ function SudokuDrawer() {
     [dispatch]
   )
 
+  const dialogExport = React.useCallback(
+    () => dispatch(DialogExport()),
+    [dispatch]
+  )
+
   return (
     <Drawer
       variant="permanent"
@@ -65,7 +70,7 @@ function SudokuDrawer() {
           <ListItemIcon><FolderOpenIcon /></ListItemIcon>
           <ListItemText primary={DRAWER_LABELS.LOAD} />
         </ListItem>
-        <ListItem button className={classes.drawerItem}>
+        <ListItem button className={classes.drawerItem} onClick={dialogExport}>
           <ListItemIcon><SaveAltIcon /></ListItemIcon>
           <ListItemText primary={DRAWER_LABELS.EXPORT} />
         </ListItem>
