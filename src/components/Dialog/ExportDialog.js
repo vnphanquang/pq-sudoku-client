@@ -13,37 +13,92 @@ import RadioGroup from '@material-ui/core/RadioGroup';
 import Button from '@material-ui/core/Button';
 import InputLabel from '@material-ui/core/InputLabel';
 import Select from '@material-ui/core/Select';
+import InputAdornment from '@material-ui/core/InputAdornment';
 
 import SudokuSVG from './SudokuSVG';
 
 const SVG = 'svg';
 const PNG = 'png';
 const PDF = 'pdf';
-const formats = [SVG, PNG, PDF];
+const JPEG = 'jpeg';
+const formats = [SVG, PNG, JPEG, PDF];
+
+function generateSVGDataURL(svgElement) {
+  return URL.createObjectURL(
+    new Blob(
+      [(new XMLSerializer()).serializeToString(svgElement)],
+      {type: 'image/svg+xml;charset=utf-8'}
+    )
+  )
+}
+
+function canvasToBlobPolyfill() {
+  Object.defineProperty(HTMLCanvasElement.prototype, 'toBlob', {
+    value: function (callback, type, quality) {
+      var canvas = this;
+      setTimeout(function () {
+        var binStr = atob(canvas.toDataURL(type, quality).split(',')[1]),
+          len = binStr.length,
+          arr = new Uint8Array(len);
+
+        for (var i = 0; i < len; i++) {
+          arr[i] = binStr.charCodeAt(i);
+        }
+
+        callback(new Blob([arr], { type: type || 'image/png' }));
+      });
+    }
+  });
+}
 
 function ExportDialog({onSubmit, onCancel, sudoku}) {
   const classes = useStyles();
   const [name, setName] = React.useState(sudoku.name);
-  const [format, setFormat] = React.useState('svg');
-
+  const [format, setFormat] = React.useState(SVG);
+  const [pngSize, setPngSize] = React.useState(500);
+  
   const svgRef = React.useRef(null);
-  const aRef = React.useRef(null);
 
-  const exportSudoku = React.useCallback(
-    () => {
-      // const svgClone = svgRef.current.cloneNode(true);
-      // const svgDocType = document.implementation.createDocumentType('svg', "-//W3C//DTD SVG 1.1//EN", "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd");
-      // const svgXMLDoc = document.implementation.createDocument('http://www.w3.org/2000/svg', 'svg', svgDocType);
-      // svgXMLDoc.replaceChild(svgClone, svgXMLDoc.documentElement);
-      const svgDataStr = (new XMLSerializer()).serializeToString(svgRef.current);
-      let svgBlob = new Blob([svgDataStr], {type: 'image/svg+xml;charset=utf-8'});
-      let svgDataURL = URL.createObjectURL(svgBlob);
-      aRef.current.href = svgDataURL;
-      aRef.current.click();
-      URL.revokeObjectURL(svgDataURL)
-    },
-    []
-  )
+  const exportSudoku = (e) => {
+      e.preventDefault();
+      let svgDataURL;
+      switch (format) {
+        case SVG:
+          svgDataURL = generateSVGDataURL(svgRef.current);
+          onSubmit(name, format, svgDataURL);
+          break;
+        case PNG:
+        case JPEG:
+          const svgClone = svgRef.current.cloneNode(true);
+          svgClone.setAttribute('width', pngSize);
+          svgClone.setAttribute('height', pngSize);
+          svgDataURL = generateSVGDataURL(svgClone);
+          const canvas = document.createElement('canvas');
+          canvas.height = pngSize;
+          canvas.width = pngSize;
+          const img = new Image(pngSize, pngSize);
+          img.src = svgDataURL;
+          img.onload = () => {
+            const ctx = canvas.getContext('2d');
+            ctx.fillStyle = 'white';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.drawImage(img, 0, 0, pngSize, pngSize);
+
+            if (!HTMLCanvasElement.prototype.toBlob) canvasToBlobPolyfill();
+            
+            canvas.toBlob((blob) => {
+              const imgDataURL = URL.createObjectURL(blob);
+              onSubmit(name, format, imgDataURL);
+            }, `image/${format}`, 1);
+          }
+          break;
+        case PDF:
+          break;
+        default:
+          break;
+      }
+      
+    }
 
   return (
     <React.Fragment>
@@ -54,68 +109,97 @@ function ExportDialog({onSubmit, onCancel, sudoku}) {
         open
       >
         <DialogTitle>Export</DialogTitle>
+        <form 
+          action="" 
+          onSubmit={exportSudoku}
+        >
+          <div className={classes.content}>
+            <div className={classes.settings}>
+              <TextField
+                className={classes.name}
+                required
+                error={name.length === 0}
+                autoFocus
+                margin="dense"
+                fullWidth={false}
+                label="Name"
+                type="text"
+                variant="outlined"
+                placeholder="Sudoku Name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+              />
+              <FormControl component="fieldset">
+                <InputLabel htmlFor="format">Format</InputLabel>
+                <Select
+                  className={classes.format}
+                  native
+                  autoWidth
+                  value={format}
+                  onChange={(e) => setFormat(e.target.value)}
+                  inputProps={{name: 'format'}}
+                >
+                  {formats.map(format => (
+                    <option key={`format-option-${format}`} value={format}>{format}</option>
+                  ))}
+                </Select>
+              </FormControl>
+            </div>
 
-        <div className={classes.content}>
-          <div className={classes.settings}>
-            <TextField
-              className={classes.name}
-              autoFocus
-              margin="dense"
-              fullWidth={false}
-              label="Name"
-              type="text"
-              variant="filled"
-              placeholder="Sudoku Name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-            />
-            <FormControl component="fieldset">
-              <InputLabel htmlFor="format">Format</InputLabel>
-              <Select
-                native
-                autoWidth
-                value={format}
-                onChange={(e) => setFormat(e.target.value)}
-                inputProps={{name: 'format'}}
-              >
-                {formats.map(format => (
-                  <option key={`format-option-${format}`} value={format}>{format}</option>
-                ))}
-              </Select>
-            </FormControl>
+            <div>
+              <TextField
+                className={classes.pngSize}
+                disabled={format !== JPEG && format !== PNG}
+                required={format === JPEG || format === PNG}
+                error={pngSize > 10000 || pngSize < 100}
+                label="Size"
+                value={pngSize}
+                onChange={(e) => setPngSize(e.target.value)}
+                placeholder="(100 to 10,000)"
+                type="number"
+                InputProps={{
+                  endAdornment: <InputAdornment position="end">px</InputAdornment>,
+                }}
+                inputProps={{ min: 100, max: 10000}}
+                variant="outlined"
+                margin="dense"
+                
+              />
+            </div>
+
+            <div className={classes.preview}>
+              <label>Preview</label>
+              <SudokuSVG 
+                id="sudoku-svg"
+                svgRef={svgRef}
+                name={name}
+                cellValues={window.sudoku.getCellValues()}
+              />
+            </div>
           </div>
 
-          <div className={classes.preview}>
-            <label>Preview</label>
-            <SudokuSVG 
-              id="sudoku-svg"
-              svgRef={svgRef}
-              name={name}
-              cellValues={window.sudoku.getCellValues()}
-            />
-          </div>
-        </div>
-
-        <DialogActions>
+          <DialogActions>
           <Button onClick={onCancel}>Cancel</Button>
-          <Button onClick={exportSudoku}>Export</Button>
-          <a 
-            style={{display: 'none'}}
-            href="/"
-            download={`${name}.${format}`}
-            ref={aRef}
-          >
-            (hidden)Export
-          </a>
+          <Button type="submit">Export</Button>
         </DialogActions>
+        </form>
+
       </Dialog>
     </React.Fragment>
   )
 }
 
 const useStyles = makeStyles(theme => ({
+  margin: {
+    margin: theme.spacing(1),
+  },
+
+  textField: {
+    flexBasis: 200,
+  },
+
   paper: {
-    minwidth: '300px',
+    minWidth: '300px',
     // height: '80%',
     // width: '80%',
     // minWidth: 250,
@@ -137,7 +221,16 @@ const useStyles = makeStyles(theme => ({
   },
 
   name: {
-    paddingRight: '20px',
+    marginRight: '20px',
+  },
+
+  format: {
+    minWidth: '100px',
+  },
+
+  pngSize: {
+    marginLeft: '20px',
+    maxWidth: '200px'
   },
 
   preview: {

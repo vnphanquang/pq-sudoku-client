@@ -67,7 +67,7 @@ class Sudoku extends React.Component {
     return (
       <React.Fragment>
         {sudokus}
-        <button onClick={() => console.log(this.getActiveCellValues())}>CellValue</button>
+        {/* <button onClick={() => console.log(this.getActiveCellValues())}>CellValue</button> */}
       </React.Fragment>
     )
   }

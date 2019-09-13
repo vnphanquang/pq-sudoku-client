@@ -15,6 +15,11 @@ function TabAdditionDialog({onSubmit, onCancel}) {
   const classes = useStyles();
   const [name, setName] = React.useState('');
 
+  function submit(e) {
+    e.preventDefault();
+    onSubmit(name);
+  }
+
   return (
     <React.Fragment>
       <Dialog
@@ -23,19 +28,24 @@ function TabAdditionDialog({onSubmit, onCancel}) {
         open
       >
         <DialogTitle>New Tab</DialogTitle>
-        <TextField
-          autoFocus
-          label="Name"
-          type="text"
-          variant="filled"
-          placeholder="Sudoku Name"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-        /> 
-        <DialogActions>
-          <Button onClick={onCancel}>Cancel</Button>
-          <Button onClick={() => onSubmit(name)}>Create</Button>
-        </DialogActions>
+        <form action="" onSubmit={submit}>
+          <TextField
+            error={name.length === 0}
+            required
+            fullWidth
+            autoFocus
+            label="Name"
+            type="text"
+            variant="outlined"
+            placeholder="Sudoku Name"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+          />
+          <DialogActions>
+            <Button onClick={onCancel}>Cancel</Button>
+            <Button type="submit">Create</Button>
+          </DialogActions>
+        </form>
       </Dialog>
     </React.Fragment>
   )

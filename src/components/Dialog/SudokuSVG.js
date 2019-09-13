@@ -21,31 +21,31 @@ function SudokuSVG({
 }) {
 
   const styles = `
-        .verticals, .horizontals, #outline, .subgrid-edges {
-          fill: none;
-          stroke-miterlimit: 10;
-        }
+.verticals, .horizontals, #outline, .subgrid-edges {
+  fill: none;
+  stroke-miterlimit: 10;
+}
 
-        .verticals, .horizontals {
-          stroke-width: ${lineStrokeWidth}px;
-          stroke: ${lineColor};
-        }
+.verticals, .horizontals {
+  stroke-width: ${lineStrokeWidth}px;
+  stroke: ${lineColor};
+}
 
-        .subgrid-edges {
-          stroke-width: ${subgridEdgeStrokeWidth}px;
-          stroke: ${subgridEdgeColor};
-        }
+.subgrid-edges {
+  stroke-width: ${subgridEdgeStrokeWidth}px;
+  stroke: ${subgridEdgeColor};
+}
 
-        #outline {
-          stroke-width: ${outlineStrokeWidth}px;
-          stroke: ${outlineColor};
-        }
+#outline {
+  stroke-width: ${outlineStrokeWidth}px;
+  stroke: ${outlineColor};
+}
 
-        .values {
-          font-size: 25px;
-          color: ${valueColor};
-          font-family: "Roboto", "Helvetica", "Arial", sans-serif;
-        }
+.values {
+  font-size: 25px;
+  color: ${valueColor};
+  font-family: "Roboto", "Helvetica", "Arial", sans-serif;
+}
   `;
   const startXY = outlineStrokeWidth / 2;
   const endXY = startXY + baseCellSize*gridSize;
@@ -84,7 +84,7 @@ function SudokuSVG({
     )
 
     for (let col = 0; col < gridSize; col++) {
-      textXY = `${baseTextX + baseCellSize * row} ${baseTextY + baseCellSize * col}`
+      textXY = `${baseTextX + baseCellSize * col} ${baseTextY + baseCellSize * row}`
       values.push(
         <text
           key={`value-${row+1}-${col+1}`}
