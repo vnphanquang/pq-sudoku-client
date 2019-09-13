@@ -19,9 +19,8 @@ import SudokuSVG from './SudokuSVG';
 
 const SVG = 'svg';
 const PNG = 'png';
-const PDF = 'pdf';
 const JPEG = 'jpeg';
-const formats = [SVG, PNG, JPEG, PDF];
+const formats = [SVG, PNG, JPEG];
 
 function generateSVGDataURL(svgElement) {
   return URL.createObjectURL(
@@ -91,8 +90,6 @@ function ExportDialog({onSubmit, onCancel, sudoku}) {
               onSubmit(name, format, imgDataURL);
             }, `image/${format}`, 1);
           }
-          break;
-        case PDF:
           break;
         default:
           break;
