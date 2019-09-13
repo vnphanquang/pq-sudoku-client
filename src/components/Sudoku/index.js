@@ -15,12 +15,17 @@ class Sudoku extends React.Component {
 
   componentDidMount() {
     window.sudoku = {
+      ...window.sudoku,
       getCellValues: this.getActiveCellValues
     }
   }
 
   componentDidUpdate() {
     if (this.activeGrid) {
+      if (window.sudoku.loadedValues) {
+        this.activeGrid.setCellValues(window.sudoku.loadedValues);
+        window.sudoku.loadedValues = null;
+      }
       setTimeout(this.activeGrid.focus, 50);
     }
   }
@@ -88,6 +93,7 @@ const Indices = styled(({...props}) => <div {...props}/>)({
     width: '100%',
     height: '100%',
     textAlign: 'center',
+    textShadow: '2px 2px 3px rgba(33, 33, 33, .25)',
     fontSize: '1.2rem',
     backgroundColor: 'transparent'
   },

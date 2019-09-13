@@ -1,3 +1,5 @@
+import uuidv1 from 'uuid/v1';
+
 /* 
 * Action Types
 */
@@ -13,8 +15,16 @@ export const DIALOG_CANCEL = 'DIALOG_CANCEL';
 export const DIALOG_ADD_TAB = 'DIALOG_ADD_TAB';
 export const DIALOG_REMOVE_TAB = 'DIALOG_REMOVE_TAB';
 export const DIALOG_EXPORT = 'DIALOG_EXPORT';
+export const DIALOG_SAVEAS = 'DIALIG_SAVEAS';
+export const DIALOG_OPEN = 'DIALOG_OPEN';
 
-export const DIALOG_ACTIONS = [DIALOG_ADD_TAB, DIALOG_REMOVE_TAB, DIALOG_EXPORT];
+export const DIALOG_ACTIONS = [
+  DIALOG_ADD_TAB, 
+  DIALOG_REMOVE_TAB, 
+  DIALOG_EXPORT, 
+  DIALOG_SAVEAS,
+  DIALOG_OPEN
+];
 
 /* 
 * Action Creators
@@ -27,7 +37,8 @@ export function TabAddition({name}) {
   return {
     type: ADD_TAB,
     payload: {
-      name
+      name,
+      id: uuidv1()
     }
   }
 }
@@ -70,8 +81,20 @@ export function DialogExport() {
   }
 }
 
-export function SudokuExport() {
+export function DialogSaveAs() {
   return {
-    type: EXPORT_SUDOKU
+    type: DIALOG_SAVEAS
   }
 }
+
+export function DialogOpen() {
+  return {
+    type: DIALOG_OPEN
+  }
+}
+
+// export function SudokuExport() {
+//   return {
+//     type: EXPORT_SUDOKU
+//   }
+// }

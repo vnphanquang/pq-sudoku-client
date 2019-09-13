@@ -6,20 +6,32 @@ import DialogTitle from '@material-ui/core/DialogTitle';
 import DialogActions from '@material-ui/core/DialogActions';
 import TextField from '@material-ui/core/TextField';
 import Button from '@material-ui/core/Button';
-import FormControlLabel from '@material-ui/core/FormControlLabel';
-import FormControl from '@material-ui/core/FormControl';
-import Radio from '@material-ui/core/Radio';
-import RadioGroup from '@material-ui/core/RadioGroup';
 
 import {dialogLabels} from '../../lang';
 
-function TabAdditionDialog({onSubmit, onCancel}) {
+export const customFormat = 'pqsudoku';
+
+function generateJSONDataURL(object) {
+  return URL.createObjectURL(
+    new Blob(
+      [JSON.stringify(object)],
+      {type: 'application/json'}
+    )
+  )
+}
+
+function SaveAsDialog({onSubmit, onCancel, sudoku}) {
   const classes = useStyles();
-  const [name, setName] = React.useState('');
+  const [name, setName] = React.useState(sudoku.name);
 
   function submit(e) {
     e.preventDefault();
-    onSubmit(name);
+    onSubmit(
+      name, customFormat, 
+      generateJSONDataURL({
+        cellValues: window.sudoku.getCellValues()
+      })
+    );
   }
 
   return (
@@ -29,7 +41,7 @@ function TabAdditionDialog({onSubmit, onCancel}) {
         onClose={onCancel}
         open
       >
-        <DialogTitle>{dialogLabels.newTab}</DialogTitle>
+        <DialogTitle>{dialogLabels.saveAs}</DialogTitle>
         <form 
           action="" 
           onSubmit={submit}
@@ -50,7 +62,7 @@ function TabAdditionDialog({onSubmit, onCancel}) {
           </div>
           <DialogActions>
             <Button onClick={onCancel}>{dialogLabels.cancel}</Button>
-            <Button type="submit">{dialogLabels.create}</Button>
+            <Button type="submit">{dialogLabels.save}</Button>
           </DialogActions>
         </form>
       </Dialog>
@@ -68,5 +80,4 @@ const useStyles = makeStyles(theme => ({
   }
 }));
 
-
-export default TabAdditionDialog
+export default SaveAsDialog

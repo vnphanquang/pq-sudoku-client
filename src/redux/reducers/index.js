@@ -1,8 +1,6 @@
 import {combineReducers} from 'redux';
 import { TOGGLE_DRAWER, ADD_TAB, CHANGE_TAB, REMOVE_TAB, DIALOG_ACTIONS } from '../actions';
-import uuidv1 from 'uuid/v1';
-import { PassThrough } from 'stream';
-import { nextTick } from 'q';
+
 const navigationInitState = {
   drawerOpen: false
 }
@@ -39,7 +37,7 @@ function tabs(state = tabsInitState, {type, payload}) {
     case ADD_TAB:
       return {
         ...state,
-        array: [...state.array, {name: payload.name, id: uuidv1()}],
+        array: [...state.array, {name: payload.name, id: payload.id}],
         activeIndex: state.array.length
       }
     case CHANGE_TAB:

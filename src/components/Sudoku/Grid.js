@@ -643,6 +643,18 @@ class Grid extends React.PureComponent {
   getCellValues() {
     return this.cells.map(cellRow => cellRow.map(cell => this.getCellValue(cell)));
   }
+  
+  setCellValues(values) {
+    let cell, value;
+    for (let row = 0; row < GRID_SIZE; row++) {
+      for (let col = 0; col < GRID_SIZE; col++) {
+        cell = this.getCell(row, col);
+        value = values[row][col];
+        cell.setState({cellValue: value});
+        this.setCellValueMapping(cell, value);
+      }
+    }
+  }
 
   static getSubgridNumber(row, col) {
     return SUBGRID_NUMBERS[Math.floor(row/3)][Math.floor(col/3)];
@@ -693,6 +705,7 @@ const StyledGrid = styled(({...other}) => <div {...other} />)(
   backgroundColor: '#212121',
   border: '4px solid',
   borderRadius: '3px',
+  boxShadow: '1px 1px 6px rgba(33,33,33,.5)',
   })
 )
 

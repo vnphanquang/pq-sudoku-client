@@ -16,7 +16,9 @@ import Select from '@material-ui/core/Select';
 import InputAdornment from '@material-ui/core/InputAdornment';
 
 import SudokuSVG from './SudokuSVG';
+import {dialogLabels} from '../../lang';
 
+//TODO: implement PDF export
 const SVG = 'svg';
 const PNG = 'png';
 const JPEG = 'jpeg';
@@ -60,23 +62,20 @@ function ExportDialog({onSubmit, onCancel, sudoku}) {
 
   const exportSudoku = (e) => {
       e.preventDefault();
-      let svgDataURL;
       switch (format) {
         case SVG:
-          svgDataURL = generateSVGDataURL(svgRef.current);
-          onSubmit(name, format, svgDataURL);
+          onSubmit(name, format, generateSVGDataURL(svgRef.current));
           break;
         case PNG:
         case JPEG:
           const svgClone = svgRef.current.cloneNode(true);
           svgClone.setAttribute('width', pngSize);
           svgClone.setAttribute('height', pngSize);
-          svgDataURL = generateSVGDataURL(svgClone);
           const canvas = document.createElement('canvas');
           canvas.height = pngSize;
           canvas.width = pngSize;
           const img = new Image(pngSize, pngSize);
-          img.src = svgDataURL;
+          img.src = generateSVGDataURL(svgClone);
           img.onload = () => {
             const ctx = canvas.getContext('2d');
             ctx.fillStyle = 'white';
@@ -108,7 +107,7 @@ function ExportDialog({onSubmit, onCancel, sudoku}) {
         onClose={onCancel}
         open
       >
-        <DialogTitle>Export</DialogTitle>
+        <DialogTitle>{dialogLabels.export}</DialogTitle>
         <form 
           action="" 
           onSubmit={exportSudoku}
@@ -117,15 +116,15 @@ function ExportDialog({onSubmit, onCancel, sudoku}) {
             <div>
               <TextField
                 className={classes.name}
+                type="text"
                 required
                 error={name.length === 0}
                 autoFocus
-                margin="dense"
+                label={dialogLabels.sudokuName.label}
+                placeholder={dialogLabels.sudokuName.placeholder}
                 fullWidth
-                label="Name"
-                type="text"
+                margin="dense"
                 variant="outlined"
-                placeholder="Sudoku Name"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
               />
@@ -133,7 +132,7 @@ function ExportDialog({onSubmit, onCancel, sudoku}) {
 
             <div className={classes.settings}>
               <FormControl component="fieldset">
-                <InputLabel htmlFor="format">Format</InputLabel>
+                <InputLabel htmlFor="format">{dialogLabels.format}</InputLabel>
                 <Select
                   className={classes.format}
                   native
@@ -153,7 +152,7 @@ function ExportDialog({onSubmit, onCancel, sudoku}) {
                 disabled={format !== JPEG && format !== PNG}
                 required={format === JPEG || format === PNG}
                 error={pngSize > 10000 || pngSize < 100}
-                label="Size"
+                label={dialogLabels.size}
                 value={pngSize}
                 onChange={(e) => setPngSize(e.target.value)}
                 placeholder="(100 to 10,000)"
@@ -169,7 +168,7 @@ function ExportDialog({onSubmit, onCancel, sudoku}) {
             </div>
 
             <div className={classes.preview}>
-              <label>Preview</label>
+              <label>{dialogLabels.preview}</label>
               <SudokuSVG 
                 id="sudoku-svg"
                 svgRef={svgRef}
@@ -180,8 +179,8 @@ function ExportDialog({onSubmit, onCancel, sudoku}) {
           </div>
 
           <DialogActions>
-          <Button onClick={onCancel}>Cancel</Button>
-          <Button type="submit">Export</Button>
+          <Button onClick={onCancel}>{dialogLabels.cancel}</Button>
+          <Button type="submit">{dialogLabels.export}</Button>
         </DialogActions>
         </form>
 
@@ -207,7 +206,7 @@ const useStyles = makeStyles(theme => ({
   },
 
   content: {
-    padding: '0 20px',
+    padding: theme.spacing(0, 2),
     display: 'flex',
     flexDirection: 'column',
     justifyContent: 'space-between',
@@ -218,7 +217,7 @@ const useStyles = makeStyles(theme => ({
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
-    margin: '10px 0'
+    margin: theme.spacing(1, 0),
   },
 
   name: {
@@ -230,7 +229,7 @@ const useStyles = makeStyles(theme => ({
   },
 
   pngSize: {
-    marginLeft: '20px',
+    marginLeft: theme.spacing(2),
     maxWidth: '200px'
   },
 

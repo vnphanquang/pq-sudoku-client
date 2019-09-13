@@ -1,9 +1,18 @@
 import React from 'react';
 import {useSelector, useDispatch} from 'react-redux';
-import {DialogCancellation, DIALOG_ADD_TAB, DIALOG_REMOVE_TAB, DIALOG_EXPORT, TabAddition, TabRemoval, SudokuExport} from '../../redux/actions';
+import { 
+  DialogCancellation, 
+  DIALOG_ADD_TAB, 
+  DIALOG_EXPORT, 
+  DIALOG_SAVEAS,
+  DIALOG_OPEN,
+  TabAddition 
+} from '../../redux/actions';
 
 import AddTabDialog from './AddTabDialog';
 import ExportDialog from './ExportDialog';
+import SaveAsDialog from './SaveAsDialog';
+import OpenDialog from './OpenDialog';
 
 function SudokuDialog() {
   console.log('SudokuDialog rendered');
@@ -30,6 +39,15 @@ function SudokuDialog() {
     setTimeout(() => URL.revokeObjectURL(url), 1000)
   }
 
+  function openSudoku(name, sudokuData) {
+    const {cellValues} = sudokuData;
+    window.sudoku = {
+      ...window.sudoku,
+      loadedValues: cellValues
+    }
+    addTab(name);
+  }
+
   let dialog;
   switch (dialogType) {
     case DIALOG_ADD_TAB:
@@ -46,6 +64,23 @@ function SudokuDialog() {
           onSubmit={exportFile}
           onCancel={cancel} 
           sudoku={sudoku}
+        />
+      )
+      break;
+    case DIALOG_SAVEAS:
+      dialog = (
+        <SaveAsDialog 
+          onSubmit={exportFile}
+          onCancel={cancel}
+          sudoku={sudoku}
+        />
+      )
+      break;
+    case DIALOG_OPEN:
+      dialog = (
+        <OpenDialog 
+          onSubmit={openSudoku}
+          onCancel={cancel}
         />
       )
       break;

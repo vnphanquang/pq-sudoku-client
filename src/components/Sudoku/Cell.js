@@ -95,6 +95,7 @@ const StyledCell = styled(({focused, styleState, row, col, ...other}) => <div {.
       width: '100%',
       height: '100%',
       textAlign: 'center',
+      textShadow: '1.5px 1.5px 2.5px rgba(33, 33, 33, .25)',
       fontSize: '1.2rem',
       backgroundColor: 'transparent'
     },

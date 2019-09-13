@@ -1,12 +1,32 @@
-export const DRAWER_LABELS = {
-  NEW: 'New...',
-  SAVE: 'Save...',
-  LOAD: 'Load...',
-  EXPORT: 'Export...',
-  THEME: 'Theme',
-  SETTINGS: 'Settings',
-  FEEDBACK: 'Feedback',
-  HELP: 'Help',
-  ABOUT: 'About',
-  SOURCE: 'Source'
+export const drawerLabels = {
+  new: 'New',
+  open: 'Open',
+  save: 'Save',
+  saveAs: 'SaveAs',
+  export: 'Export',
+  theme: 'Theme',
+  settings: 'Settings',
+  feedback: 'Feedback',
+  help: 'Help',
+  about: 'About',
+  source: 'Source'
+}
+
+export const dialogLabels = {
+  newTab: 'New Sudoku Tab',
+  sudokuName: {
+    label: 'Name',
+    placeholder: 'Sudoku Name'
+  },
+  cancel: 'Cancel',
+  create: 'Create',
+  format: 'Format',
+  size: 'Size',
+  export: drawerLabels.export,
+  saveAs: drawerLabels.saveAs,
+  save: drawerLabels.save,
+  choose: 'Choose',
+  open: drawerLabels.open,
+  preview: 'Preview',
+
 }
