@@ -80,7 +80,10 @@ function ExportDialog({onSubmit, onCancel, sudoku}) {
           img.onload = () => {
             const ctx = canvas.getContext('2d');
             ctx.fillStyle = 'white';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            //FIXME: fill rect taken into account stroke width
+            const fillXY = 4 * canvas.width / 450;
+            const fillSize = canvas.width - fillXY * 2
+            ctx.fillRect(fillXY, fillXY, fillSize, fillSize);
             ctx.drawImage(img, 0, 0, pngSize, pngSize);
 
             if (!HTMLCanvasElement.prototype.toBlob) canvasToBlobPolyfill();
@@ -111,14 +114,14 @@ function ExportDialog({onSubmit, onCancel, sudoku}) {
           onSubmit={exportSudoku}
         >
           <div className={classes.content}>
-            <div className={classes.settings}>
+            <div>
               <TextField
                 className={classes.name}
                 required
                 error={name.length === 0}
                 autoFocus
                 margin="dense"
-                fullWidth={false}
+                fullWidth
                 label="Name"
                 type="text"
                 variant="outlined"
@@ -126,6 +129,9 @@ function ExportDialog({onSubmit, onCancel, sudoku}) {
                 value={name}
                 onChange={(e) => setName(e.target.value)}
               />
+            </div>
+
+            <div className={classes.settings}>
               <FormControl component="fieldset">
                 <InputLabel htmlFor="format">Format</InputLabel>
                 <Select
@@ -141,9 +147,7 @@ function ExportDialog({onSubmit, onCancel, sudoku}) {
                   ))}
                 </Select>
               </FormControl>
-            </div>
 
-            <div>
               <TextField
                 className={classes.pngSize}
                 disabled={format !== JPEG && format !== PNG}
@@ -214,11 +218,11 @@ const useStyles = makeStyles(theme => ({
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
-    padding: '10px 0'
+    margin: '10px 0'
   },
 
   name: {
-    marginRight: '20px',
+    // marginRight: '20px',
   },
 
   format: {
