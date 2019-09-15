@@ -15,7 +15,8 @@ import MenuIcon from '@material-ui/icons/Menu';
 import CloseIcon from '@material-ui/icons/Close';
 import WbSunnyIcon from '@material-ui/icons/WbSunny';
 import Brightness3Icon from '@material-ui/icons/Brightness3';
-import { APPBAR_HEIGHT } from './utils'
+import { APPBAR_HEIGHT } from './utils';
+import Tooltip from '@material-ui/core/Tooltip';
 
 const themeTypeIcon = {
   light: <WbSunnyIcon />,
@@ -23,7 +24,7 @@ const themeTypeIcon = {
 }
 
 function SudokuAppBar() {
-  // console.log('DrawerIcon rendered');
+  console.log('DrawerIcon rendered');
   const classes = useStyles();
   const themeType = useSelector(state => state.theme.palette.type);
   const dispatch = useDispatch();
@@ -41,9 +42,11 @@ function SudokuAppBar() {
           Sudoku PQ
         </Typography>
         <SudokuTabs />
-      <IconButton className={classes.themeTypeToggle} onClick={toggleThemeType}>
-        {themeTypeIcon[themeType]}
-      </IconButton>
+      <Tooltip title="Toggle light/dark theme">
+        <IconButton className={classes.themeTypeToggle} onClick={toggleThemeType}>
+          {themeTypeIcon[themeType]}
+        </IconButton>
+      </Tooltip>
       </Toolbar>
     </AppBar>
   )
