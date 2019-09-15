@@ -6,7 +6,8 @@ import {
   DIALOG_EXPORT, 
   DIALOG_SAVEAS,
   DIALOG_OPEN,
-  TabAddition 
+  TabAddition,
+  SnackbarNoSudoku
 } from '../../redux/actions';
 
 import AddTabDialog from './AddTabDialog';
@@ -15,11 +16,15 @@ import SaveAsDialog from './SaveAsDialog';
 import OpenDialog from './OpenDialog';
 
 function SudokuDialog() {
-  console.log('SudokuDialog rendered');
+  // console.log('SudokuDialog rendered');
   const aRef = React.useRef(null);
-  const dialogType = useSelector(state => state.dialog);
-  const sudoku= useSelector(state => state.dialog !== null && state.tabs.array[state.tabs.activeIndex]);
 
+  // const dialogType = useSelector(state => state.dialog);
+  // const sudoku= useSelector(state => state.dialog !== null && state.tabs.array[state.tabs.activeIndex]);
+  const {dialogType, sudoku} = useSelector(state => ({
+    dialogType: state.dialog,
+    sudoku: (state.dialog !== null && state.tabs.activeIndex !== null) && state.tabs.array[state.tabs.activeIndex]
+  }))
   const dispatch = useDispatch();
 
   const addTab = React.useCallback(
@@ -32,12 +37,15 @@ function SudokuDialog() {
     [dispatch],
   )
   
-  function exportFile(name, format, url) {
-    aRef.current.href = url;
-    aRef.current.download = `${name}.${format}`;
-    aRef.current.click();
-    setTimeout(() => URL.revokeObjectURL(url), 1000)
-  }
+  const exportFile = React.useCallback(
+    (name, format, url) => {
+      aRef.current.href = url;
+      aRef.current.download = `${name}.${format}`;
+      aRef.current.click();
+      setTimeout(() => URL.revokeObjectURL(url), 1000)
+    },
+    [aRef]
+  )
 
   function openSudoku(name, sudokuData) {
     const {cellValues} = sudokuData;
@@ -58,23 +66,32 @@ function SudokuDialog() {
     // case DIALOG_REMOVE_TAB:
     //   return <TabRemovalDialog onSubmit={addTab}/>
     case DIALOG_EXPORT:
-      //FIME: if no active sudoku ==> deny and give message -> user
-      dialog = (
-        <ExportDialog 
-          onSubmit={exportFile}
-          onCancel={cancel} 
-          sudoku={sudoku}
-        />
-      )
+      if (!sudoku) {
+        dispatch(SnackbarNoSudoku());
+        dialog = null;
+      } else {
+        dialog = (
+          <ExportDialog 
+            onSubmit={exportFile}
+            onCancel={cancel} 
+            sudoku={sudoku}
+          />
+        )
+      }
       break;
     case DIALOG_SAVEAS:
-      dialog = (
-        <SaveAsDialog 
-          onSubmit={exportFile}
-          onCancel={cancel}
-          sudoku={sudoku}
-        />
-      )
+      if (!sudoku) {
+        dispatch(SnackbarNoSudoku());
+        dialog = null;
+      } else {
+        dialog = (
+          <SaveAsDialog 
+            onSubmit={exportFile}
+            onCancel={cancel}
+            sudoku={sudoku}
+          />
+        )
+      }
       break;
     case DIALOG_OPEN:
       dialog = (

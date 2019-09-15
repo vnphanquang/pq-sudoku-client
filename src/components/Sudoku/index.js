@@ -4,7 +4,7 @@ import {styled} from '@material-ui/styles';
 
 import Grid from './Grid';
 
-import {COLLAPSED_DRAWER_WIDTH, APPBAR_HEIGHT, DIRECTION, GRID_SIZE} from '../utils';
+import { DIRECTION, GRID_SIZE} from '../utils';
 class Sudoku extends React.Component {
   constructor(props) {
     super(props)
@@ -39,7 +39,7 @@ class Sudoku extends React.Component {
   }
 
   render() {
-    console.log('Sudoku rendered');
+    // console.log('Sudoku rendered');
     let colIndices = [];
     let rowIndices = [];
     for (let row = 0; row < GRID_SIZE; row++) {
@@ -56,12 +56,10 @@ class Sudoku extends React.Component {
     }
 
     let isActive = false;
-    let id;
     const sudokus = this.props.tabs.array.map(({id}, index) => {
       isActive = this.props.tabs.activeIndex === index;
-      id = `sudoku-container-${id}}`
       return (
-        <SudokuContainer key={id} hidden={!isActive}>
+        <SudokuContainer key={`sudoku-container-${id}}`} hidden={!isActive}>
           <ColIndices>{colIndices}</ColIndices>
           <RowIndices>{rowIndices}</RowIndices>
           <Grid {...isActive && {ref: this.updateGridRef}}/>
@@ -78,29 +76,31 @@ class Sudoku extends React.Component {
   }
 }
 
-const Indices = styled(({...props}) => <div {...props}/>)({
+const Indices = styled(({...props}) => <div {...props}/>)(
+  ({theme}) => ({
   display: 'grid',
   gridColumnGap: '1px',
   textAlign: 'center',
   justifyContent: 'stretch',
   '& div:hover': {
-    backgroundColor: 'rgb(218, 255, 214)'
+    backgroundColor: theme.sudoku.cell.hoverBg[theme.palette.type],
   },
   '& input': {
+    color: `${theme.sudoku.color[theme.palette.type]}`,
     margin: '0',
     padding: '0',
     border: 'none',
     width: '100%',
     height: '100%',
     textAlign: 'center',
-    textShadow: '2px 2px 3px rgba(33, 33, 33, .25)',
+    textShadow: `2px 2px 3px ${theme.sudoku.shadow[theme.palette.type]}`,
     fontSize: '1.2rem',
     backgroundColor: 'transparent'
   },
   '& input:focus': {
     outline: 'none'
   }
-})
+}))
 
 const RowIndices = styled(({...props}) => <Indices {...props} />)({
   gridArea: 'row-indices',

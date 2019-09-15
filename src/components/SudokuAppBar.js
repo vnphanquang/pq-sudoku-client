@@ -1,7 +1,7 @@
 import React from 'react';
-import clsx from 'clsx';
+// import clsx from 'clsx';
 import { useSelector, useDispatch } from 'react-redux';
-import { DrawerToggle, TabChange, TabRemoval } from '../redux/actions'
+import { DrawerToggle, TabChange, TabRemoval, ThemeTypeToggle} from '../redux/actions'
 
 import { makeStyles } from '@material-ui/styles';
 import AppBar from '@material-ui/core/AppBar';
@@ -13,14 +13,26 @@ import Tab from '@material-ui/core/Tab';
 import ArrowUp from '@material-ui/icons/KeyboardArrowUp';
 import MenuIcon from '@material-ui/icons/Menu';
 import CloseIcon from '@material-ui/icons/Close';
-import GridIcon from '@material-ui/icons/GridOn';
-
+import WbSunnyIcon from '@material-ui/icons/WbSunny';
+import Brightness3Icon from '@material-ui/icons/Brightness3';
 import { APPBAR_HEIGHT } from './utils'
-import { flexbox } from '@material-ui/system';
+
+const themeTypeIcon = {
+  light: <WbSunnyIcon />,
+  dark: <Brightness3Icon />
+}
 
 function SudokuAppBar() {
   // console.log('DrawerIcon rendered');
   const classes = useStyles();
+  const themeType = useSelector(state => state.theme.palette.type);
+  const dispatch = useDispatch();
+
+  const toggleThemeType = React.useCallback(
+    () => dispatch(ThemeTypeToggle()),
+    [dispatch]
+  )
+  
   return (
     <AppBar className={classes.root}>
       <Toolbar disableGutters>
@@ -29,13 +41,16 @@ function SudokuAppBar() {
           Sudoku PQ
         </Typography>
         <SudokuTabs />
+      <IconButton className={classes.themeTypeToggle} onClick={toggleThemeType}>
+        {themeTypeIcon[themeType]}
+      </IconButton>
       </Toolbar>
     </AppBar>
   )
 }
 
 function SudokuTabs() {
-  console.log('Sudoku Tabs rendered');
+  // console.log('Sudoku Tabs rendered');
 
   const classes = useStyles();
 
@@ -63,6 +78,7 @@ function SudokuTabs() {
     >
       {tabs.array.map(({name, id}, index) => (
         <SudokuTab 
+          className={classes.tab}
           key={`sudoku-tab-${id}`}
           index={index} 
           name={name} 
@@ -119,13 +135,13 @@ function DrawerIcon(props) {
 
 const useStyles = makeStyles(theme => ({
   tabs: {
-    marginLeft: '20px',
-    marginTop: '20px',
-    // alignItems: 'end'
+    flexGrow: 1,
+    margin: theme.spacing(2, 0, 0, 1)
   },
 
   tab: {
-
+    padding: theme.spacing(1, 0),
+    minWidth: '140px',
   },
 
   tabSelected: {
@@ -134,22 +150,23 @@ const useStyles = makeStyles(theme => ({
 
   tabLabel: {
     display: 'flex',
-    justifyContent: 'stretch',
-    alignItems: 'center'
+    alignItems: 'center',
   },
 
   tabName: {
-    textTransform: 'none'
+    textTransform: 'none',
+    textAlign: 'left',
+    margin: theme.spacing(0, 0, 1, 0),
   },
 
   tabCloseBtn: {
     padding: 0,
-    marginLeft: 12,
+    margin: theme.spacing(0, 0, 1, 1),
   },
 
   root: {
     zIndex: theme.zIndex.drawer,
-    height: APPBAR_HEIGHT
+    height: APPBAR_HEIGHT,
   },
 
   brand: {
@@ -157,9 +174,13 @@ const useStyles = makeStyles(theme => ({
   },
 
   drawerBtn: {
-    marginLeft: 12,
-    marginRight: 12
+    margin: theme.spacing(0, 1),
   },
+
+  themeTypeToggle: {
+    margin: theme.spacing(0, 2),
+    color: theme.palette.type === 'light' ? 'white' : 'black',
+  }
 }))
 
 export default React.memo(SudokuAppBar);

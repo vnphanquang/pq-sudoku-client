@@ -30,3 +30,7 @@ export const dialogLabels = {
   preview: 'Preview',
 
 }
+
+export const messages = {
+  noSudoku: 'No active sudoku!'
+}

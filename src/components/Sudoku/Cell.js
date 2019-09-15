@@ -79,23 +79,24 @@ class Cell extends React.PureComponent {
 
 const StyledCell = styled(({focused, styleState, row, col, ...other}) => <div {...other} />)(
   ({theme, row, col, focused, styleState}) => ({
-    backgroundColor: getBgColor(focused, styleState, theme.cell),
-    borderColor: '#212121',
+    backgroundColor: getBgColor(focused, styleState, theme),
+    borderColor: `${theme.sudoku.color[theme.palette.type]}`,
     borderStyle: 'solid',
     borderWidth: getBorderWidth(row, col),
     position: 'relative',
     cursor: 'pointer',
     '&:hover': {
-      backgroundColor: theme.cell.hoverBg
+      backgroundColor: theme.sudoku.cell.hoverBg[theme.palette.type]
     },
     '& input': {
+      color: `${theme.sudoku.color[theme.palette.type]}`,
       margin: '0',
       padding: '0',
       border: 'none',
       width: '100%',
       height: '100%',
       textAlign: 'center',
-      textShadow: '1.5px 1.5px 2.5px rgba(33, 33, 33, .25)',
+      textShadow: `1.5px 1.5px 2.5px ${theme.sudoku.shadow[theme.palette.type]}`,
       fontSize: '1.2rem',
       backgroundColor: 'transparent'
     },
@@ -106,19 +107,19 @@ const StyledCell = styled(({focused, styleState, row, col, ...other}) => <div {.
   {withTheme: true}
 )
 
-function getBgColor(focused, styleState, cell) {
+function getBgColor(focused, styleState, {sudoku: {cell}, palette: {type}}) {
   switch(styleState) {
     case STYLE_STATES.LIT:
-      return cell.litBg;
+      return cell.litBg[type];
     case STYLE_STATES.SPOTTED:
-      return cell.spottedBg;
+      return cell.spottedBg[type];
     case STYLE_STATES.CONFLICTING:
-      return cell.conflictingBg;
+      return cell.conflictingBg[type];
     case STYLE_STATES.SELECTED:
-      if (focused) return cell.focusedBg;
-      else         return cell.selectedBg;
+      if (focused) return cell.focusedBg[type];
+      else         return cell.selectedBg[type];
     default:
-      return 'white'
+      return cell.neutralBg[type];
   }
 }
 

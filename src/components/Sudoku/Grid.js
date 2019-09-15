@@ -29,9 +29,6 @@ class Grid extends React.PureComponent {
     this.focus = this.focus.bind(this);
     this.isFocused = this.isFocused.bind(this);
     
-    // JSON handling
-    // this.getJSONValues = this.getJSONValues.bind(this);
-    // this.setValuesFromJSON = this.setValuesFromJSON.bind(this);
     
     // Play Mode Specifics
     // this.getGameValue = this.getGameValue.bind(this);
@@ -95,7 +92,7 @@ class Grid extends React.PureComponent {
   }
 
   handleKeyPress(e, targetCell) {
-    let {ctrlKey, shiftkey, altKey, key} = e
+    let {ctrlKey, key} = e
     if (VALUES.has(key)) {
       if (this.pencilMode) {
         targetCell.setState((st) => {
@@ -665,7 +662,7 @@ class Grid extends React.PureComponent {
   }
 
   render() {
-    console.log('Grid rendered!');
+    // console.log('Grid rendered!');
 
     let cells = [];
     let subgrid;
@@ -702,10 +699,10 @@ const StyledGrid = styled(({...other}) => <div {...other} />)(
   gridTemplateColumns: `repeat(${GRID_SIZE}, 1fr)`,
   gridTemplateRows: `repeat(${GRID_SIZE}, 1fr)`,
   gridGap: '1px 1px',
-  backgroundColor: '#212121',
+  backgroundColor: `${theme.sudoku.color[theme.palette.type]}`,
   border: '4px solid',
   borderRadius: '3px',
-  boxShadow: '1px 1px 6px rgba(33,33,33,.5)',
+  boxShadow: `1px 1px 6px ${theme.sudoku.shadow[theme.palette.type]}`,
   })
 )
 

@@ -1,5 +1,5 @@
 import uuidv1 from 'uuid/v1';
-
+import {messages} from '../../lang';
 /* 
 * Action Types
 */
@@ -15,7 +15,7 @@ export const DIALOG_CANCEL = 'DIALOG_CANCEL';
 export const DIALOG_ADD_TAB = 'DIALOG_ADD_TAB';
 export const DIALOG_REMOVE_TAB = 'DIALOG_REMOVE_TAB';
 export const DIALOG_EXPORT = 'DIALOG_EXPORT';
-export const DIALOG_SAVEAS = 'DIALIG_SAVEAS';
+export const DIALOG_SAVEAS = 'DIALOG_SAVEAS';
 export const DIALOG_OPEN = 'DIALOG_OPEN';
 
 export const DIALOG_ACTIONS = [
@@ -26,9 +26,22 @@ export const DIALOG_ACTIONS = [
   DIALOG_OPEN
 ];
 
+
+export const SNACKBAR_CLOSE = 'SNACKBAR_CLOSE';
+export const SNACKBAR_NO_SUDOKU = 'SNACKBAR_NO_SUDOKU';
+
+export const THEME_TYPE_TOGGLE = 'THEME_TYPE_TOGGLE';
+
 /* 
 * Action Creators
 */
+export function ThemeTypeToggle() {
+  return {
+    type: THEME_TYPE_TOGGLE
+  }
+}
+
+
 export function DrawerToggle() {
   return {type: TOGGLE_DRAWER};
 }
@@ -90,6 +103,19 @@ export function DialogSaveAs() {
 export function DialogOpen() {
   return {
     type: DIALOG_OPEN
+  }
+}
+
+export function SnackbarClose() {
+  return {
+    type: SNACKBAR_CLOSE
+  }
+}
+
+export function SnackbarNoSudoku() {
+  return {
+    type: SNACKBAR_NO_SUDOKU,
+    payload: messages.noSudoku
   }
 }
 
