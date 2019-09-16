@@ -20,7 +20,7 @@ function generateJSONDataURL(object) {
   )
 }
 
-function SaveAsDialog({onSubmit, onCancel, sudoku}) {
+function SaveAsDialog({onSubmit, onCancel, data: sudoku}) {
   const classes = useStyles();
   const [name, setName] = React.useState(sudoku.name);
 

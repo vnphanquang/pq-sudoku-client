@@ -5,8 +5,8 @@ import {CssBaseline} from '@material-ui/core';
 import {ThemeProvider, withStyles} from '@material-ui/styles';
 import {createMuiTheme} from '@material-ui/core/styles';
 
-import Appbar from './AppBar';
-import Drawer from './Drawer';
+import Navigator from './Navigator';
+// import Drawer from './Drawer';
 import Sudoku from './Sudoku';
 import Dialog from './Dialog';
 import Snackbar from './Snackbar';
@@ -28,8 +28,8 @@ class App extends React.PureComponent {
         <ThemeProvider theme={theme}>
           <CssBaseline />
           <div className={classes.root}>
-            <Appbar />
-            <Drawer />
+            <Navigator />
+            {/* <Drawer /> */}
             <div className={classes.sudokuWrapper}>
               <Sudoku />
             </div>

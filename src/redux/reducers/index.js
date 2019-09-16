@@ -98,40 +98,40 @@ const themeInitState = {
   sudoku: {
     color: {
       light: '#212121',
-      dark: 'rgb(255,255,255)'
+      dark: '#ffffff'
     },
     shadow: {
       light: 'rgba(33, 33, 33, .3)',
       dark: 'rgba(255,255,255, .5)'
     },
     cell: {
-      neutralBg: {
-        light: 'white',
+      baseBg: {
+        light: '#ffffff',
         dark: '#212121'
       },
       hoverBg: {
-        light: 'rgb(218, 255, 214)',
-        dark: 'rgb(218, 255, 214)'
+        light: '#daffd6',
+        dark: '#384d36'
       },
       litBg: {
-        light: 'rgb(216, 216, 216)',
-        dark: 'rgb(80, 80, 80)'
+        light: '#d8d8d8',
+        dark: '#505050'
       },
       spottedBg: {
-        light: 'rgb(153, 153, 153)',
-        dark: 'rgb(153, 153, 153)',
+        light: '#999999',
+        dark: '#999999',
       },
       conflictingBg: {
-        light: 'rgb(255, 117, 117)',
-        dark: 'rgb(255, 117, 117)'
+        light: '#ff7575',
+        dark: '#ff7575'
       },
       selectedBg: {
-        light: 'rgb(168, 168, 255)',
-        dark: 'rgb(168, 168, 255)'
+        light: '#a8a8ff',
+        dark: '#a8a8ff'
       },
       focusedBg: {
-        light:  'rgb(100, 255, 255)',
-        dark:  'rgb(100, 255, 255)'
+        light:  '#64ffff',
+        dark:  '#64ffff'
       },
     }
   },
@@ -143,6 +143,8 @@ function theme(state=themeInitState, {type, payload}) {
         ...state,
         type: state.type === 'light' ? 'dark' : 'light',
       }
+    // case UPDATE_THEME:
+    //   return payload;
     default:
       return state;
   }

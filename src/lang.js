@@ -28,7 +28,8 @@ export const dialogLabels = {
   choose: 'Choose',
   open: drawerLabels.open,
   preview: 'Preview',
-
+  apply: 'Apply',
+  settings: drawerLabels.settings
 }
 
 export const messages = {

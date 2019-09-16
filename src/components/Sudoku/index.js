@@ -1,6 +1,7 @@
 import React from 'react';
 import {connect} from 'react-redux';
 import {styled} from '@material-ui/styles';
+import ButtonBase from '@material-ui/core/ButtonBase';
 
 import Grid from './Grid';
 
@@ -44,14 +45,20 @@ class Sudoku extends React.Component {
     let rowIndices = [];
     for (let row = 0; row < GRID_SIZE; row++) {
       rowIndices.push(
-        <div key={row+1} onClick={(e) => this.activeGrid.handleCellSelectionByIndex(e, row, DIRECTION.ROW)}>
-          <input type="button" readOnly value={row+1} />
-      </div>
+        <ButtonBase 
+          key={`row-index-${row+1}`} 
+          onClick={(e) => this.activeGrid.handleCellSelectionByIndex(e, row, DIRECTION.ROW)}
+        >
+          {row+1}
+        </ButtonBase>
       )
       colIndices.push(
-        <div key={row+1} onClick={(e) => this.activeGrid.handleCellSelectionByIndex(e, row, DIRECTION.COL)}>
-          <input type="button" readOnly value={row+1} />
-        </div>
+        <ButtonBase 
+          key={`col-index-${row+1}`} 
+          onClick={(e) => this.activeGrid.handleCellSelectionByIndex(e, row, DIRECTION.COL)}
+        >
+          {row+1}
+        </ButtonBase>
       )
     }
 
@@ -78,36 +85,26 @@ class Sudoku extends React.Component {
 
 const Indices = styled(({...props}) => <div {...props}/>)(
   ({theme}) => ({
-  display: 'grid',
-  gridColumnGap: '1px',
-  textAlign: 'center',
-  justifyContent: 'stretch',
-  '& div:hover': {
-    backgroundColor: theme.sudoku.cell.hoverBg[theme.palette.type],
-  },
-  '& input': {
-    color: `${theme.sudoku.color[theme.palette.type]}`,
-    margin: '0',
-    padding: '0',
-    border: 'none',
-    width: '100%',
-    height: '100%',
+    display: 'grid',
+    gridColumnGap: '1px',
     textAlign: 'center',
-    textShadow: `2px 2px 3px ${theme.sudoku.shadow[theme.palette.type]}`,
-    fontSize: '1.2rem',
-    backgroundColor: 'transparent'
-  },
-  '& input:focus': {
-    outline: 'none'
-  }
-}))
+    justifyContent: 'stretch',
+    '& :hover': {
+      backgroundColor: theme.sudoku.cell.hoverBg[theme.palette.type],
+    },
+    '& button': {
+      textShadow: `2px 2px 3px ${theme.sudoku.shadow[theme.palette.type]}`,
+      fontSize: '1.2rem',
+    },
+  })
+)
 
 const RowIndices = styled(({...props}) => <Indices {...props} />)({
   gridArea: 'row-indices',
   gridTemplateRows: `repeat(${GRID_SIZE}, 1fr)`,
   gridRowGap: '1px',
   padding: '4px 0 4px 2px',
-  '& div': {
+  '& button': {
     borderRadius: '10% 50% 50% 10%',
     cursor: 'pointer',
   },
@@ -118,7 +115,7 @@ const ColIndices = styled(({...props}) => <Indices {...props} />)({
   gridArea: 'col-indices',
   gridTemplateColumns: `repeat(${GRID_SIZE}, 1fr)`,
   padding: '4px 2px 0 2px',
-  '& div': {
+  '& button': {
     borderRadius: '10% 10% 50% 50%',
     cursor: 'pointer',
   },

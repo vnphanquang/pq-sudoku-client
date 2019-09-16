@@ -1,6 +1,6 @@
 import React from 'react';
-import {connect} from 'react-redux';
-import { TabChange, TabRemoval } from '../../redux/actions'
+// import {connect} from 'react-redux';
+// import { TabChange, TabRemoval } from '../../redux/actions'
 import {withStyles} from '@material-ui/styles'
 import Tabs from '@material-ui/core/Tabs';
 import Tab from '@material-ui/core/Tab';
@@ -20,7 +20,7 @@ class TabsPQS extends React.PureComponent {
   }
 
   render() {
-    // console.log('Tabs rendered')
+    console.log('Tabs rendered')
     const {classes, tabs, removeTab} = this.props;
     return (
       <Tabs
@@ -90,20 +90,22 @@ const styles = theme => ({
   },
 })
 
-const mapStateToProps = state => ({
-  tabs: state.tabs,
-})
+// const mapStateToProps = state => ({
+//   tabs: state.tabs,
+// })
 
-const mapDispatchToProps = (dispatch, ownProps) => ({
-  changeTab: (index) => dispatch(TabChange(index)),
-  removeTab: (index) => dispatch(TabRemoval(index)),
-})
+// const mapDispatchToProps = (dispatch, ownProps) => ({
+//   changeTab: (index) => dispatch(TabChange(index)),
+//   removeTab: (index) => dispatch(TabRemoval(index)),
+// })
 
-export default connect(
-  mapStateToProps, 
-  mapDispatchToProps,
-  // (stateProps, dispatchProps, ownProps) => ({ ...ownProps, ...stateProps, ...dispatchProps }),
-  // {
-  //   pure: true
-  // }
-)(withStyles(styles)(TabsPQS));
+// export default connect(
+//   mapStateToProps, 
+//   mapDispatchToProps,
+//   // (stateProps, dispatchProps, ownProps) => ({ ...ownProps, ...stateProps, ...dispatchProps }),
+//   // {
+//   //   pure: true
+//   // }
+// )(withStyles(styles)(TabsPQS));
+
+export default (withStyles(styles)(TabsPQS));

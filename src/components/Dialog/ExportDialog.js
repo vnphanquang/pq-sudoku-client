@@ -48,7 +48,7 @@ function canvasToBlobPolyfill() {
   });
 }
 
-function ExportDialog({onSubmit, onCancel, sudoku}) {
+function ExportDialog({onSubmit, onCancel, data:sudoku}) {
   const classes = useStyles();
   const [name, setName] = React.useState(sudoku.name);
   const [format, setFormat] = React.useState(SVG);
@@ -113,7 +113,6 @@ function ExportDialog({onSubmit, onCancel, sudoku}) {
               type="text"
               required
               error={name.length === 0}
-              autoFocus
               label={dialogLabels.sudokuName.label}
               placeholder={dialogLabels.sudokuName.placeholder}
               fullWidth
@@ -173,9 +172,9 @@ function ExportDialog({onSubmit, onCancel, sudoku}) {
         </div>
 
         <DialogActions>
-        <Button onClick={onCancel}>{dialogLabels.cancel}</Button>
-        <Button type="submit">{dialogLabels.export}</Button>
-      </DialogActions>
+          <Button onClick={onCancel}>{dialogLabels.cancel}</Button>
+          <Button type="submit">{dialogLabels.export}</Button>
+        </DialogActions>
       </form>
 
     </Dialog>

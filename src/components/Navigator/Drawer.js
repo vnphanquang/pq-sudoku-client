@@ -19,12 +19,12 @@ import InfoIcon from '@material-ui/icons/Info';
 import FeedbackIcon from '@material-ui/icons/Feedback';
 import SourceIcon from '@material-ui/icons/Code';
 
-import {EXPANDED_DRAWER_WIDTH, COLLAPSED_DRAWER_WIDTH, APPBAR_HEIGHT} from './utils';
-import {drawerLabels} from '../lang.js';
+import {EXPANDED_DRAWER_WIDTH, COLLAPSED_DRAWER_WIDTH, APPBAR_HEIGHT} from '../utils';
+import {drawerLabels} from '../../lang.js';
 
-import {connect} from 'react-redux';
+// import {connect} from 'react-redux';
 import {
-  Dialog,
+  // DialogAction,
   DIALOG_ADD_TAB, 
   DIALOG_OPEN,
   DIALOG_SAVEAS,
@@ -33,7 +33,7 @@ import {
   DIALOG_FEEDBACK,
   DIALOG_HELP,
   DIALOG_ABOUT,
-} from '../redux/actions/dialogs';
+} from '../../redux/actions/dialogs';
 
 
 class DrawerPQS extends React.PureComponent {
@@ -43,8 +43,8 @@ class DrawerPQS extends React.PureComponent {
   // }
   
   render() {
-    // console.log('Drawer rendered');
-    const {classes, drawerOpen, dispatchDialog, isActive} = this.props;
+    console.log('Drawer rendered');
+    const {classes, drawerOpen, dispatchDialog, sudokuActive} = this.props;
     return (
       <Drawer
         variant="permanent"
@@ -73,7 +73,7 @@ class DrawerPQS extends React.PureComponent {
             button 
             className={classes.drawerItem} 
             onClick={() => dispatchDialog(DIALOG_SAVEAS)}
-            disabled={!isActive}
+            disabled={!sudokuActive}
           >
             <ListItemIcon><SaveIcon /></ListItemIcon>
             <ListItemText primary={drawerLabels.saveAs + '...'} />
@@ -82,7 +82,7 @@ class DrawerPQS extends React.PureComponent {
             button 
             className={classes.drawerItem} 
             onClick={() => dispatchDialog(DIALOG_EXPORT)}
-            disabled={!isActive}
+            disabled={!sudokuActive}
           >
             <ListItemIcon><SaveAltIcon /></ListItemIcon>
             <ListItemText primary={drawerLabels.export + '...'} />
@@ -176,14 +176,15 @@ const styles = theme => ({
 })
 
 
-const mapStateToProps = (state) => ({
-  drawerOpen: state.navigation.drawerOpen,
-  isActive: (state.tabs.activeIndex || state.tabs.activeIndex === 0) && true
-})
+// const mapStateToProps = (state) => ({
+//   drawerOpen: state.navigation.drawerOpen,
+//   isActive: (state.tabs.activeIndex || state.tabs.activeIndex === 0) && true
+// })
 
-const mapDispatchToProps = (dispatch) => ({
-  dispatchDialog: (type) => dispatch(Dialog(type))
-})
+// const mapDispatchToProps = (dispatch) => ({
+//   dispatchDialog: (type) => dispatch(Dialog(type))
+// })
 
+// export default connect(mapStateToProps, mapDispatchToProps)(withStyles(styles)(DrawerPQS));
 
-export default connect(mapStateToProps, mapDispatchToProps)(withStyles(styles)(DrawerPQS));
+export default withStyles(styles)(DrawerPQS);

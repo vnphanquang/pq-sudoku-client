@@ -24,9 +24,12 @@ const variantIcon = {
   info: InfoIcon,
 }
 
-function SlideTransition(props) {
-  return <Slide {...props} direction="up" />;
-}
+const SlideTransition = React.forwardRef(function Transition(props, ref) {
+  return <Slide direction="right" ref={ref} {...props} />;
+});
+// function SlideTransition(props) {
+//   return <Slide {...props} direction="right" />;
+// }
 
 
 function SnackbarPQS() {

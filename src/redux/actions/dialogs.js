@@ -28,7 +28,7 @@ export const DIALOG_ACTIONS = [
 /* 
 * Dialog Action Creators
 */
-export function Dialog(type) {
+export function DialogAction(type) {
   return {
     type
   };

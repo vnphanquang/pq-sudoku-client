@@ -6,24 +6,27 @@ import {
 } from '../../redux/actions';
 
 import {  
-  Dialog,
+  DialogAction,
   DIALOG_CANCEL,
   DIALOG_ADD_TAB, 
   DIALOG_EXPORT, 
   DIALOG_SAVEAS,
   DIALOG_OPEN,
+  DIALOG_SETTINGS,
 } from '../../redux/actions/dialogs';
 
 import AddTabDialog from './AddTabDialog';
 import ExportDialog from './ExportDialog';
 import SaveAsDialog from './SaveAsDialog';
 import OpenDialog from './OpenDialog';
+import SettingsDialog from './SettingsDialog';
 
 const dialogVariants = {
   [DIALOG_ADD_TAB]: AddTabDialog,
   [DIALOG_EXPORT]: ExportDialog,
   [DIALOG_SAVEAS]: SaveAsDialog,
   [DIALOG_OPEN]: OpenDialog,
+  [DIALOG_SETTINGS]: SettingsDialog,
 }
 
 const submitVariants = {
@@ -31,6 +34,7 @@ const submitVariants = {
   [DIALOG_EXPORT]: (thisArg) => thisArg.exportFile.bind(thisArg),
   [DIALOG_SAVEAS]: (thisArg) => thisArg.exportFile.bind(thisArg),
   [DIALOG_OPEN]: (thisArg) => thisArg.openSudoku.bind(thisArg),
+  [DIALOG_SETTINGS]: (thisArg) => thisArg.applySettings.bind(thisArg),
 }
 
 class DialogPQS extends React.PureComponent {
@@ -61,9 +65,13 @@ class DialogPQS extends React.PureComponent {
     this.props.addTab(name);
   }
 
+  applySettings(settings) {
+    console.log('Settings apply logic')
+  }
+
   render() {
-    // console.log('Dialog rendered')
-    const {type, sudoku, cancel} = this.props;
+    console.log('Dialog rendered')
+    const {type, data, cancelDialog} = this.props;
     const Dialog = dialogVariants[type];
     
     return (
@@ -72,8 +80,8 @@ class DialogPQS extends React.PureComponent {
           Dialog && 
           <Dialog 
             onSubmit={submitVariants[type](this)}
-            onCancel={cancel}
-            sudoku={sudoku}
+            onCancel={cancelDialog}
+            data={data}
           />
         }
         <a 
@@ -89,13 +97,31 @@ class DialogPQS extends React.PureComponent {
 }
 
 
-const mapStateToProps = state => ({
-  type: state.dialog,
-  sudoku: (state.dialog !== null && state.tabs.activeIndex !== null) && state.tabs.array[state.tabs.activeIndex]
-})
+const mapStateToProps = state => {
+  const type = state.dialog;
+  let data = null;
+  switch (type) {
+    case DIALOG_SAVEAS:
+    case DIALOG_EXPORT:
+      const activeIndex = state.tabs.activeIndex
+      if ((activeIndex || activeIndex === 0) && true) {
+        data = state.tabs.array[activeIndex];
+      }
+      break;
+    case DIALOG_SETTINGS:
+      data = {theme: state.theme};
+      break;
+    default:
+      break;
+  }
+  return {
+    type,
+    data
+  }
+}
 
 const mapDispatchToProps = dispatch => ({
-  cancel: () => dispatch(Dialog(DIALOG_CANCEL)),
+  cancelDialog: () => dispatch(DialogAction(DIALOG_CANCEL)),
   addTab: (name) => dispatch(TabAddition({name})),
 
 })

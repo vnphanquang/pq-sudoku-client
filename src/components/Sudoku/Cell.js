@@ -119,7 +119,7 @@ function getBgColor(focused, styleState, {sudoku: {cell}, palette: {type}}) {
       if (focused) return cell.focusedBg[type];
       else         return cell.selectedBg[type];
     default:
-      return cell.neutralBg[type];
+      return cell.baseBg[type];
   }
 }
 
