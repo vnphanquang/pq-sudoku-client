@@ -29,7 +29,7 @@ function SlideTransition(props) {
 }
 
 
-function SudokuSnackbar() {
+function SnackbarPQS() {
   const classes = useStyles();
   const {type, message} = useSelector(state => state.snackbar);
   const dispatch = useDispatch();
@@ -107,5 +107,5 @@ const useStyles = makeStyles(theme => ({
   },
 }))
 
-export default SudokuSnackbar;
+export default SnackbarPQS;
 

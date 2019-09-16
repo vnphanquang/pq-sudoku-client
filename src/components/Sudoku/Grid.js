@@ -647,8 +647,10 @@ class Grid extends React.PureComponent {
       for (let col = 0; col < GRID_SIZE; col++) {
         cell = this.getCell(row, col);
         value = values[row][col];
-        cell.setState({cellValue: value});
-        this.setCellValueMapping(cell, value);
+        if (value !== '') {
+          cell.setState({cellValue: value});
+          this.setCellValueMapping(cell, value);
+        }
       }
     }
   }

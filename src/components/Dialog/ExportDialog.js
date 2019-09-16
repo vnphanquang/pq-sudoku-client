@@ -4,9 +4,9 @@ import {makeStyles} from '@material-ui/styles';
 import Dialog from '@material-ui/core/Dialog';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import DialogActions from '@material-ui/core/DialogActions';
-import TextField from '@material-ui/core/TextField';
 import FormControl from '@material-ui/core/FormControl';
 import Button from '@material-ui/core/Button';
+import TextField from '@material-ui/core/TextField';
 import InputLabel from '@material-ui/core/InputLabel';
 import Select from '@material-ui/core/Select';
 import InputAdornment from '@material-ui/core/InputAdornment';
@@ -96,92 +96,89 @@ function ExportDialog({onSubmit, onCancel, sudoku}) {
     }
 
   return (
-    <React.Fragment>
-      <Dialog
-        maxWidth={false}
-        classes={{paper: classes.paper}}
-        onClose={onCancel}
-        open
+    <Dialog
+      classes={{paper: classes.paper}}
+      onClose={onCancel}
+      open
+    >
+      <DialogTitle>{dialogLabels.export}</DialogTitle>
+      <form 
+        action="" 
+        onSubmit={exportSudoku}
       >
-        <DialogTitle>{dialogLabels.export}</DialogTitle>
-        <form 
-          action="" 
-          onSubmit={exportSudoku}
-        >
-          <div className={classes.content}>
-            <div>
-              <TextField
-                className={classes.name}
-                type="text"
-                required
-                error={name.length === 0}
-                autoFocus
-                label={dialogLabels.sudokuName.label}
-                placeholder={dialogLabels.sudokuName.placeholder}
-                fullWidth
-                margin="dense"
-                variant="outlined"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-              />
-            </div>
-
-            <div className={classes.settings}>
-              <FormControl component="fieldset">
-                <InputLabel htmlFor="format">{dialogLabels.format}</InputLabel>
-                <Select
-                  className={classes.format}
-                  native
-                  autoWidth
-                  value={format}
-                  onChange={(e) => setFormat(e.target.value)}
-                  inputProps={{name: 'format'}}
-                >
-                  {formats.map(format => (
-                    <option key={`format-option-${format}`} value={format}>{format}</option>
-                  ))}
-                </Select>
-              </FormControl>
-
-              <TextField
-                className={classes.pngSize}
-                disabled={format !== JPEG && format !== PNG}
-                required={format === JPEG || format === PNG}
-                error={pngSize > 10000 || pngSize < 100}
-                label={dialogLabels.size}
-                value={pngSize}
-                onChange={(e) => setPngSize(e.target.value)}
-                placeholder="(100 to 10,000)"
-                type="number"
-                InputProps={{
-                  endAdornment: <InputAdornment position="end">px</InputAdornment>,
-                }}
-                inputProps={{ min: 100, max: 10000}}
-                variant="outlined"
-                margin="dense"
-                
-              />
-            </div>
-
-            <div className={classes.preview}>
-              <label>{dialogLabels.preview}</label>
-              <SudokuSVG 
-                id="sudoku-svg"
-                svgRef={svgRef}
-                name={name}
-                cellValues={window.sudoku.getCellValues()}
-              />
-            </div>
+        <div className={classes.content}>
+          <div>
+            <TextField
+              className={classes.name}
+              type="text"
+              required
+              error={name.length === 0}
+              autoFocus
+              label={dialogLabels.sudokuName.label}
+              placeholder={dialogLabels.sudokuName.placeholder}
+              fullWidth
+              margin="dense"
+              variant="outlined"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+            />
           </div>
 
-          <DialogActions>
-          <Button onClick={onCancel}>{dialogLabels.cancel}</Button>
-          <Button type="submit">{dialogLabels.export}</Button>
-        </DialogActions>
-        </form>
+          <div className={classes.settings}>
+            <FormControl component="fieldset">
+              <InputLabel htmlFor="format">{dialogLabels.format}</InputLabel>
+              <Select
+                className={classes.format}
+                native
+                autoWidth
+                value={format}
+                onChange={(e) => setFormat(e.target.value)}
+                inputProps={{name: 'format'}}
+              >
+                {formats.map(format => (
+                  <option key={`format-option-${format}`} value={format}>{format}</option>
+                ))}
+              </Select>
+            </FormControl>
 
-      </Dialog>
-    </React.Fragment>
+            <TextField
+              className={classes.pngSize}
+              disabled={format !== JPEG && format !== PNG}
+              required={format === JPEG || format === PNG}
+              error={pngSize > 10000 || pngSize < 100}
+              label={dialogLabels.size}
+              value={pngSize}
+              onChange={(e) => setPngSize(e.target.value)}
+              placeholder="(100 to 10,000)"
+              type="number"
+              InputProps={{
+                endAdornment: <InputAdornment position="end">px</InputAdornment>,
+              }}
+              inputProps={{ min: 100, max: 10000}}
+              variant="outlined"
+              margin="dense"
+              
+            />
+          </div>
+
+          <div className={classes.preview}>
+            <label>{dialogLabels.preview}</label>
+            <SudokuSVG 
+              id="sudoku-svg"
+              svgRef={svgRef}
+              name={name}
+              cellValues={window.sudoku.getCellValues()}
+            />
+          </div>
+        </div>
+
+        <DialogActions>
+        <Button onClick={onCancel}>{dialogLabels.cancel}</Button>
+        <Button type="submit">{dialogLabels.export}</Button>
+      </DialogActions>
+      </form>
+
+    </Dialog>
   )
 }
 

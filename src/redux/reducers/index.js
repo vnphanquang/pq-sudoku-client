@@ -4,12 +4,13 @@ import {
   ADD_TAB, 
   CHANGE_TAB, 
   REMOVE_TAB, 
-  DIALOG_ACTIONS, 
   SNACKBAR_CLOSE,
   SNACKBAR_NO_SUDOKU,
   THEME_TYPE_TOGGLE,
 } 
 from '../actions';
+
+import {  DIALOG_ACTIONS } from '../actions/dialogs';
 
 const navigationInitState = {
   drawerOpen: false
@@ -77,18 +78,23 @@ const snackbarInitState = {
 function snackbar(state=snackbarInitState, {type, payload}) {
   switch(type) {
     case SNACKBAR_NO_SUDOKU:
-      return {type: 'error', message: payload};
+      return {
+        ...state,
+        type: 'error', 
+        message: payload
+      };
     case SNACKBAR_CLOSE:
-      return {type: null, message: ''};
+      return {
+        ...state,
+        type: null, message: ''
+      };
     default:
       return state;
   }
 }
 
 const themeInitState = {
-  palette: {
-    type: 'dark'
-  },
+  type: 'dark',
   sudoku: {
     color: {
       light: '#212121',
@@ -135,10 +141,7 @@ function theme(state=themeInitState, {type, payload}) {
     case THEME_TYPE_TOGGLE:
       return {
         ...state,
-        palette: {
-          ...state.palette,
-          type: state.palette.type === 'light' ? 'dark' : 'light',
-        }
+        type: state.type === 'light' ? 'dark' : 'light',
       }
     default:
       return state;

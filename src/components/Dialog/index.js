@@ -1,121 +1,103 @@
 import React from 'react';
-import {useSelector, useDispatch} from 'react-redux';
+import {connect} from 'react-redux';
+
 import { 
-  DialogCancellation, 
+  TabAddition,
+} from '../../redux/actions';
+
+import {  
+  Dialog,
+  DIALOG_CANCEL,
   DIALOG_ADD_TAB, 
   DIALOG_EXPORT, 
   DIALOG_SAVEAS,
   DIALOG_OPEN,
-  TabAddition,
-  SnackbarNoSudoku
-} from '../../redux/actions';
+} from '../../redux/actions/dialogs';
 
 import AddTabDialog from './AddTabDialog';
 import ExportDialog from './ExportDialog';
 import SaveAsDialog from './SaveAsDialog';
 import OpenDialog from './OpenDialog';
 
-function SudokuDialog() {
-  // console.log('SudokuDialog rendered');
-  const aRef = React.useRef(null);
+const dialogVariants = {
+  [DIALOG_ADD_TAB]: AddTabDialog,
+  [DIALOG_EXPORT]: ExportDialog,
+  [DIALOG_SAVEAS]: SaveAsDialog,
+  [DIALOG_OPEN]: OpenDialog,
+}
 
-  // const dialogType = useSelector(state => state.dialog);
-  // const sudoku= useSelector(state => state.dialog !== null && state.tabs.array[state.tabs.activeIndex]);
-  const {dialogType, sudoku} = useSelector(state => ({
-    dialogType: state.dialog,
-    sudoku: (state.dialog !== null && state.tabs.activeIndex !== null) && state.tabs.array[state.tabs.activeIndex]
-  }))
-  const dispatch = useDispatch();
+const submitVariants = {
+  [DIALOG_ADD_TAB]: (thisArg) => thisArg.props.addTab.bind(thisArg),
+  [DIALOG_EXPORT]: (thisArg) => thisArg.exportFile.bind(thisArg),
+  [DIALOG_SAVEAS]: (thisArg) => thisArg.exportFile.bind(thisArg),
+  [DIALOG_OPEN]: (thisArg) => thisArg.openSudoku.bind(thisArg),
+}
 
-  const addTab = React.useCallback(
-    (name) => dispatch(TabAddition({name})),
-    [dispatch]
-  )
+class DialogPQS extends React.PureComponent {
 
-  const cancel = React.useCallback(
-    () => dispatch(DialogCancellation()),
-    [dispatch],
-  )
+  constructor(props) {
+    super(props)
+    this.aRef = null;
+    this.updateARef = this.updateARef.bind(this);
+  }
   
-  const exportFile = React.useCallback(
-    (name, format, url) => {
-      aRef.current.href = url;
-      aRef.current.download = `${name}.${format}`;
-      aRef.current.click();
-      setTimeout(() => URL.revokeObjectURL(url), 1000)
-    },
-    [aRef]
-  )
+  updateARef(node) {
+    this.aRef = node;
+  }
 
-  function openSudoku(name, sudokuData) {
+  exportFile(name, format, url) {
+    this.aRef.href = url;
+    this.aRef.download = `${name}.${format}`;
+    this.aRef.click();
+    setTimeout(() => URL.revokeObjectURL(url), 1000)
+  }
+
+  openSudoku(name, sudokuData) {
     const {cellValues} = sudokuData;
     window.sudoku = {
       ...window.sudoku,
       loadedValues: cellValues
     }
-    addTab(name);
+    this.props.addTab(name);
   }
 
-  let dialog;
-  switch (dialogType) {
-    case DIALOG_ADD_TAB:
-      dialog =  (
-        <AddTabDialog onSubmit={addTab} onCancel={cancel}/>
-      )
-      break;
-    // case DIALOG_REMOVE_TAB:
-    //   return <TabRemovalDialog onSubmit={addTab}/>
-    case DIALOG_EXPORT:
-      if (!sudoku) {
-        dispatch(SnackbarNoSudoku());
-        dialog = null;
-      } else {
-        dialog = (
-          <ExportDialog 
-            onSubmit={exportFile}
-            onCancel={cancel} 
-            sudoku={sudoku}
-          />
-        )
-      }
-      break;
-    case DIALOG_SAVEAS:
-      if (!sudoku) {
-        dispatch(SnackbarNoSudoku());
-        dialog = null;
-      } else {
-        dialog = (
-          <SaveAsDialog 
-            onSubmit={exportFile}
+  render() {
+    // console.log('Dialog rendered')
+    const {type, sudoku, cancel} = this.props;
+    const Dialog = dialogVariants[type];
+    
+    return (
+      <React.Fragment>
+        { 
+          Dialog && 
+          <Dialog 
+            onSubmit={submitVariants[type](this)}
             onCancel={cancel}
             sudoku={sudoku}
           />
-        )
-      }
-      break;
-    case DIALOG_OPEN:
-      dialog = (
-        <OpenDialog 
-          onSubmit={openSudoku}
-          onCancel={cancel}
-        />
-      )
-      break;
-    default:
-      dialog = null;
+        }
+        <a 
+          style={{display: 'none'}}
+          href="/"
+          ref={this.updateARef}
+        >
+          (hidden)Export
+        </a>
+      </React.Fragment>
+    )
   }
-  return (
-    <React.Fragment>
-      {dialog}
-      <a 
-        style={{display: 'none'}}
-        href="/"
-        ref={aRef}
-      >
-        (hidden)Export
-      </a>
-    </React.Fragment>
-  )
 }
 
-export default SudokuDialog
+
+const mapStateToProps = state => ({
+  type: state.dialog,
+  sudoku: (state.dialog !== null && state.tabs.activeIndex !== null) && state.tabs.array[state.tabs.activeIndex]
+})
+
+const mapDispatchToProps = dispatch => ({
+  cancel: () => dispatch(Dialog(DIALOG_CANCEL)),
+  addTab: (name) => dispatch(TabAddition({name})),
+
+})
+
+export default connect(mapStateToProps, mapDispatchToProps)(DialogPQS);

@@ -37,58 +37,56 @@ function OpenDialog({onSubmit, onCancel}) {
   }
 
   return (
-  <React.Fragment>
-      <Dialog
-        classes={{paper: classes.paper}}
-        onClose={onCancel}
-        open
+    <Dialog
+      classes={{paper: classes.paper}}
+      onClose={onCancel}
+      open
+    >
+      <DialogTitle>{dialogLabels.open}</DialogTitle>
+      <form 
+        action="" 
+        onSubmit={submit}
       >
-        <DialogTitle>{dialogLabels.open}</DialogTitle>
-        <form 
-          action="" 
-          onSubmit={submit}
-        >
-          <div className={classes.content}>
-            <input 
-              name="sudoku-file-picker"
-              type="file"
+        <div className={classes.content}>
+          <input 
+            name="sudoku-file-picker"
+            type="file"
+            required
+            id="sudoku-file-picker"
+            accept={`.${customFormat}`}
+            multiple={false}
+            onChange={changeFile}
+            style={{display: 'none'}}
+          />
+          <label htmlFor="sudoku-file-picker">
+            <Button variant="contained" component="span">
+              <FolderOpenIcon className={classes.fileBtn}/>
+              {dialogLabels.choose}
+            </Button>
+          </label>
+          {
+            (file !== null) && 
+            <TextField
+              className={classes.name}
+              error={name.length === 0}
               required
-              id="sudoku-file-picker"
-              accept={`.${customFormat}`}
-              multiple={false}
-              onChange={changeFile}
-              style={{display: 'none'}}
+              fullWidth
+              autoFocus
+              label={dialogLabels.sudokuName.label}
+              type="text"
+              variant="outlined"
+              placeholder={dialogLabels.sudokuName.placeholder}
+              value={name}
+              onChange={(e) => setName(e.target.value)}
             />
-            <label htmlFor="sudoku-file-picker">
-              <Button variant="contained" component="span">
-                <FolderOpenIcon className={classes.fileBtn}/>
-                {dialogLabels.choose}
-              </Button>
-            </label>
-            {
-              (file !== null) && 
-              <TextField
-                className={classes.name}
-                error={name.length === 0}
-                required
-                fullWidth
-                autoFocus
-                label={dialogLabels.sudokuName.label}
-                type="text"
-                variant="outlined"
-                placeholder={dialogLabels.sudokuName.placeholder}
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-              />
-            }
-          </div>
-          <DialogActions>
-            <Button onClick={onCancel}>{dialogLabels.cancel}</Button>
-            <Button type="submit">{dialogLabels.open}</Button>
-          </DialogActions>
-        </form>
-      </Dialog>
-    </React.Fragment>
+          }
+        </div>
+        <DialogActions>
+          <Button onClick={onCancel}>{dialogLabels.cancel}</Button>
+          <Button type="submit">{dialogLabels.open}</Button>
+        </DialogActions>
+      </form>
+    </Dialog>
   )
 }
 

@@ -1,43 +1,48 @@
 import React from 'react';
+import {connect} from 'react-redux';
 
-import {useSelector} from 'react-redux';
-
-import { ThemeProvider} from '@material-ui/styles';
 import {CssBaseline} from '@material-ui/core';
-import {createMuiTheme, makeStyles} from '@material-ui/core/styles';
+import {ThemeProvider, withStyles} from '@material-ui/styles';
+import {createMuiTheme} from '@material-ui/core/styles';
 
-import SudokuAppBar from './SudokuAppBar';
-import SudokuDrawer from './SudokuDrawer';
+import Appbar from './AppBar';
+import Drawer from './Drawer';
 import Sudoku from './Sudoku';
-import SudokuDialog from './Dialog';
-import SudokuSnackbar from './Snackbar';
+import Dialog from './Dialog';
+import Snackbar from './Snackbar';
 import {APPBAR_HEIGHT, COLLAPSED_DRAWER_WIDTH} from './utils';
 
-function App() {
-  const classes = useStyles();
+class App extends React.PureComponent {
+  render() {
+    // console.log('App rendered');
+    let {classes, theme} = this.props;
+    theme = createMuiTheme({
+      palette: {
+        type: theme.type
+      },
+      sudoku: theme.sudoku
+    })
 
-  const theme = useSelector(state => createMuiTheme(state.theme));
-
-  return (
-    <React.Fragment>
-      <ThemeProvider theme={theme}>
-        <CssBaseline />
-        <div className={classes.root}>
-          <SudokuAppBar />
-          <SudokuDrawer />
-          <div className={classes.sudokuWrapper}>
-            <Sudoku/>
+    return (
+      <React.Fragment>
+        <ThemeProvider theme={theme}>
+          <CssBaseline />
+          <div className={classes.root}>
+            <Appbar />
+            <Drawer />
+            <div className={classes.sudokuWrapper}>
+              <Sudoku />
+            </div>
+            <Dialog />
+            <Snackbar />
           </div>
-          <SudokuDialog />
-          <SudokuSnackbar />
-        </div>
-      </ThemeProvider>
-    </React.Fragment>
-  )
+        </ThemeProvider>
+      </React.Fragment>
+    )
+  }
 }
 
-
-const useStyles = makeStyles( theme => ({
+const styles = theme => ({
   root: {
     // position: 'absolute'
   },
@@ -53,6 +58,9 @@ const useStyles = makeStyles( theme => ({
     paddingTop: APPBAR_HEIGHT,
     paddingLeft: COLLAPSED_DRAWER_WIDTH,
   }
-}))
+})
+const mapStateToProps = (state, ownProps) => ({
+  theme: (ownProps.theme && ownProps.theme.type === state.theme.type) ? ownProps.theme : state.theme
+})
 
-export default App
+export default connect(mapStateToProps)(withStyles(styles)(App));

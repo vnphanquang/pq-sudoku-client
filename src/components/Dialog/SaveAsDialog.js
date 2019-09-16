@@ -35,38 +35,36 @@ function SaveAsDialog({onSubmit, onCancel, sudoku}) {
   }
 
   return (
-    <React.Fragment>
-      <Dialog
-        classes={{paper: classes.paper}}
-        onClose={onCancel}
-        open
+    <Dialog
+      classes={{paper: classes.paper}}
+      onClose={onCancel}
+      open
+    >
+      <DialogTitle>{dialogLabels.saveAs}</DialogTitle>
+      <form 
+        action="" 
+        onSubmit={submit}
       >
-        <DialogTitle>{dialogLabels.saveAs}</DialogTitle>
-        <form 
-          action="" 
-          onSubmit={submit}
-        >
-          <div className={classes.content}>
-            <TextField
-              error={name.length === 0}
-              required
-              fullWidth
-              autoFocus
-              label={dialogLabels.sudokuName.label}
-              type="text"
-              variant="outlined"
-              placeholder={dialogLabels.sudokuName.placeholder}
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-            />
-          </div>
-          <DialogActions>
-            <Button onClick={onCancel}>{dialogLabels.cancel}</Button>
-            <Button type="submit">{dialogLabels.save}</Button>
-          </DialogActions>
-        </form>
-      </Dialog>
-    </React.Fragment>
+        <div className={classes.content}>
+          <TextField
+            error={name.length === 0}
+            required
+            fullWidth
+            autoFocus
+            label={dialogLabels.sudokuName.label}
+            type="text"
+            variant="outlined"
+            placeholder={dialogLabels.sudokuName.placeholder}
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+          />
+        </div>
+        <DialogActions>
+          <Button onClick={onCancel}>{dialogLabels.cancel}</Button>
+          <Button type="submit">{dialogLabels.save}</Button>
+        </DialogActions>
+      </form>
+    </Dialog>
   )
 }
 
