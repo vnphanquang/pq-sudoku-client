@@ -17,11 +17,12 @@ function SudokuSVG({
   subgridEdgeColor='#212121',
   lineStrokeWidth=0.5,
   lineColor='#212121',
-  valueColor='#212121'
+  valueColor='#212121',
+  backgroundColor='white',
 }) {
 
   const styles = `
-.verticals, .horizontals, #outline, .subgrid-edges {
+.verticals, .horizontals, .subgrid-edges {
   fill: none;
   stroke-miterlimit: 10;
 }
@@ -37,6 +38,7 @@ function SudokuSVG({
 }
 
 #outline {
+  stroke-miterlimit: 10;
   stroke-width: ${outlineStrokeWidth}px;
   stroke: ${outlineColor};
 }
@@ -120,6 +122,7 @@ function SudokuSVG({
           width={baseCellSize * gridSize} 
           height={baseCellSize * gridSize} 
           rx="3"
+          fill={backgroundColor}
         />
         <g id="horizontals">
           {horizontals}

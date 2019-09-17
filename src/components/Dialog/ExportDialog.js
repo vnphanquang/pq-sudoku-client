@@ -74,15 +74,8 @@ function ExportDialog({onSubmit, onCancel, data:sudoku}) {
           img.src = generateSVGDataURL(svgClone);
           img.onload = () => {
             const ctx = canvas.getContext('2d');
-            ctx.fillStyle = 'white';
-            //FIXME: fill rect taken into account stroke width
-            const fillXY = 4 * canvas.width / 450;
-            const fillSize = canvas.width - fillXY * 2
-            ctx.fillRect(fillXY, fillXY, fillSize, fillSize);
             ctx.drawImage(img, 0, 0, pngSize, pngSize);
-
             if (!HTMLCanvasElement.prototype.toBlob) canvasToBlobPolyfill();
-            
             canvas.toBlob((blob) => {
               const imgDataURL = URL.createObjectURL(blob);
               onSubmit(name, format, imgDataURL);
