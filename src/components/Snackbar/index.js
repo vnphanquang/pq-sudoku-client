@@ -1,21 +1,27 @@
 import React from 'react';
 import clsx from 'clsx';
 
-import {useDispatch, useSelector} from 'react-redux';
-import {SnackbarClose} from '../../redux/actions';
-
-import {makeStyles} from '@material-ui/styles';
-import IconButton from '@material-ui/core/IconButton';
-import Snackbar from '@material-ui/core/Snackbar';
-import SnackbarContent from '@material-ui/core/SnackbarContent';
-import CheckCircleIcon from '@material-ui/icons/CheckCircle';
-import ErrorIcon from '@material-ui/icons/Error';
-import WarningIcon from '@material-ui/icons/Warning';
-import InfoIcon from '@material-ui/icons/Info';
-import CloseIcon from '@material-ui/icons/Close';
 import { amber, green } from '@material-ui/core/colors';
+import {
+  IconButton,
+  Slide,
+  Snackbar,
+  SnackbarContent,
+} from '@material-ui/core';
+import {
+  CheckCircle as CheckCircleIcon,
+  Close as CloseIcon,
+  Error as ErrorIcon,
+  Info as InfoIcon,
+  Warning as WarningIcon,
+} from '@material-ui/icons';
+import { makeStyles } from '@material-ui/styles';
 
-import Slide from '@material-ui/core/Slide';
+import { useDispatch, useSelector } from 'react-redux';
+import { SnackbarClose } from '../../redux/actions';
+
+
+
 
 const variantIcon = {
   success: CheckCircleIcon,

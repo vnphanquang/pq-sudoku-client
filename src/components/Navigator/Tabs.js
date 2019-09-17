@@ -2,10 +2,12 @@ import React from 'react';
 // import {connect} from 'react-redux';
 // import { TabChange, TabRemoval } from '../../redux/actions'
 import {withStyles} from '@material-ui/styles'
-import Tabs from '@material-ui/core/Tabs';
-import Tab from '@material-ui/core/Tab';
-import IconButton from '@material-ui/core/IconButton';
-import Typography from '@material-ui/core/Typography';
+import {
+  Tabs,
+  Tab,
+  IconButton,
+  Typography,
+} from '@material-ui/core';
 import CloseIcon from '@material-ui/icons/Close';
 
 class TabsPQS extends React.PureComponent {

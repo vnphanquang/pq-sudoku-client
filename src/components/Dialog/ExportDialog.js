@@ -1,15 +1,17 @@
 import React from 'react';
-import {makeStyles} from '@material-ui/styles';
 
-import Dialog from '@material-ui/core/Dialog';
-import DialogTitle from '@material-ui/core/DialogTitle';
-import DialogActions from '@material-ui/core/DialogActions';
-import FormControl from '@material-ui/core/FormControl';
-import Button from '@material-ui/core/Button';
-import TextField from '@material-ui/core/TextField';
-import InputLabel from '@material-ui/core/InputLabel';
-import Select from '@material-ui/core/Select';
-import InputAdornment from '@material-ui/core/InputAdornment';
+import {makeStyles} from '@material-ui/styles';
+import {
+  Dialog,
+  DialogTitle,
+  DialogActions,
+  FormControl,
+  Button,
+  TextField,
+  InputLabel,
+  InputAdornment,
+  Select,
+} from '@material-ui/core';
 
 import SudokuSVG from './SudokuSVG';
 import {dialogLabels} from '../../lang';

@@ -1,15 +1,21 @@
 import React from 'react';
 import clsx from 'clsx';
-import Box from '@material-ui/core/Box';
-import ButtonBase from '@material-ui/core/ButtonBase';
-import Divider from '@material-ui/core/Divider';
-import Grid from '@material-ui/core/Grid';
-import IconButton from '@material-ui/core/IconButton';
-import Typography from '@material-ui/core/Typography';
-import Brightness3Icon from '@material-ui/icons/Brightness3';
-import MenuIcon from '@material-ui/icons/Menu';
-import WbSunnyIcon from '@material-ui/icons/WbSunny';
+
+import {
+  Box,
+  ButtonBase,
+  Divider,
+  Grid,
+  IconButton,
+  Typography,
+} from '@material-ui/core';
+import {
+  Brightness3 as Brightness3Icon,
+  WbSunny as WbSunnyIcon,
+  Menu as MenuIcon
+} from '@material-ui/icons';
 import { styled, withStyles } from '@material-ui/styles';
+
 import { StyledCell } from '../../Sudoku/Cell';
 import { StyledGrid } from '../../Sudoku/Grid';
 import { STYLE_STATES } from '../../utils';

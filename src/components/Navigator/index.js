@@ -1,22 +1,25 @@
 import React from 'react';
+import { connect } from 'react-redux';
 
-import {connect} from 'react-redux';
-import {ThemeTypeToggle, DrawerToggle, TabChange, TabRemoval} from '../../redux/actions';
-import {DialogAction} from '../../redux/actions/dialogs';
+import {
+  AppBar,
+  IconButton,
+  Toolbar,
+  Tooltip,
+  Typography,
+} from '@material-ui/core';
+import {
+  Brightness3 as Brightness3Icon,
+  WbSunny as WbSunnyIcon,
+} from '@material-ui/icons'
+import { withStyles } from '@material-ui/styles';
 
-import AppBar from '@material-ui/core/AppBar';
-import Toolbar from '@material-ui/core/Toolbar';
-import IconButton from '@material-ui/core/IconButton';
-import Typography from '@material-ui/core/Typography';
-import WbSunnyIcon from '@material-ui/icons/WbSunny';
-import Brightness3Icon from '@material-ui/icons/Brightness3';
+import { DrawerToggle, TabChange, TabRemoval, ThemeTypeToggle } from '../../redux/actions';
+import { DialogAction } from '../../redux/actions/dialogs';
 import { APPBAR_HEIGHT } from '../utils';
-import Tooltip from '@material-ui/core/Tooltip';
-import {withStyles} from '@material-ui/styles'
-
-import Tabs from './Tabs';
-import DrawerIcon from './DrawerIcon';
 import Drawer from './Drawer';
+import DrawerIcon from './DrawerIcon';
+import Tabs from './Tabs';
 
 const themeTypeIcon = {
   light: <WbSunnyIcon />,

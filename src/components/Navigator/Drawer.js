@@ -2,22 +2,27 @@ import React from 'react';
 import clsx from 'clsx';
 
 import {withStyles} from '@material-ui/styles';
-import Drawer from '@material-ui/core/Drawer';
-import Divider from '@material-ui/core/Divider';
-import List from '@material-ui/core/List';
-import ListItem from '@material-ui/core/ListItem';
-import ListItemIcon from '@material-ui/core/ListItemIcon';
-import ListItemText from '@material-ui/core/ListItemText';
-import Link from '@material-ui/core/Link';
-import AddIcon from '@material-ui/icons/AddCircle';
-import FolderOpenIcon from '@material-ui/icons/FolderOpen';
-import SaveIcon from '@material-ui/icons/Save';
-import SaveAltIcon from '@material-ui/icons/SaveAlt'
-import SettingsIcon from '@material-ui/icons/Settings';
-import HelpIcon from '@material-ui/icons/Help';
-import InfoIcon from '@material-ui/icons/Info';
-import FeedbackIcon from '@material-ui/icons/Feedback';
-import SourceIcon from '@material-ui/icons/Code';
+import {
+  Drawer,
+  Divider,
+  List,
+  ListItem,
+  ListItemIcon,
+  ListItemText,
+  Link,
+} from '@material-ui/core';
+import {
+  AddCircle as AddIcon,
+  FolderOpen as FolderOpenIcon,
+  Save as SaveIcon,
+  SaveAlt as SaveAltIcon,
+  Settings as SettingsIcon,
+  Help as HelpIcon,
+  Info as InfoIcon,
+  Feedback as FeedbackIcon,
+  Code as SourceIcon,
+} from '@material-ui/icons';
+
 
 import {EXPANDED_DRAWER_WIDTH, COLLAPSED_DRAWER_WIDTH, APPBAR_HEIGHT} from '../utils';
 import {drawerLabels} from '../../lang.js';

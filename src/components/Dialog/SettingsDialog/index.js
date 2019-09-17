@@ -1,19 +1,26 @@
 import React from 'react';
 import clsx from 'clsx';
-import AppBar from '@material-ui/core/AppBar';
-import Button from '@material-ui/core/Button';
-import Dialog from '@material-ui/core/Dialog';
-import DialogActions from '@material-ui/core/DialogActions';
-import Drawer from '@material-ui/core/Drawer';
-import IconButton from '@material-ui/core/IconButton';
-import Slide from '@material-ui/core/Slide';
-import Tab from '@material-ui/core/Tab';
-import Tabs from '@material-ui/core/Tabs';
-import Toolbar from '@material-ui/core/Toolbar';
-import Typography from '@material-ui/core/Typography';
-import KeyboardArrowUpIcon from '@material-ui/icons/KeyboardArrowUp';
-import MenuIcon from '@material-ui/icons/Menu';
+
+import {
+  AppBar,
+  Button,
+  Dialog,
+  DialogActions,
+  Drawer,
+  IconButton,
+  Slide,
+  Tab,
+  Tabs,
+  Toolbar,
+  Typography,
+} from '@material-ui/core';
+import {
+  Menu as MenuIcon,
+  KeyboardArrowUp as KeyboardArrowUpIcon,
+} from '@material-ui/icons';
 import { makeStyles } from '@material-ui/styles';
+
+
 import { dialogLabels } from '../../../lang';
 import AppearancePanel from './AppearancePanel';
 
