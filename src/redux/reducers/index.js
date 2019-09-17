@@ -7,6 +7,8 @@ import {
   SNACKBAR_CLOSE,
   SNACKBAR_NO_SUDOKU,
   THEME_TYPE_TOGGLE,
+  THEME_REPLACE,
+
 } 
 from '../actions';
 
@@ -27,13 +29,13 @@ function navigation(state = navigationInitState, action) {
   }
 }
 
-const dialogInitState = null
+const dialogInitState = null;
 function dialog(state = dialogInitState, action) {
   if (DIALOG_ACTIONS.includes(action.type)) {
     return action.type;
   } else {
     // FIXME: or return state?
-    return null;
+    return dialogInitState;
   }
 }
 
@@ -95,6 +97,12 @@ function snackbar(state=snackbarInitState, {type, payload}) {
 
 const themeInitState = {
   type: 'dark',
+  colors: {
+    appBar: {
+      light: '#4169E1',
+      dark: '#696969',
+    }
+  },
   sudoku: {
     color: {
       light: '#212121',
@@ -109,7 +117,7 @@ const themeInitState = {
         light: '#ffffff',
         dark: '#212121'
       },
-      hoverBg: {
+      hoveredBg: {
         light: '#daffd6',
         dark: '#384d36'
       },
@@ -143,8 +151,8 @@ function theme(state=themeInitState, {type, payload}) {
         ...state,
         type: state.type === 'light' ? 'dark' : 'light',
       }
-    // case UPDATE_THEME:
-    //   return payload;
+    case THEME_REPLACE:
+      return payload || themeInitState;
     default:
       return state;
   }

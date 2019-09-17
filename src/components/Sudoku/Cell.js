@@ -66,18 +66,16 @@ class Cell extends React.PureComponent {
         focused={this.state.focused}
       >
         <PencilLayer pencils={this.state.pencils} />
-        <input
-          type="button"
-          ref={this.inputRef}
-          value={this.state.cellValue}
-        />
+        <button ref={this.inputRef}>
+          {this.state.cellValue}
+        </button>
       </StyledCell>
     )
   }
 }
 
 
-const StyledCell = styled(({focused, styleState, row, col, ...other}) => <div {...other} />)(
+export const StyledCell = styled(({focused, styleState, row, col, ...other}) => <div {...other} />)(
   ({theme, row, col, focused, styleState}) => ({
     backgroundColor: getBgColor(focused, styleState, theme),
     borderColor: `${theme.sudoku.color[theme.palette.type]}`,
@@ -86,9 +84,10 @@ const StyledCell = styled(({focused, styleState, row, col, ...other}) => <div {.
     position: 'relative',
     cursor: 'pointer',
     '&:hover': {
-      backgroundColor: theme.sudoku.cell.hoverBg[theme.palette.type]
+      backgroundColor: theme.sudoku.cell.hoveredBg[theme.palette.type]
     },
-    '& input': {
+    '& button': {
+      cursor: 'pointer',
       color: `${theme.sudoku.color[theme.palette.type]}`,
       margin: '0',
       padding: '0',
@@ -100,11 +99,10 @@ const StyledCell = styled(({focused, styleState, row, col, ...other}) => <div {.
       fontSize: '1.2rem',
       backgroundColor: 'transparent'
     },
-    '& input:focus': {
+    '& button:focus': {
       outline: 'none'
     }
   }),
-  {withTheme: true}
 )
 
 function getBgColor(focused, styleState, {sudoku: {cell}, palette: {type}}) {

@@ -16,7 +16,7 @@ export const SNACKBAR_CLOSE = 'SNACKBAR_CLOSE';
 export const SNACKBAR_NO_SUDOKU = 'SNACKBAR_NO_SUDOKU';
 
 export const THEME_TYPE_TOGGLE = 'THEME_TYPE_TOGGLE';
-
+export const THEME_REPLACE = 'THEME_REPLACE';
 /* 
 * Action Creators
 */
@@ -26,6 +26,12 @@ export function ThemeTypeToggle() {
   }
 }
 
+export function ThemeReplacement(theme) {
+  return {
+    type: THEME_REPLACE,
+    payload: theme
+  }
+}
 
 export function DrawerToggle() {
   return {type: TOGGLE_DRAWER};

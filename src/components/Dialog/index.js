@@ -3,6 +3,7 @@ import {connect} from 'react-redux';
 
 import { 
   TabAddition,
+  ThemeReplacement,
 } from '../../redux/actions';
 
 import {  
@@ -65,8 +66,14 @@ class DialogPQS extends React.PureComponent {
     this.props.addTab(name);
   }
 
-  applySettings(settings) {
-    console.log('Settings apply logic')
+  applySettings(type, settings) {
+    switch(type) {
+      case 'theme':
+        this.props.replaceTheme(settings.theme);
+        break;
+      default:
+        break
+    }
   }
 
   render() {
@@ -123,7 +130,7 @@ const mapStateToProps = state => {
 const mapDispatchToProps = dispatch => ({
   cancelDialog: () => dispatch(DialogAction(DIALOG_CANCEL)),
   addTab: (name) => dispatch(TabAddition({name})),
-
+  replaceTheme: (theme) => dispatch(ThemeReplacement(theme)),
 })
 
 export default connect(mapStateToProps, mapDispatchToProps)(DialogPQS);

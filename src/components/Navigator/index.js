@@ -37,7 +37,7 @@ class Navigator extends React.PureComponent {
     } = this.props;
     return (
       <React.Fragment>
-        <AppBar className={classes.root}>
+        <AppBar className={classes.appBar}>
           <Toolbar disableGutters>
 
             <DrawerIcon 
@@ -75,9 +75,10 @@ class Navigator extends React.PureComponent {
 }
 
 const styles = theme => ({
-  root: {
+  appBar: {
     zIndex: theme.zIndex.drawer,
     height: APPBAR_HEIGHT,
+    backgroundColor: theme.colors.appBar[theme.palette.type],
   },
 
   brand: {

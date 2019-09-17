@@ -20,7 +20,8 @@ class App extends React.PureComponent {
       palette: {
         type: theme.type
       },
-      sudoku: theme.sudoku
+      colors: theme.colors,
+      sudoku: theme.sudoku,
     })
 
     return (
@@ -59,8 +60,8 @@ const styles = theme => ({
     paddingLeft: COLLAPSED_DRAWER_WIDTH,
   }
 })
-const mapStateToProps = (state, ownProps) => ({
-  theme: (ownProps.theme && ownProps.theme.type === state.theme.type) ? ownProps.theme : state.theme
+const mapStateToProps = (state, ownProps=state) => ({
+  theme: (ownProps.theme.type === state.theme.type) ? ownProps.theme : state.theme
 })
 
 export default connect(mapStateToProps)(withStyles(styles)(App));

@@ -689,22 +689,28 @@ class Grid extends React.PureComponent {
     }
 
     
-    return <StyledGrid>{cells}</StyledGrid>
+    return  (
+      <StyledGrid rows={GRID_SIZE} cols={GRID_SIZE}>
+        {cells}
+      </StyledGrid>
+    )
   }
 }
 
-const StyledGrid = styled(({...other}) => <div {...other} />)(
-  ({theme}) => ({
-  gridArea: 'sudoku-grid',
-  display: 'grid',
-  justifyContent: 'center',
-  gridTemplateColumns: `repeat(${GRID_SIZE}, 1fr)`,
-  gridTemplateRows: `repeat(${GRID_SIZE}, 1fr)`,
-  gridGap: '1px 1px',
-  backgroundColor: `${theme.sudoku.color[theme.palette.type]}`,
-  border: '4px solid',
-  borderRadius: '3px',
-  boxShadow: `1px 1px 6px ${theme.sudoku.shadow[theme.palette.type]}`,
+export const StyledGrid = styled(({...props}) => <div {...props} />)(
+  ({theme, rows, cols}) => ({
+    width: '100%',
+    height: '100%',
+    gridArea: 'sudoku-grid',
+    display: 'grid',
+    justifyContent: 'center',
+    gridTemplateColumns: `repeat(${cols}, 1fr)`,
+    gridTemplateRows: `repeat(${rows}, 1fr)`,
+    gridGap: '1px 1px',
+    backgroundColor: `${theme.sudoku.color[theme.palette.type]}`,
+    border: '4px solid',
+    borderRadius: '3px',
+    boxShadow: `1px 1px 6px ${theme.sudoku.shadow[theme.palette.type]}`,
   })
 )
 

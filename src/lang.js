@@ -29,7 +29,8 @@ export const dialogLabels = {
   open: drawerLabels.open,
   preview: 'Preview',
   apply: 'Apply',
-  settings: drawerLabels.settings
+  settings: drawerLabels.settings,
+  default: 'Default',
 }
 
 export const messages = {

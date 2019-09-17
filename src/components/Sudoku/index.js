@@ -90,7 +90,7 @@ const Indices = styled(({...props}) => <div {...props}/>)(
     textAlign: 'center',
     justifyContent: 'stretch',
     '& :hover': {
-      backgroundColor: theme.sudoku.cell.hoverBg[theme.palette.type],
+      backgroundColor: theme.sudoku.cell.hoveredBg[theme.palette.type],
     },
     '& button': {
       textShadow: `2px 2px 3px ${theme.sudoku.shadow[theme.palette.type]}`,
