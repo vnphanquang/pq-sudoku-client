@@ -5,6 +5,7 @@ import FolderOpenIcon from '@material-ui/icons/FolderOpen';
 import {
   Dialog,
   DialogTitle,
+  DialogContent,
   DialogActions,
   TextField,
   Button,
@@ -49,7 +50,7 @@ function OpenDialog({onSubmit, onCancel}) {
         action="" 
         onSubmit={submit}
       >
-        <div className={classes.content}>
+        <DialogContent className={classes.content} dividers>
           <input 
             name="sudoku-file-picker"
             type="file"
@@ -82,7 +83,7 @@ function OpenDialog({onSubmit, onCancel}) {
               onChange={(e) => setName(e.target.value)}
             />
           }
-        </div>
+        </DialogContent>
         <DialogActions>
           <Button onClick={onCancel}>{dialogLabels.cancel}</Button>
           <Button type="submit">{dialogLabels.open}</Button>
@@ -98,7 +99,6 @@ const useStyles = makeStyles(theme => ({
     margin:  0
   },
   content: {
-    padding: theme.spacing(0, 2),
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center'

@@ -5,6 +5,7 @@ import {
   Dialog,
   DialogTitle,
   DialogActions,
+  DialogContent,
   TextField,
   Button,
 } from '@material-ui/core';
@@ -31,7 +32,7 @@ function TabAdditionDialog({onSubmit, onCancel}) {
         action="" 
         onSubmit={submit}
       >
-        <div className={classes.content}>
+        <DialogContent className={classes.content} dividers>
           <TextField
             error={name.length === 0}
             required
@@ -44,7 +45,7 @@ function TabAdditionDialog({onSubmit, onCancel}) {
             value={name}
             onChange={(e) => setName(e.target.value)}
           />
-        </div>
+        </DialogContent>
         <DialogActions>
           <Button onClick={onCancel}>{dialogLabels.cancel}</Button>
           <Button type="submit">{dialogLabels.create}</Button>
@@ -59,9 +60,6 @@ const useStyles = makeStyles(theme => ({
     minWidth: 250,
     margin:  0
   },
-  content: {
-    padding: theme.spacing(0, 2),
-  }
 }));
 
 

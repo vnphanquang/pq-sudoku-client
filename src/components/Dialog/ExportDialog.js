@@ -4,6 +4,7 @@ import {makeStyles} from '@material-ui/styles';
 import {
   Dialog,
   DialogTitle,
+  DialogContent,
   DialogActions,
   FormControl,
   Button,
@@ -101,7 +102,7 @@ function ExportDialog({onSubmit, onCancel, data:sudoku}) {
         action="" 
         onSubmit={exportSudoku}
       >
-        <div className={classes.content}>
+        <DialogContent dividers className={classes.content}>
           <div>
             <TextField
               className={classes.name}
@@ -164,7 +165,7 @@ function ExportDialog({onSubmit, onCancel, data:sudoku}) {
               cellValues={window.sudoku.getCellValues()}
             />
           </div>
-        </div>
+        </DialogContent>
 
         <DialogActions>
           <Button onClick={onCancel}>{dialogLabels.cancel}</Button>
@@ -193,7 +194,6 @@ const useStyles = makeStyles(theme => ({
   },
 
   content: {
-    padding: theme.spacing(0, 2),
     display: 'flex',
     flexDirection: 'column',
     justifyContent: 'space-between',

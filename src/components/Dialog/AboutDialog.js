@@ -28,7 +28,7 @@ function AboutDialog({onCancel}) {
         {`Version ${'0.1.1'}. ${'© 2019 Quang Phan'}`}
       </Typography>
     </DialogTitle>
-      <DialogContent className={classes.content} dividers>
+      <DialogContent dividers>
         <Typography variant="body1" align="center">
           pqSudoku is an open source project, 
           and a playground built by and for sudoku enthusiasts. 
@@ -60,9 +60,6 @@ const useStyles = makeStyles(theme => ({
     minWidth: 250,
     // margin:  0
   },
-  content: {
-    // padding: theme.spacing(0, 2),
-  }
 }));
 
 export default AboutDialog

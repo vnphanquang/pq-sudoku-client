@@ -4,6 +4,7 @@ import {makeStyles} from '@material-ui/styles';
 import {
   Dialog,
   DialogTitle,
+  DialogContent,
   DialogActions,
   TextField,
   Button,
@@ -47,7 +48,7 @@ function SaveAsDialog({onSubmit, onCancel, data: sudoku}) {
         action="" 
         onSubmit={submit}
       >
-        <div className={classes.content}>
+        <DialogContent className={classes.content} dividers>
           <TextField
             error={name.length === 0}
             required
@@ -60,7 +61,7 @@ function SaveAsDialog({onSubmit, onCancel, data: sudoku}) {
             value={name}
             onChange={(e) => setName(e.target.value)}
           />
-        </div>
+        </DialogContent>
         <DialogActions>
           <Button onClick={onCancel}>{dialogLabels.cancel}</Button>
           <Button type="submit">{dialogLabels.save}</Button>
@@ -76,7 +77,6 @@ const useStyles = makeStyles(theme => ({
     margin:  0
   },
   content: {
-    padding: theme.spacing(0, 2),
   }
 }));
 
