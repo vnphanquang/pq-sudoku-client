@@ -14,6 +14,9 @@ import {
   DIALOG_SAVEAS,
   DIALOG_OPEN,
   DIALOG_SETTINGS,
+  DIALOG_FEEDBACK,
+  DIALOG_ABOUT,
+  DIALOG_HELP,
 } from '../../redux/actions/dialogs';
 
 import AddTabDialog from './AddTabDialog';
@@ -21,6 +24,7 @@ import ExportDialog from './ExportDialog';
 import SaveAsDialog from './SaveAsDialog';
 import OpenDialog from './OpenDialog';
 import SettingsDialog from './SettingsDialog';
+import AboutDialog from './AboutDialog';
 
 const dialogVariants = {
   [DIALOG_ADD_TAB]: AddTabDialog,
@@ -28,6 +32,7 @@ const dialogVariants = {
   [DIALOG_SAVEAS]: SaveAsDialog,
   [DIALOG_OPEN]: OpenDialog,
   [DIALOG_SETTINGS]: SettingsDialog,
+  [DIALOG_ABOUT]: AboutDialog,
 }
 
 const submitVariants = {
@@ -36,6 +41,8 @@ const submitVariants = {
   [DIALOG_SAVEAS]: (thisArg) => thisArg.exportFile.bind(thisArg),
   [DIALOG_OPEN]: (thisArg) => thisArg.openSudoku.bind(thisArg),
   [DIALOG_SETTINGS]: (thisArg) => thisArg.applySettings.bind(thisArg),
+  [DIALOG_ABOUT]: () => null,
+  
 }
 
 class DialogPQS extends React.PureComponent {

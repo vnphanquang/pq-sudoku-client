@@ -35,7 +35,7 @@ const themeTypeIcon = {
   dark: <Brightness3Icon />
 }
 
-
+//TODO: pull display texts from lang
 class AppearancePanel extends React.Component {
   constructor(props) {
     super(props);

@@ -17,9 +17,11 @@ import { withStyles } from '@material-ui/styles';
 import { DrawerToggle, TabChange, TabRemoval, ThemeTypeToggle } from '../../redux/actions';
 import { DialogAction } from '../../redux/actions/dialogs';
 import { APPBAR_HEIGHT } from '../utils';
+import { pqSudoku } from '../../lang';
 import Drawer from './Drawer';
 import DrawerIcon from './DrawerIcon';
 import Tabs from './Tabs';
+
 
 const themeTypeIcon = {
   light: <WbSunnyIcon />,
@@ -50,7 +52,7 @@ class Navigator extends React.PureComponent {
             />
 
             <Typography variant="h5" className={classes.brand}>
-              Sudoku PQ
+              {pqSudoku}
             </Typography>
 
             <Tabs 

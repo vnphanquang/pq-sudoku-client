@@ -9,7 +9,6 @@ import {
   ListItem,
   ListItemIcon,
   ListItemText,
-  Link,
 } from '@material-ui/core';
 import {
   AddCircle as AddIcon,
@@ -20,7 +19,6 @@ import {
   Help as HelpIcon,
   Info as InfoIcon,
   Feedback as FeedbackIcon,
-  Code as SourceIcon,
 } from '@material-ui/icons';
 
 
@@ -127,17 +125,6 @@ class DrawerPQS extends React.PureComponent {
             <ListItemIcon><InfoIcon /></ListItemIcon>
             <ListItemText primary={drawerLabels.about} />
           </ListItem>
-          <Link
-            color="inherit"
-            href="https://github.com/vnphanquang/pq-sudoku"
-            target="_blank"
-            underline="none"
-          >
-            <ListItem button className={classes.drawerItem}>
-              <ListItemIcon><SourceIcon /></ListItemIcon>
-              <ListItemText primary={drawerLabels.source} />
-            </ListItem>
-          </Link>
         </List>
       </Drawer>
     )

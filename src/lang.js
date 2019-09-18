@@ -9,7 +9,6 @@ export const drawerLabels = {
   feedback: 'Feedback',
   help: 'Help',
   about: 'About',
-  source: 'Source'
 }
 
 export const dialogLabels = {
@@ -31,7 +30,12 @@ export const dialogLabels = {
   apply: 'Apply',
   settings: drawerLabels.settings,
   default: 'Default',
+  about: drawerLabels.about,
+  source: 'Source',
+  close: 'Close',
 }
+
+export const pqSudoku = 'pqSudoku';
 
 export const messages = {
   noSudoku: 'No active sudoku!'
