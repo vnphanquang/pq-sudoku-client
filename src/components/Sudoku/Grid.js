@@ -1,14 +1,39 @@
 import React from 'react';
-import {PencilMap, SELECTION, VALUES, KEYS_STROKES, DIRECTION, STYLE_STATES, SUBGRID_NUMBERS, GRID_SIZE, SubgridMap, ValueMap} from '../utils';
+import {SELECTION, KEYS_STROKES, DIRECTION, STYLE_STATES} from '../utils';
 import Cell from './Cell';
-import {styled} from '@material-ui/styles'
+import {styled} from '@material-ui/styles';
+
+function SubgridToCellsMap(gridSize) {
+  const entries = [];
+  for (let i = 0; i < gridSize; i++) {
+    entries.push([i, []]);
+  }
+  return new Map(entries);
+}
+
+function ValueToCellsMap(values) {
+  const entries = [];
+  for (let i = 0; i < values.length; i++) {
+    entries.push([values[i], []])
+  }
+  return new Map(entries);
+}
+
+function ValueMap(values) {
+  const entries = [];
+  for (let i = 0; i < values.length; i++) {
+    entries.push([i+1, values[i]])
+  }
+  return new Map(entries);
+}
 
 class Grid extends React.PureComponent {
   constructor(props) {
     super(props);
 
-    this.cellValueMap = ValueMap();
-    this.subgridMap = SubgridMap();
+    this.valueToCellsMap = ValueToCellsMap(this.props.values);
+    this.subgridToCellsMap = SubgridToCellsMap(this.props.size);
+    this.valueMap = ValueMap(this.props.values);
     this.conflictCells = [];
     this.selectedCells = [null];
     this.selection = {
@@ -20,7 +45,7 @@ class Grid extends React.PureComponent {
     // this.state = {
     //   isCompleted: false,
     // }
-    this.pencilMode = false;
+    this.pencilMode = true;
 
     // Input & Navigation
     this.handleKeyPress = this.handleKeyPress.bind(this);
@@ -29,25 +54,15 @@ class Grid extends React.PureComponent {
     this.focus = this.focus.bind(this);
     this.isFocused = this.isFocused.bind(this);
     
-    
-    // Play Mode Specifics
-    // this.getGameValue = this.getGameValue.bind(this);
-    // this.checkGameCompletion = this.checkGameCompletion.bind(this);
     this.cells = this.initGrid();
   }
 
   initGrid() {
     let refs = [];
     let cellRow, cell;
-    // let gameValue;
-    for (let row = 0; row < GRID_SIZE; row++) {
+    for (let row = 0; row < this.props.size; row++) {
       cellRow = [];
-      // if (flag === 'random') {
-      //   gameValue = `${Math.floor(Math.random() * GRID_SIZE) + 1}`;
-      // } else if (flag === 'blank') {
-      //   gameValue = ''
-      // }
-      for (let col = 0; col < GRID_SIZE; col++) {
+      for (let col = 0; col < this.props.size; col++) {
         cell = null;
         cellRow.push(cell);
       }
@@ -59,12 +74,8 @@ class Grid extends React.PureComponent {
   mapCellRef(targetCell) {
     if (targetCell) {
       let {row, col} = targetCell.props;
-      // let targetValue = this.getGameValue(row, col);
       this.cells[row][col] = targetCell;
-      // if (targetValue !== '') {
-      //   this.setCellValueMapping(targetCell, targetValue);
-      // }
-      this.setSubgridMapping(targetCell);
+      this.setSubgridToCellsMapping(targetCell);
     }
   }
 
@@ -73,16 +84,14 @@ class Grid extends React.PureComponent {
     if (newValue !== oldValue) {
       targetCell.setState({cellValue: newValue}, () => {
         if (oldValue !== '') {
-          this.removeCellValueMapping(targetCell, oldValue);
-          // if (this.selectedCells.length === 1) {
+          this.removeCellFromValueMap(targetCell, oldValue);
           if (this.selection.type === SELECTION.TYPES.SINGLE) {
             this.unspotMatchedCells(oldValue);
             this.uncheckConflicts(targetCell);
           }
         }  
         if (newValue !== '') {
-          this.setCellValueMapping(targetCell, newValue);
-          // if (this.selectedCells.length === 1) {
+          this.setValueToCellsMapping(targetCell, newValue);
           if (this.selection.type === SELECTION.TYPES.SINGLE) {
             this.spotMatchedCellsAndConflicts(targetCell);
           }
@@ -93,22 +102,26 @@ class Grid extends React.PureComponent {
 
   handleKeyPress(e, targetCell) {
     let {ctrlKey, key} = e
-    if (VALUES.has(key)) {
+    let numKey = parseInt(key);
+    if (this.valueMap.has(numKey)) {
+      let inputValue = this.valueMap.get(numKey);
       if (this.pencilMode) {
-        targetCell.setState((st) => {
-          st.cellValue = '';
-          st.pencils.set(key, !st.pencils.get(key));
-          return st;
+        this.selection.cells.forEach(cell => {
+          cell.setState((st) => ({
+            cellValue: '',
+            // pencilMap: st.pencilMap.set(key, st.pencilMap.get(key) ? false : inputValue)
+            pencils: st.pencils.map((value, index) => {
+              if (index + 1 === numKey) {
+                return value ? false : inputValue;
+              } else {
+                return value;
+              }
+            })
+          }))
         })
       } else {
-        let inputValue = VALUES.get(key);
         this.selection.cells.forEach(cell => {
-          if (inputValue !== cell.state.cellValue) {
-            this.updateCellValue(cell, inputValue); 
-            // cell.setState({cellValue: VALUES.get(key), pencils: PencilMap()});
-          } else {
-            this.updateCellValue(cell, '');
-          }
+          this.updateCellValue(cell, inputValue !== cell.state.cellValue ? inputValue : '');
         })
 
       }
@@ -116,7 +129,9 @@ class Grid extends React.PureComponent {
       this.keyNavigate(e);
     } else if (KEYS_STROKES.DELETES.includes(key)) {
       if (this.pencilMode) {
-        targetCell.setState({pencils: PencilMap()});
+        this.selection.cells.forEach(cell => {
+          cell.setState({pencils: new Array(this.props.size).fill(false)});
+        })
       } else {
         this.selection.cells.forEach(cell => {
           if (cell.state.cellValue !== '') {
@@ -258,7 +273,7 @@ class Grid extends React.PureComponent {
       col: targetIndex
     }
     let cursor = (direction === DIRECTION.ROW) ? DIRECTION.COL : DIRECTION.ROW;
-    for (coor[cursor] = 0; coor[cursor] < GRID_SIZE; coor[cursor]++) {
+    for (coor[cursor] = 0; coor[cursor] < this.props.size; coor[cursor]++) {
       this.selectCell(this.getCell(coor.row, coor.col));
     }
     let selectedCell = this.selection.focus;
@@ -329,9 +344,9 @@ class Grid extends React.PureComponent {
     if (this.selection.type !== direction) return false;
     let cursor = (direction === DIRECTION.ROW) ? DIRECTION.ROW : DIRECTION.COL;
     let selectedCells = this.selection.cells;
-    for (let i = 0; i < selectedCells.length; i += GRID_SIZE) {
+    for (let i = 0; i < selectedCells.length; i += this.props.size) {
       if (selectedCells[i].props[cursor] === targetIndex) {
-        selectedCells.splice(i, GRID_SIZE).forEach(cell => {
+        selectedCells.splice(i, this.props.size).forEach(cell => {
           this.clearCellStyle(cell);
         });
         if (selectedCells.length === 0) {
@@ -353,8 +368,8 @@ class Grid extends React.PureComponent {
     this.clearSelection();
     this.selection.type = SELECTION.TYPES.MULTI;
     this.selection.position = null;
-    for (let row = 0; row < GRID_SIZE; row++) {
-      for (let col = 0; col < GRID_SIZE; col++) {
+    for (let row = 0; row < this.props.size; row++) {
+      for (let col = 0; col < this.props.size; col++) {
         this.selectCell(this.getCell(row, col));
       }
     }
@@ -393,12 +408,12 @@ class Grid extends React.PureComponent {
         }
         break;
       case 'ArrowRight':
-        if (col + 1 < GRID_SIZE) {
+        if (col + 1 < this.props.size) {
           targetCell = this.getCell(row, col + 1);
         }
         break;
       case 'ArrowDown':
-        if (row + 1 < GRID_SIZE) {
+        if (row + 1 < this.props.size) {
           targetCell = this.getCell(row + 1, col);
         }
         break;
@@ -445,7 +460,7 @@ class Grid extends React.PureComponent {
     let cursor = (direction === DIRECTION.ROW) ? DIRECTION.COL : DIRECTION.ROW;
 
     let cell;
-    for (coor[cursor] = 0; coor[cursor] < GRID_SIZE; coor[cursor]++) {
+    for (coor[cursor] = 0; coor[cursor] < this.props.size; coor[cursor]++) {
       cell = this.getCell(coor.row, coor.col);
       this.setCellStyle(cell, STYLE_STATES.LIT);
     }
@@ -459,7 +474,7 @@ class Grid extends React.PureComponent {
     let cursor = (direction === DIRECTION.ROW) ? DIRECTION.COL : DIRECTION.ROW;
 
     let cell;
-    for (coor[cursor] = 0; coor[cursor] < GRID_SIZE; coor[cursor]++) {
+    for (coor[cursor] = 0; coor[cursor] < this.props.size; coor[cursor]++) {
       cell = this.getCell(coor.row, coor.col);
       this.clearCellStyle(cell); 
     }
@@ -568,7 +583,7 @@ class Grid extends React.PureComponent {
     if (this.selection.focus) {
       this.selection.focus.input.focus();
     } else {
-      let center = parseInt(GRID_SIZE / 2);
+      let center = parseInt(this.props.size / 2);
       let cell = this.getCell(center, center)
       this.handleCellSelection({ctrlKey: false, shiftKey: false}, cell);
     }
@@ -589,20 +604,6 @@ class Grid extends React.PureComponent {
     targetCell.setState({styleState: null})
   }
 
-  // getGameValue(row, col) {
-  //   return this.cells[row][col].gameValue;
-  // }
-
-  // setGameValue(row, col, targetValue) {
-  //   this.cells[row][col].gameValue = targetValue;
-  // }
-
-  // isCorrectValue(targetCell) {
-  //   let cellValue = this.getCellValue(targetCell);
-  //   let gameValue = this.getGameValue(targetCell.props.row, targetCell.props.col);
-  //   return cellValue === gameValue;
-  // }
-
   getCell(row, col) {
     return this.cells[row][col];
   }
@@ -612,28 +613,28 @@ class Grid extends React.PureComponent {
   }
 
   getCellsByValue(targetValue) {
-    return this.cellValueMap.get(`${targetValue}`)
+    return this.valueToCellsMap.get(`${targetValue}`)
   }
 
-  removeCellValueMapping(targetCell, targetValue) {
+  removeCellFromValueMap(targetCell, targetValue) {
     let isSelf;
     let cells = this.getCellsByValue(targetValue);
     cells = cells.filter((cell) => {
       isSelf = cell.isSameCell(targetCell);
       return !isSelf;
     });
-    this.cellValueMap.set(`${targetValue}`, cells);
+    this.valueToCellsMap.set(`${targetValue}`, cells);
   }
 
-  setCellValueMapping(targetCell, targetValue) {
+  setValueToCellsMapping(targetCell, targetValue) {
     this.getCellsByValue(targetValue).push(targetCell);
   }
 
   getCellsBySubgrid(subgrid) {
-    return this.subgridMap.get(subgrid);
+    return this.subgridToCellsMap.get(subgrid);
   }
   
-  setSubgridMapping(targetCell) {
+  setSubgridToCellsMapping(targetCell) {
     this.getCellsBySubgrid(targetCell.props.subgrid).push(targetCell);
   }
 
@@ -643,20 +644,22 @@ class Grid extends React.PureComponent {
   
   setCellValues(values) {
     let cell, value;
-    for (let row = 0; row < GRID_SIZE; row++) {
-      for (let col = 0; col < GRID_SIZE; col++) {
+    for (let row = 0; row < this.props.size; row++) {
+      for (let col = 0; col < this.props.size; col++) {
         cell = this.getCell(row, col);
         value = values[row][col];
         if (value !== '') {
           cell.setState({cellValue: value});
-          this.setCellValueMapping(cell, value);
+          this.setValueToCellsMapping(cell, value);
         }
       }
     }
   }
 
-  static getSubgridNumber(row, col) {
-    return SUBGRID_NUMBERS[Math.floor(row/3)][Math.floor(col/3)];
+  static getSubgridNumber(row, col, gridSize) {
+    const subgridSize = Math.sqrt(gridSize);
+    const [subgridRow, subgridCol] = [Math.floor(row/subgridSize), Math.floor(col/subgridSize)];
+    return subgridRow + subgridCol * subgridSize;
   }
 
   togglePencilMode() {
@@ -665,32 +668,28 @@ class Grid extends React.PureComponent {
 
   render() {
     // console.log('Grid rendered!');
-
+    let size = this.props.size;
     let cells = [];
     let subgrid;
-    for (let row = 0; row < GRID_SIZE; row++) {
-      for (let col = 0; col < GRID_SIZE; col++) {
-        subgrid = Grid.getSubgridNumber(row, col);
+    for (let row = 0; row < size; row++) {
+      for (let col = 0; col < size; col++) {
+        subgrid = Grid.getSubgridNumber(row, col, size);
         cells.push(
           <Cell
+            gridSize={this.props.size}
             ref={this.mapCellRef}
             key={`${row}-${col}`}
             row={row} col={col}
             subgrid={subgrid}
-            // handleCellValueInput={this.handleCellValueInput} 
             handleCellSelection={this.handleCellSelection}
-            // navigate={this.navigate}
-            // getGameValue={this.getGameValue}
-            // pencilMode={this.pencilMode}
             handleKeyPress={this.handleKeyPress}
           />
         );
       }
     }
-
     
     return  (
-      <StyledGrid rows={GRID_SIZE} cols={GRID_SIZE}>
+      <StyledGrid rows={this.props.size} cols={this.props.size}>
         {cells}
       </StyledGrid>
     )

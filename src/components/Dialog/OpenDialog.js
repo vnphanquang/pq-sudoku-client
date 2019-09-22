@@ -31,10 +31,8 @@ function OpenDialog({onSubmit, onCancel}) {
     e.preventDefault();
     const reader = new FileReader();
     reader.onload = () => {
-      // console.log(reader.result);
       onSubmit(name, JSON.parse(reader.result))
     }
-    // reader.readAsDataURL(file);
     reader.readAsBinaryString(file);
     
   }

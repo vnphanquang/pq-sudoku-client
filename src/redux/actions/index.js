@@ -37,12 +37,12 @@ export function DrawerToggle() {
   return {type: TOGGLE_DRAWER};
 }
 
-export function TabAddition({name}) {
+export function TabAddition({name='New Sudoku', size=9, values=['1', '2', '3', '4', '5', '6', '7', '8', '9']}) {
   return {
     type: ADD_TAB,
     payload: {
-      name,
-      id: uuidv1()
+      id: uuidv1(),
+      name, size, values
     }
   }
 }

@@ -65,12 +65,12 @@ class DialogPQS extends React.PureComponent {
   }
 
   openSudoku(name, sudokuData) {
-    const {cellValues} = sudokuData;
+    const {cellValues, size} = sudokuData;
     window.sudoku = {
       ...window.sudoku,
       loadedValues: cellValues
     }
-    this.props.addTab(name);
+    this.props.addTab({name, size});
   }
 
   applySettings(type, settings) {
@@ -136,7 +136,7 @@ const mapStateToProps = state => {
 
 const mapDispatchToProps = dispatch => ({
   cancelDialog: () => dispatch(DialogAction(DIALOG_CANCEL)),
-  addTab: (name) => dispatch(TabAddition({name})),
+  addTab: (config) => dispatch(TabAddition(config)),
   replaceTheme: (theme) => dispatch(ThemeReplacement(theme)),
 })
 

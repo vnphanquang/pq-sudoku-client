@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types'
 import PencilLayer from './PencilLayer'
-import {STYLE_STATES, PencilMap} from '../utils';
+import {STYLE_STATES} from '../utils';
 import {styled} from '@material-ui/styles';
 
 class Cell extends React.PureComponent {
@@ -20,9 +20,8 @@ class Cell extends React.PureComponent {
     super(props)
     this.input = null;
     this.state = {
-      // cellValue: this.props.getGameValue(this.props.row, this.props.col),
       cellValue: '',
-      pencils: PencilMap(),
+      pencils: new Array(this.props.gridSize).fill(false),
       styleState: null,
       focused: false
     }
@@ -58,6 +57,7 @@ class Cell extends React.PureComponent {
     // console.log('Cell rendered');
     return (
       <StyledCell
+        gridSize={this.props.gridSize}
         row={this.props.row}
         col={this.props.col}
         styleState={this.state.styleState}
@@ -76,11 +76,11 @@ class Cell extends React.PureComponent {
 
 
 export const StyledCell = styled(({focused, styleState, row, col, ...other}) => <div {...other} />)(
-  ({theme, row, col, focused, styleState}) => ({
+  ({theme, row, col, gridSize, focused, styleState}) => ({
     backgroundColor: getBgColor(focused, styleState, theme),
     borderColor: `${theme.sudoku.color[theme.palette.type]}`,
     borderStyle: 'solid',
-    borderWidth: getBorderWidth(row, col),
+    borderWidth: getBorderWidth(row, col, gridSize),
     position: 'relative',
     cursor: 'pointer',
     '&:hover': {
@@ -121,19 +121,19 @@ function getBgColor(focused, styleState, {sudoku: {cell}, palette: {type}}) {
   }
 }
 
-function getBorderWidth(row, col) {
+function getBorderWidth(row, col, gridSize) {
   let [top, right, bottom, left] = [0, 0, 0, 0]
-  
-  if (row === 3 || row === 6) {
+  const subgridSize = Math.sqrt(gridSize)
+  if (row !== 0 && row % subgridSize === 0) {
     top = '1px'
   }
-  if (col === 2 || col === 5) {
+  if (col !== gridSize - 1 && (col + 1) % subgridSize === 0) {
     right = '1px'
   }
-  if (row === 2 || row === 5) {
+  if (row !== gridSize - 1 && (row + 1) % subgridSize === 0) {
     bottom = '1px'
   }
-  if (col === 3 || col === 6) {
+  if (col !== 0 && col % subgridSize === 0) {
     left = '1px'
   }
   return `${top} ${right} ${bottom} ${left}`

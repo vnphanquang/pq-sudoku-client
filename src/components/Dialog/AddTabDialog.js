@@ -18,7 +18,8 @@ function TabAdditionDialog({onSubmit, onCancel}) {
 
   function submit(e) {
     e.preventDefault();
-    onSubmit(name);
+    onSubmit({name});
+    //TODO: add size parameter & value mapping option
   }
 
   return (

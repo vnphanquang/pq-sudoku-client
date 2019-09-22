@@ -5,7 +5,7 @@ import ButtonBase from '@material-ui/core/ButtonBase';
 
 import Grid from './Grid';
 
-import { DIRECTION, GRID_SIZE} from '../utils';
+import { DIRECTION } from '../utils';
 class Sudoku extends React.Component {
   constructor(props) {
     super(props)
@@ -41,39 +41,44 @@ class Sudoku extends React.Component {
 
   render() {
     // console.log('Sudoku rendered');
-    let colIndices = [];
-    let rowIndices = [];
-    for (let row = 0; row < GRID_SIZE; row++) {
-      rowIndices.push(
-        <ButtonBase 
-          key={`row-index-${row+1}`} 
-          onClick={(e) => this.activeGrid.handleCellSelectionByIndex(e, row, DIRECTION.ROW)}
-        >
-          {row+1}
-        </ButtonBase>
-      )
-      colIndices.push(
-        <ButtonBase 
-          key={`col-index-${row+1}`} 
-          onClick={(e) => this.activeGrid.handleCellSelectionByIndex(e, row, DIRECTION.COL)}
-        >
-          {row+1}
-        </ButtonBase>
-      )
-    }
 
     let isActive = false;
-    const sudokus = this.props.tabs.array.map(({id}, index) => {
+    const sudokus = this.props.tabs.array.map(({id, size, values}, index) => {
+      const colIndices = [];
+      const rowIndices = [];
+      for (let row = 0; row < size; row++) {
+        rowIndices.push(
+          <ButtonBase 
+            key={`row-index-${row+1}`} 
+            onClick={(e) => this.activeGrid.handleCellSelectionByIndex(e, row, DIRECTION.ROW)}
+          >
+            {row+1}
+          </ButtonBase>
+        )
+        colIndices.push(
+          <ButtonBase 
+            key={`col-index-${row+1}`} 
+            onClick={(e) => this.activeGrid.handleCellSelectionByIndex(e, row, DIRECTION.COL)}
+          >
+            {row+1}
+          </ButtonBase>
+        )
+      }
+
       isActive = this.props.tabs.activeIndex === index;
       return (
-        <SudokuContainer key={`sudoku-container-${id}}`} hidden={!isActive}>
-          <ColIndices>{colIndices}</ColIndices>
-          <RowIndices>{rowIndices}</RowIndices>
-          <Grid {...isActive && {ref: this.updateGridRef}}/>
+        <SudokuContainer 
+          key={`sudoku-container-${id}}`} 
+          hidden={!isActive} 
+          size={size}
+        >
+          <ColIndices size={size}>{colIndices}</ColIndices>
+          <RowIndices size={size}>{rowIndices}</RowIndices>
+          <Grid {...isActive && {ref: this.updateGridRef}} size={size} values={values}/>
         </SudokuContainer>
       )
     });
-
+    
     return (
       <React.Fragment>
         {sudokus}
@@ -83,6 +88,7 @@ class Sudoku extends React.Component {
   }
 }
 
+//TODO: dynamic sizing for font size to fit cell
 const Indices = styled(({...props}) => <div {...props}/>)(
   ({theme}) => ({
     display: 'grid',
@@ -99,35 +105,38 @@ const Indices = styled(({...props}) => <div {...props}/>)(
   })
 )
 
-const RowIndices = styled(({...props}) => <Indices {...props} />)({
-  gridArea: 'row-indices',
-  gridTemplateRows: `repeat(${GRID_SIZE}, 1fr)`,
-  gridRowGap: '1px',
-  padding: '4px 0 4px 2px',
-  '& button': {
-    borderRadius: '10% 50% 50% 10%',
-    cursor: 'pointer',
-  },
-  
-})
+const RowIndices = styled(({...props}) => <Indices {...props} />)(
+  ({size}) => ({
+    gridArea: 'row-indices',
+    gridTemplateRows: `repeat(${size}, 1fr)`,
+    gridRowGap: '1px',
+    padding: '4px 0 4px 2px',
+    '& button': {
+      borderRadius: '10% 50% 50% 10%',
+      cursor: 'pointer',
+    },
+    
+  })
+)
 
-const ColIndices = styled(({...props}) => <Indices {...props} />)({
-  gridArea: 'col-indices',
-  gridTemplateColumns: `repeat(${GRID_SIZE}, 1fr)`,
-  padding: '4px 2px 0 2px',
-  '& button': {
-    borderRadius: '10% 10% 50% 50%',
-    cursor: 'pointer',
-  },
-})
-
+const ColIndices = styled(({...props}) => <Indices {...props} />)(
+  ({size}) => ({
+    gridArea: 'col-indices',
+    gridTemplateColumns: `repeat(${size}, 1fr)`,
+    padding: '4px 2px 0 2px',
+    '& button': {
+      borderRadius: '10% 10% 50% 50%',
+      cursor: 'pointer',
+    },
+  })
+)
 const SudokuContainer = styled(({...props}) => <div {...props} />)(
-  ({hidden}) => ({
+  ({hidden, size}) => ({
     overflow: 'hidden',
     display: hidden ? 'none' : 'grid',
     justifyContent: 'center',
-    gridTemplateColumns: `1fr ${GRID_SIZE}fr`,
-    gridTemplateRows: `1fr ${GRID_SIZE}fr`,
+    gridTemplateColumns: `1fr ${size}fr`,
+    gridTemplateRows: `1fr ${size}fr`,
     gridTemplateAreas: `". col-indices" "row-indices sudoku-grid"`,
     width: '600px',
     height: '600px'

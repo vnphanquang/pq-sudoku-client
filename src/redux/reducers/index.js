@@ -48,7 +48,7 @@ function tabs(state = tabsInitState, {type, payload}) {
     case ADD_TAB:
       return {
         ...state,
-        array: [...state.array, {name: payload.name, id: payload.id}],
+        array: [...state.array, payload],
         activeIndex: state.array.length
       }
     case CHANGE_TAB:
@@ -138,8 +138,8 @@ const themeInitState = {
         dark: '#a8a8ff'
       },
       focusedBg: {
-        light:  '#64ffff',
-        dark:  '#64ffff'
+        light:  '#00FFFF',
+        dark:  '#7F8C8D'
       },
     }
   },

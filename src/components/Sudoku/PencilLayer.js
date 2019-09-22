@@ -1,6 +1,24 @@
 import React from 'react';
-import {VALUES} from '../utils';
 import {makeStyles} from '@material-ui/styles';
+
+function PencilLayer({pencils}) {
+  console.log('PencilLayer inside');
+
+  const classes = useStyles({pencils});
+  let marks = [];
+
+  pencils.forEach((value, index) => {
+    marks.push(
+      <div className={classes.pencil} key={index}> {value} </div>
+    )
+  })
+
+  return (
+    <div className={classes.root}>
+      {marks}
+    </div>
+  )
+}
 
 const useStyles = makeStyles({
   root: {
@@ -9,35 +27,19 @@ const useStyles = makeStyles({
     height: '100%',
     display: 'grid',
     justifyContent: 'center',
-    gridTemplateColumns: 'repeat(3, 1fr)',
-    gridTemplateRows: 'repeat(3, 1fr)',
+    gridTemplateColumns: ({pencils}) => `repeat(${Math.sqrt(pencils.length)}, 1fr)`,
+    gridTemplateRows: ({pencils}) => `repeat(${Math.sqrt(pencils.length)}, 1fr)`,
     fontSize: '.9rem',
     textAlign: 'center',
     lineHeight: '100%'
+  },
+  pencil: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
   }
 })
 
-function PencilLayer(props) {
-  // console.log('PencilLayer inside');
-
-  const classes = useStyles();
-  let pencils = [];
-  for (let i = 1; i <= VALUES.size; i++) {
-    if (props.pencils.get(`${i}`)) {
-      pencils.push(
-        <div key={i}>
-          {VALUES.get(`${i}`)}
-        </div>
-      )
-    } else {
-      pencils.push(<div key={i}></div>);
-    }
-  }
-  return (
-    <div className={classes.root}>
-      {pencils}
-    </div>
-  )
-}
 
 export default PencilLayer;
+
