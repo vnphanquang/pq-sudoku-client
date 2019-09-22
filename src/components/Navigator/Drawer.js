@@ -42,7 +42,6 @@ import {
 class DrawerPQS extends React.PureComponent {
   // constructor(props) {
   //   super(props);
-  
   // }
   
   render() {
@@ -59,7 +58,7 @@ class DrawerPQS extends React.PureComponent {
             <ListItem 
               className={classes.drawerItem} 
               button 
-              onClick={() => dispatchDialog(DIALOG_ADD_TAB)}
+              onClick={() => dispatchDialog(DIALOG_ADD_TAB, drawerOpen)}
             >
               <ListItemIcon><AddIcon /></ListItemIcon>
               <ListItemText primary={drawerLabels.new + '...'} />
@@ -67,7 +66,7 @@ class DrawerPQS extends React.PureComponent {
             <ListItem 
               button 
               className={classes.drawerItem}
-              onClick={() => dispatchDialog(DIALOG_OPEN)}
+              onClick={() => dispatchDialog(DIALOG_OPEN, drawerOpen)}
             >
               <ListItemIcon><FolderOpenIcon /></ListItemIcon>
               <ListItemText primary={drawerLabels.open + '...'} />
@@ -75,7 +74,7 @@ class DrawerPQS extends React.PureComponent {
             <ListItem 
               button 
               className={classes.drawerItem} 
-              onClick={() => dispatchDialog(DIALOG_SAVEAS)}
+              onClick={() => dispatchDialog(DIALOG_SAVEAS, drawerOpen)}
               disabled={!sudokuActive}
             >
               <ListItemIcon><SaveIcon /></ListItemIcon>
@@ -84,7 +83,7 @@ class DrawerPQS extends React.PureComponent {
             <ListItem 
               button 
               className={classes.drawerItem} 
-              onClick={() => dispatchDialog(DIALOG_EXPORT)}
+              onClick={() => dispatchDialog(DIALOG_EXPORT, drawerOpen)}
               disabled={!sudokuActive}
             >
               <ListItemIcon><SaveAltIcon /></ListItemIcon>
@@ -93,7 +92,7 @@ class DrawerPQS extends React.PureComponent {
             <ListItem 
               button 
               className={classes.drawerItem} 
-              onClick={() => dispatchDialog(DIALOG_SETTINGS)}
+              onClick={() => dispatchDialog(DIALOG_SETTINGS, drawerOpen)}
             >
               <ListItemIcon><SettingsIcon /></ListItemIcon>
               <ListItemText primary={drawerLabels.settings}/>
@@ -104,7 +103,7 @@ class DrawerPQS extends React.PureComponent {
             <ListItem 
               button 
               className={classes.drawerItem} 
-              onClick={() => dispatchDialog(DIALOG_FEEDBACK)}
+              onClick={() => dispatchDialog(DIALOG_FEEDBACK, drawerOpen)}
             >
               <ListItemIcon><FeedbackIcon /></ListItemIcon>
               <ListItemText primary={drawerLabels.feedback} />
@@ -112,7 +111,7 @@ class DrawerPQS extends React.PureComponent {
             <ListItem 
               button 
               className={classes.drawerItem} 
-              onClick={() => dispatchDialog(DIALOG_HELP)}
+              onClick={() => dispatchDialog(DIALOG_HELP, drawerOpen)}
             >
               <ListItemIcon><HelpIcon /></ListItemIcon>
               <ListItemText primary={drawerLabels.help} />
@@ -120,7 +119,7 @@ class DrawerPQS extends React.PureComponent {
             <ListItem 
               button 
               className={classes.drawerItem} 
-              onClick={() => dispatchDialog(DIALOG_ABOUT)}
+              onClick={() => dispatchDialog(DIALOG_ABOUT, drawerOpen)}
             >
               <ListItemIcon><InfoIcon /></ListItemIcon>
               <ListItemText primary={drawerLabels.about} />

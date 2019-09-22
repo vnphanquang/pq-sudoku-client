@@ -1,5 +1,5 @@
 import React from 'react';
-import { connect } from 'react-redux';
+import { connect, batch } from 'react-redux';
 
 import {
   AppBar,
@@ -88,7 +88,10 @@ const styles = theme => ({
   },
 
   brand: {
-    whiteSpace: 'nowrap'
+    whiteSpace: 'nowrap',
+    [theme.breakpoints.down('xs')]: {
+      display: 'none',
+    },
   },
 
   drawerBtn: {
@@ -112,7 +115,10 @@ const mapDispatchToProps = dispatch => ({
   toggleDrawer: () => dispatch(DrawerToggle()),
   changeTab: (index) => dispatch(TabChange(index)),
   removeTab: (index) => dispatch(TabRemoval(index)),
-  dispatchDialog: (type) => dispatch(DialogAction(type)),
+  dispatchDialog: (type, toggle) => batch(() => { 
+    if (toggle) dispatch(DrawerToggle());
+    dispatch(DialogAction(type)); 
+  }),
 })
 
 export default connect(mapStateToProps, mapDispatchToProps)(withStyles(styles, {withTheme: true})(Navigator));

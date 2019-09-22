@@ -132,14 +132,16 @@ const ColIndices = styled(({...props}) => <Indices {...props} />)(
 )
 const SudokuContainer = styled(({...props}) => <div {...props} />)(
   ({hidden, size}) => ({
-    overflow: 'hidden',
+    // overflow: 'hidden',
     display: hidden ? 'none' : 'grid',
     justifyContent: 'center',
     gridTemplateColumns: `1fr ${size}fr`,
     gridTemplateRows: `1fr ${size}fr`,
     gridTemplateAreas: `". col-indices" "row-indices sudoku-grid"`,
-    width: '600px',
-    height: '600px'
+    maxWidth: '700px',
+    width: `calc(100vw - 10px)`,
+    maxHeight: '700px',
+    height: `calc(100vw - 10px)`,
   })
 )
 

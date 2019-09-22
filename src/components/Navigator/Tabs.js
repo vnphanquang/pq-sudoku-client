@@ -30,8 +30,7 @@ class TabsPQS extends React.PureComponent {
         value={tabs.activeIndex !== null ? tabs.activeIndex : false}
         onChange={this.handleTabChange}
         variant="scrollable"
-        //FIXME: scroll buttons appear when tab closes!
-        scrollButtons="on"
+        scrollButtons="desktop"
         aria-label="sudoku tabs"
       >
         {tabs.array.map(({name, id}, index) => (

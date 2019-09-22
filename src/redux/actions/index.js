@@ -33,8 +33,11 @@ export function ThemeReplacement(theme) {
   }
 }
 
-export function DrawerToggle() {
-  return {type: TOGGLE_DRAWER};
+export function DrawerToggle(state) {
+  return {
+    type: TOGGLE_DRAWER,
+    payload: state,
+  };
 }
 
 export function TabAddition({name='New Sudoku', size=9, values=['1', '2', '3', '4', '5', '6', '7', '8', '9']}) {

@@ -17,12 +17,12 @@ import {  DIALOG_ACTIONS } from '../actions/dialogs';
 const navigationInitState = {
   drawerOpen: false
 }
-function navigation(state = navigationInitState, action) {
-  switch (action.type) {
+function navigation(state = navigationInitState, {type, payload}) {
+  switch (type) {
     case TOGGLE_DRAWER:
       return { 
         ...state,
-        drawerOpen: !state.drawerOpen
+        drawerOpen: payload === undefined ? !state.drawerOpen : payload
       };
     default:
       return state;

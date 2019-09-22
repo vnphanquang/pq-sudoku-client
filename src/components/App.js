@@ -1,6 +1,10 @@
 import React from 'react';
 import {withStyles} from '@material-ui/styles';
 
+// import {
+
+// } from '@material-ui/core';
+
 import Navigator from './Navigator';
 // import Drawer from './Drawer';
 import Sudoku from './Sudoku';
@@ -16,7 +20,6 @@ class App extends React.PureComponent {
       <React.Fragment>
         <div className={classes.root}>
           <Navigator />
-          {/* <Drawer /> */}
           <div className={classes.sudokuWrapper}>
             <Sudoku />
           </div>
@@ -36,14 +39,15 @@ const styles = theme => ({
   sudokuWrapper: {
     position: 'absolute',
     width: '100vw',
-    height: '100vh',
+    height: `calc(100vh - ${APPBAR_HEIGHT}px)`,
     display: 'flex',
     flexDirection: 'column',
     justifyContent: 'center',
     alignItems: 'center',
-    paddingTop: APPBAR_HEIGHT,
+    marginTop: APPBAR_HEIGHT,
     [theme.breakpoints.up('md')]: {
-      paddingLeft: COLLAPSED_DRAWER_WIDTH,
+      marginLeft: COLLAPSED_DRAWER_WIDTH,
+      width: `calc(100vw - ${COLLAPSED_DRAWER_WIDTH}px)`,
     },
   },
 })
