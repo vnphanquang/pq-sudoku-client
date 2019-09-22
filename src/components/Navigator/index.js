@@ -72,6 +72,7 @@ class Navigator extends React.PureComponent {
         <Drawer
           sudokuActive={(tabs.activeIndex || tabs.activeIndex === 0) && true}
           drawerOpen={drawerOpen}
+          toggleDrawer={toggleDrawer}
           dispatchDialog={dispatchDialog}
         />
       </React.Fragment>

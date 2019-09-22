@@ -42,10 +42,7 @@ class Grid extends React.PureComponent {
       cells: [],
       focus: null
     }
-    // this.state = {
-    //   isCompleted: false,
-    // }
-    this.pencilMode = true;
+    this.pencilMode = false;
 
     // Input & Navigation
     this.handleKeyPress = this.handleKeyPress.bind(this);
@@ -676,7 +673,7 @@ class Grid extends React.PureComponent {
         subgrid = Grid.getSubgridNumber(row, col, size);
         cells.push(
           <Cell
-            gridSize={this.props.size}
+            gridsize={this.props.size}
             ref={this.mapCellRef}
             key={`${row}-${col}`}
             row={row} col={col}

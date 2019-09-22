@@ -21,7 +21,7 @@ class Cell extends React.PureComponent {
     this.input = null;
     this.state = {
       cellValue: '',
-      pencils: new Array(this.props.gridSize).fill(false),
+      pencils: new Array(this.props.gridsize).fill(false),
       styleState: null,
       focused: false
     }
@@ -57,7 +57,7 @@ class Cell extends React.PureComponent {
     // console.log('Cell rendered');
     return (
       <StyledCell
-        gridSize={this.props.gridSize}
+        gridsize={this.props.gridsize}
         row={this.props.row}
         col={this.props.col}
         styleState={this.state.styleState}
@@ -76,11 +76,11 @@ class Cell extends React.PureComponent {
 
 
 export const StyledCell = styled(({focused, styleState, row, col, ...other}) => <div {...other} />)(
-  ({theme, row, col, gridSize, focused, styleState}) => ({
+  ({theme, row, col, gridsize, focused, styleState}) => ({
     backgroundColor: getBgColor(focused, styleState, theme),
     borderColor: `${theme.sudoku.color[theme.palette.type]}`,
     borderStyle: 'solid',
-    borderWidth: getBorderWidth(row, col, gridSize),
+    borderWidth: getBorderWidth(row, col, gridsize),
     position: 'relative',
     cursor: 'pointer',
     '&:hover': {

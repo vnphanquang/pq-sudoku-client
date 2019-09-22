@@ -2,8 +2,6 @@ import React from 'react';
 import {makeStyles} from '@material-ui/styles';
 
 function PencilLayer({pencils}) {
-  console.log('PencilLayer inside');
-
   const classes = useStyles({pencils});
   let marks = [];
 
