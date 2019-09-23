@@ -23,6 +23,7 @@ class Cell extends React.PureComponent {
     this.state = {
       cellValue: '',
       pencils: new Array(this.props.gridsize).fill(false),
+      showPencils: false,
       styleState: null,
       focused: false
     }
@@ -73,7 +74,7 @@ class Cell extends React.PureComponent {
         onKeyDown={this.handleKeyPress}
         focused={this.state.focused}
       >
-        <PencilLayer pencils={this.state.pencils} />
+        { this.state.showPencils && <PencilLayer pencils={this.state.pencils} />}
         <button ref={this.inputRef}>
           {this.state.cellValue}
         </button>

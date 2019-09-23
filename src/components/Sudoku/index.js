@@ -23,12 +23,14 @@ class Sudoku extends React.Component {
     this.activeGrid = null;
     this.updateGridRef = this.updateGridRef.bind(this);
     this.getActiveCellValues = this.getActiveCellValues.bind(this);
+    this.togglePencilMode = this.togglePencilMode.bind(this);
+    this.clearCells = this.clearCells.bind(this);
   }
 
   componentDidMount() {
     window.sudoku = {
       ...window.sudoku,
-      getCellValues: this.getActiveCellValues
+      getCellValues: this.getActiveCellValues,
     }
   }
 
@@ -48,6 +50,15 @@ class Sudoku extends React.Component {
 
   getActiveCellValues() {
     return this.activeGrid.getCellValues();
+  }
+
+  togglePencilMode() {
+    this.activeGrid.togglePencilMode();
+    this.activeGrid.focus();
+  }
+
+  clearCells() {
+    this.activeGrid.clear();
   }
 
   render() {
@@ -90,21 +101,22 @@ class Sudoku extends React.Component {
 
           <PadContainer>
             <PadButtons>
-              <Button variant="outlined">
+              <Button variant="outlined" onClick={this.togglePencilMode}>
                 <CreateIcon/>
               </Button>
-              <Button variant="outlined">
+              <Button variant="outlined" onClick={this.clearCells}>
                 <DeleteSweepIcon/>
               </Button>
             </PadButtons>
 
-            <PadValues xs={8} size={values.length}>
-              {values.map((value) => (
+            <PadValues xs={8} size={values.length} >
+              {values.map((value, index) => (
                 <Button 
-                  key={`${id}-valuepad-${value}`}
+                  key={`${id}-valuePad-${value}`}
                   variant="outlined"
+                  onClick={(e) => this.activeGrid.input(parseInt(index+1))}
                 >
-                  <Typography variant="h5">
+                  <Typography variant="h4">
                     {value}
                   </Typography>
                 </Button>

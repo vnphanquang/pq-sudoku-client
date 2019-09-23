@@ -80,7 +80,7 @@ class Grid extends React.PureComponent {
   updateCellValue(targetCell, newValue) {
     let oldValue = this.getCellValue(targetCell);
     if (newValue !== oldValue) {
-      targetCell.setState({cellValue: newValue}, () => {
+      targetCell.setState({cellValue: newValue, showPencils: false}, () => {
         if (oldValue !== '') {
           this.removeCellFromValueMap(targetCell, oldValue);
           if (this.selection.type === SELECTION.TYPES.SINGLE) {
@@ -98,45 +98,57 @@ class Grid extends React.PureComponent {
     }
   }
 
+  input(keyIndex) {
+    let inputValue = this.valueMap.get(keyIndex);
+    if (this.pencilMode) {
+      this.selection.cells.forEach(cell => {
+        this.updateCellValue(cell, '');
+        cell.setState((st) => ({
+          // pencilMap: st.pencilMap.set(key, st.pencilMap.get(key) ? false : inputValue)
+          showPencils: true,
+          pencils: st.pencils.map((value, index) => {
+            if (index + 1 === keyIndex) {
+              return value ? false : inputValue;
+            } else {
+              return value;
+            }
+          })
+        }))
+      })
+    } else {
+      this.selection.cells.forEach(cell => {
+        this.updateCellValue(cell, inputValue !== cell.state.cellValue ? inputValue : '');
+      })
+    }
+    this.focus();
+  }
+
+  clear() {
+    this.selection.cells.forEach(cell => {
+      if (cell.state.cellValue !== '') {
+        this.updateCellValue(cell, '');
+        if (cell.state.pencils.some((pencil) => pencil)) {
+          cell.setState({showPencils: true});
+        }
+      } else {
+        cell.setState({
+          showPencils: false,
+          pencils: new Array(this.props.size).fill(false)
+        });
+      }
+    })
+    this.focus();
+  }
+
   handleKeyPress(e, targetCell) {
     let {ctrlKey, key} = e
-    let numKey = parseInt(key);
-    if (this.valueMap.has(numKey)) {
-      let inputValue = this.valueMap.get(numKey);
-      if (this.pencilMode) {
-        this.selection.cells.forEach(cell => {
-          cell.setState((st) => ({
-            cellValue: '',
-            // pencilMap: st.pencilMap.set(key, st.pencilMap.get(key) ? false : inputValue)
-            pencils: st.pencils.map((value, index) => {
-              if (index + 1 === numKey) {
-                return value ? false : inputValue;
-              } else {
-                return value;
-              }
-            })
-          }))
-        })
-      } else {
-        this.selection.cells.forEach(cell => {
-          this.updateCellValue(cell, inputValue !== cell.state.cellValue ? inputValue : '');
-        })
-
-      }
+    let keyIndex = parseInt(key);
+    if (this.valueMap.has(keyIndex)) {
+      this.input(keyIndex);
     } else if (KEYS_STROKES.ARROWS.includes(key)) {
       this.keyNavigate(e);
     } else if (KEYS_STROKES.DELETES.includes(key)) {
-      if (this.pencilMode) {
-        this.selection.cells.forEach(cell => {
-          cell.setState({pencils: new Array(this.props.size).fill(false)});
-        })
-      } else {
-        this.selection.cells.forEach(cell => {
-          if (cell.state.cellValue !== '') {
-            this.updateCellValue(cell, '');
-          }
-        })
-      }
+      this.clear();
     } else if (ctrlKey) {
       switch(key) {
         case 'a':
