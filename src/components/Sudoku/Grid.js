@@ -46,7 +46,8 @@ class Grid extends React.PureComponent {
 
     // Input & Navigation
     this.handleKeyPress = this.handleKeyPress.bind(this);
-    this.handleCellSelection = this.handleCellSelection.bind(this);
+    this.handleCellClick = this.handleCellClick.bind(this);
+    this.handleCellDoubleClick = this.handleCellDoubleClick.bind(this);
     this.mapCellRef = this.mapCellRef.bind(this);
     this.focus = this.focus.bind(this);
     this.isFocused = this.isFocused.bind(this);
@@ -166,7 +167,11 @@ class Grid extends React.PureComponent {
     }
   }
 
-  handleCellSelection({ctrlKey, shiftKey}, targetCell) {
+  handleCellDoubleClick(e, targetCell) {
+    this.selectCellsBySubgrid(targetCell.props.subgrid);
+  }
+
+  handleCellClick({ctrlKey, shiftKey}, targetCell) {
     let lastSelectedCell = this.selection.focus;
     if (this.selection.type === SELECTION.TYPES.SINGLE) {
       if (ctrlKey && lastSelectedCell && !targetCell.isSameCell(lastSelectedCell)) {
@@ -333,7 +338,7 @@ class Grid extends React.PureComponent {
       this.getCellsBySubgrid(subgrid).forEach(cell => this.selectCell(cell));
       this.selection.focus.input.focus();
     } else {
-      this.handleCellSelection({ctrlKey: false, shiftKey: false}, this.selection.focus);
+      this.handleCellClick({ctrlKey: false, shiftKey: false}, this.selection.focus);
     }
   }
 
@@ -348,7 +353,7 @@ class Grid extends React.PureComponent {
         });
         if (selectedCells.length === 0) {
           if (this.selection.focus) {
-            this.handleCellSelection({ctrlKey: false, shiftKey: false}, this.selection.focus);
+            this.handleCellClick({ctrlKey: false, shiftKey: false}, this.selection.focus);
           } else {
             this.selection.type = SELECTION.TYPES.SINGLE;
             this.selection.cells = [];
@@ -431,7 +436,7 @@ class Grid extends React.PureComponent {
         this.focusCell(targetCell)
         targetCell.input.focus();
       } else {
-        this.handleCellSelection({ctrlKey, shiftKey}, targetCell);
+        this.handleCellClick({ctrlKey, shiftKey}, targetCell);
       }
     }
   }
@@ -582,7 +587,7 @@ class Grid extends React.PureComponent {
     } else {
       let center = parseInt(this.props.size / 2);
       let cell = this.getCell(center, center)
-      this.handleCellSelection({ctrlKey: false, shiftKey: false}, cell);
+      this.handleCellClick({ctrlKey: false, shiftKey: false}, cell);
     }
   }
   isFocused() {
@@ -678,7 +683,8 @@ class Grid extends React.PureComponent {
             key={`${row}-${col}`}
             row={row} col={col}
             subgrid={subgrid}
-            handleCellSelection={this.handleCellSelection}
+            handleCellClick={this.handleCellClick}
+            handleCellDoubleClick={this.handleCellDoubleClick}
             handleKeyPress={this.handleKeyPress}
           />
         );

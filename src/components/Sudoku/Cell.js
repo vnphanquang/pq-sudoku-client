@@ -12,7 +12,8 @@ class Cell extends React.PureComponent {
     row: PropTypes.number.isRequired,
     col: PropTypes.number.isRequired,
     subgrid: PropTypes.number.isRequired,
-    handleCellSelection: PropTypes.func.isRequired,
+    handleCellClick: PropTypes.func.isRequired,
+    handleCellDoubleClick: PropTypes.func.isRequired,
     handleKeyPress: PropTypes.func.isRequired
   }
 
@@ -27,6 +28,7 @@ class Cell extends React.PureComponent {
     }
     this.inputRef = this.inputRef.bind(this);
     this.handleClick = this.handleClick.bind(this);
+    this.handleDoubleClick = this.handleDoubleClick.bind(this);
     this.handleKeyPress = this.handleKeyPress.bind(this);
   }
 
@@ -37,6 +39,7 @@ class Cell extends React.PureComponent {
       this.props.col === otherCell.props.col
     )
   }
+
   isSelected() {
     return this.state.styleState === STYLE_STATES.SELECTED;
   }
@@ -46,11 +49,15 @@ class Cell extends React.PureComponent {
   }
 
   handleClick(e) {
-    this.props.handleCellSelection(e, this);
+    this.props.handleCellClick(e, this);
   }
   
   handleKeyPress(e) {
-    this.props.handleKeyPress(e, this)
+    this.props.handleKeyPress(e, this);
+  }
+
+  handleDoubleClick(e) {
+    this.props.handleCellDoubleClick(e, this);
   }
 
   render() {
@@ -62,6 +69,7 @@ class Cell extends React.PureComponent {
         col={this.props.col}
         styleState={this.state.styleState}
         onClick={this.handleClick}
+        onDoubleClick={this.handleDoubleClick}
         onKeyDown={this.handleKeyPress}
         focused={this.state.focused}
       >
