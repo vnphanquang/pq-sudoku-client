@@ -59,7 +59,8 @@ function TabAdditionDialog({onSubmit, onCancel}) {
 const useStyles = makeStyles(theme => ({
   paper: {
     minWidth: 250,
-    margin:  0
+    minHeight: 220,
+    margin:  0,
   },
 }));
 
