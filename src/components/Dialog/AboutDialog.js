@@ -31,9 +31,9 @@ function AboutDialog({onCancel}) {
       <DialogContent dividers>
         <Typography variant="body1" align="center">
           pqSudoku is an open source project, 
-          and a playground built by and for sudoku enthusiasts. 
+          a playground built by and for sudoku enthusiasts. 
           You are using an early version of pqSudoku; 
-          more features are being developed at the moment. 
+          more exciting features are being developed at the moment. 
         </Typography>
         <Typography variant="body1" align="center">
           Any feedback or feature request is much appreciated. 
