@@ -159,10 +159,13 @@ function ExportDialog({onSubmit, onCancel, data:sudoku}) {
           <div className={classes.preview}>
             <label>{dialogLabels.preview}</label>
             <SudokuSVG 
+              className={classes.svg}
               id="sudoku-svg"
               svgRef={svgRef}
               name={name}
+              //FIXME: save cellsData to state!
               cellsData={window.sudoku.getCellsData()}
+              size={sudoku.size}
             />
           </div>
         </DialogContent>
@@ -223,7 +226,10 @@ const useStyles = makeStyles(theme => ({
   preview: {
     display: 'block',
     width: '100%',
-    maxWidth: '300px'
+    maxWidth: 300,
+  },
+  svg: {
+    width: '100%',
   }
 
 }));

@@ -6,10 +6,11 @@ const baseTextX = 20;
 const baseTextY = 36;
 //TODO: customizable styling for exports, receive styling props from ExportDialog
 function SudokuSVG({
+  className,
   svgRef,
   id,
   name,
-  gridSize=9,
+  size,
   cellsData,
   outlineStrokeWidth=4, 
   outlineColor='#212121',
@@ -50,18 +51,18 @@ function SudokuSVG({
 }
   `;
   const startXY = outlineStrokeWidth / 2;
-  const endXY = startXY + baseCellSize*gridSize;
+  const endXY = startXY + baseCellSize*size;
 
   const horizontals = [];
   const verticals = [];
   const values = [];
   
-  const subGridEdge = Math.sqrt(gridSize)
+  const subGridEdge = Math.sqrt(size);
 
   let index = 0;
   let end = 0;
   let textXY = '';
-  for (let row = 0; row < gridSize; row++) {
+  for (let row = 0; row < size; row++) {
     index = row + 1;
     end = startXY + baseCellSize*(index)
     horizontals.push(
@@ -85,7 +86,7 @@ function SudokuSVG({
       />
     )
 
-    for (let col = 0; col < gridSize; col++) {
+    for (let col = 0; col < size; col++) {
       textXY = `${baseTextX + baseCellSize * col} ${baseTextY + baseCellSize * row}`
       values.push(
         <text
@@ -104,7 +105,7 @@ function SudokuSVG({
   verticals.pop();
 
   return (
-    <svg ref={svgRef} id={id} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 454 454">
+    <svg ref={svgRef} id={id} xmlns="http://www.w3.org/2000/svg" viewBox={`0 0 ${size*baseCellSize+outlineStrokeWidth} ${size*baseCellSize+outlineStrokeWidth}`} className={className}>
 
       <defs>
         <style>
@@ -119,8 +120,8 @@ function SudokuSVG({
           id="outline" 
           x={startXY} 
           y={startXY} 
-          width={baseCellSize * gridSize} 
-          height={baseCellSize * gridSize} 
+          width={baseCellSize * size} 
+          height={baseCellSize * size} 
           rx="3"
           fill={backgroundColor}
         />
