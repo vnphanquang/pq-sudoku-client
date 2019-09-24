@@ -59,7 +59,6 @@ class Grid extends React.Component {
     // Input & Navigation
     this.handleKeyPress = this.handleKeyPress.bind(this);
     this.handleCellClick = this.handleCellClick.bind(this);
-    this.handleCellDoubleClick = this.handleCellDoubleClick.bind(this);
     this.mapCellRef = this.mapCellRef.bind(this);
     this.focus = this.focus.bind(this);
     this.isFocused = this.isFocused.bind(this);
@@ -197,68 +196,71 @@ class Grid extends React.Component {
     }
   }
 
-  handleCellDoubleClick(e, targetCell) {
-    this.selectCellsBySubgrid(targetCell.props.subgrid);
-  }
-
-  handleCellClick({ctrlKey, shiftKey}, targetCell) {
-    let lastSelectedCell = this.selection.focus;
-    if (this.selection.type === SELECTION.TYPES.SINGLE) {
-      if (ctrlKey && lastSelectedCell && !targetCell.isSameCell(lastSelectedCell)) {
-        this.clearSelection();
-        this.selectCell(lastSelectedCell);
-        this.selection.type = SELECTION.TYPES.MULTI;
-        this.selectCell(targetCell);
-        this.focusCell(targetCell);
-        targetCell.input.focus();
-      } else if (shiftKey && lastSelectedCell && !targetCell.isSameCell(lastSelectedCell)) {
-        this.clearSelection();
-        this.selection.type = SELECTION.TYPES.MULTI;
-        this.shiftSelectCell(lastSelectedCell, targetCell);
-        lastSelectedCell.input.focus();
-      } else {
-        if (!targetCell.isSameCell(lastSelectedCell)) {
-          if (lastSelectedCell) {
-            this.clearCellStyle(lastSelectedCell);
-            this.unlitRelatives(lastSelectedCell);
-            let lastSelectedValue = this.getCellValue(lastSelectedCell);
-            let targetValue = this.getCellValue(targetCell);
-            if (lastSelectedValue !== '') {
-              this.uncheckConflicts(targetCell);
-              if (targetValue !== lastSelectedValue) {
-                this.unspotMatchedCells(lastSelectedValue);
-              }
-            }
-          }
-          this.singleSelectCell(targetCell);
-        } else {
-          lastSelectedCell.input.focus();
-        }
-      }
-    } else if (this.selection.type === SELECTION.TYPES.MULTI) {
-      if (ctrlKey) {
-        if (targetCell.isSelected()) {
-          this.unselectCell(targetCell);
-        } else {
+  handleCellClick(e, targetCell) {
+    const {ctrlKey, shiftKey, detail} = e;
+    if (detail === 2) {
+      this.selectCellsBySubgrid(targetCell.props.subgrid);
+    } else if (detail === 3) {
+      this.selectAll();
+    } else {
+      let lastSelectedCell = this.selection.focus;
+      if (this.selection.type === SELECTION.TYPES.SINGLE) {
+        if (ctrlKey && lastSelectedCell && !targetCell.isSameCell(lastSelectedCell)) {
+          this.clearSelection();
+          this.selectCell(lastSelectedCell);
+          this.selection.type = SELECTION.TYPES.MULTI;
           this.selectCell(targetCell);
           this.focusCell(targetCell);
           targetCell.input.focus();
+        } else if (shiftKey && lastSelectedCell && !targetCell.isSameCell(lastSelectedCell)) {
+          this.clearSelection();
+          this.selection.type = SELECTION.TYPES.MULTI;
+          this.shiftSelectCell(lastSelectedCell, targetCell);
+          lastSelectedCell.input.focus();
+        } else {
+          if (!targetCell.isSameCell(lastSelectedCell)) {
+            if (lastSelectedCell) {
+              this.clearCellStyle(lastSelectedCell);
+              this.unlitRelatives(lastSelectedCell);
+              let lastSelectedValue = this.getCellValue(lastSelectedCell);
+              let targetValue = this.getCellValue(targetCell);
+              if (lastSelectedValue !== '') {
+                this.uncheckConflicts(targetCell);
+                if (targetValue !== lastSelectedValue) {
+                  this.unspotMatchedCells(lastSelectedValue);
+                }
+              }
+            }
+            this.singleSelectCell(targetCell);
+          } else {
+            lastSelectedCell.input.focus();
+          }
         }
-      } else if (shiftKey &&  !targetCell.isSameCell(lastSelectedCell)) {
-        this.clearSelection();
-        this.shiftSelectCell(lastSelectedCell, targetCell);
-        lastSelectedCell.input.focus();
+      } else if (this.selection.type === SELECTION.TYPES.MULTI) {
+        if (ctrlKey) {
+          if (targetCell.isSelected()) {
+            this.unselectCell(targetCell);
+          } else {
+            this.selectCell(targetCell);
+            this.focusCell(targetCell);
+            targetCell.input.focus();
+          }
+        } else if (shiftKey &&  !targetCell.isSameCell(lastSelectedCell)) {
+          this.clearSelection();
+          this.shiftSelectCell(lastSelectedCell, targetCell);
+          lastSelectedCell.input.focus();
+        } else {
+          this.selection.cells.forEach(cell => {
+            this.clearCellStyle(cell);
+          })
+          this.singleSelectCell(targetCell);  
+        }
       } else {
         this.selection.cells.forEach(cell => {
           this.clearCellStyle(cell);
         })
-        this.singleSelectCell(targetCell);  
+        this.singleSelectCell(targetCell);
       }
-    } else {
-      this.selection.cells.forEach(cell => {
-        this.clearCellStyle(cell);
-      })
-      this.singleSelectCell(targetCell);
     }
   }
 
@@ -726,7 +728,6 @@ class Grid extends React.Component {
             subgrid={subgrid}
             initValue={initCellsData[row][col]}
             handleCellClick={this.handleCellClick}
-            handleCellDoubleClick={this.handleCellDoubleClick}
             handleKeyPress={this.handleKeyPress}
           />
         );
