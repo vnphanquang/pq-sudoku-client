@@ -1,5 +1,5 @@
 import React from 'react';
-import PropTypes from 'prop-types'
+import PropTypes from 'prop-types';
 import PencilLayer from './PencilLayer'
 import {STYLE_STATES} from '../utils';
 import {styled} from '@material-ui/styles';
@@ -12,9 +12,11 @@ class Cell extends React.PureComponent {
   static propTypes = {
     // ref: PropTypes.func.isRequired,
     // key: PropTypes.string.isRequired,
+    gridsize: PropTypes.number.isRequired,
     row: PropTypes.number.isRequired,
     col: PropTypes.number.isRequired,
     subgrid: PropTypes.number.isRequired,
+    initValue: PropTypes.string,
     handleCellClick: PropTypes.func.isRequired,
     handleCellDoubleClick: PropTypes.func.isRequired,
     handleKeyPress: PropTypes.func.isRequired
@@ -24,7 +26,7 @@ class Cell extends React.PureComponent {
     super(props)
     this.input = null;
     this.state = {
-      cellValue: '',
+      cellValue: this.props.initValue || '',
       pencils: new Array(this.props.gridsize).fill(false),
       showPencils: false,
       styleState: null,
@@ -65,7 +67,7 @@ class Cell extends React.PureComponent {
   }
 
   render() {
-    // console.log('Cell rendered');
+    console.log('Cell rendered');
     return (
       <StyledCell
         gridsize={this.props.gridsize}

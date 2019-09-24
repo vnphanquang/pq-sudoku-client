@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import {SELECTION, KEYS_STROKES, DIRECTION, STYLE_STATES} from '../utils';
 import Cell from './Cell';
 import {styled} from '@material-ui/styles';
@@ -27,10 +28,16 @@ function ValueMap(values) {
   return new Map(entries);
 }
 
-class Grid extends React.PureComponent {
+class Grid extends React.Component {
+
+  static propTypes = {
+    size: PropTypes.number.isRequired,
+    values: PropTypes.array.isRequired,
+    initCellsData: PropTypes.array,
+  }
+
   constructor(props) {
     super(props);
-
     this.valueToCellsMap = ValueToCellsMap(this.props.values);
     this.subgridToCellsMap = SubgridToCellsMap(this.props.size);
     this.valueMap = ValueMap(this.props.values);
@@ -58,6 +65,7 @@ class Grid extends React.PureComponent {
   initGrid() {
     let refs = [];
     let cellRow, cell;
+
     for (let row = 0; row < this.props.size; row++) {
       cellRow = [];
       for (let col = 0; col < this.props.size; col++) {
@@ -71,9 +79,13 @@ class Grid extends React.PureComponent {
 
   mapCellRef(targetCell) {
     if (targetCell) {
-      let {row, col} = targetCell.props;
+      const {row, col} = targetCell.props;
       this.cells[row][col] = targetCell;
       this.setSubgridToCellsMapping(targetCell);
+      const targetValue = this.props.initCellsData[row][col];
+      if (targetValue) {
+        this.setValueToCellsMapping(targetCell, targetValue)
+      }
     }
   }
 
@@ -652,23 +664,23 @@ class Grid extends React.PureComponent {
     this.getCellsBySubgrid(targetCell.props.subgrid).push(targetCell);
   }
 
-  getCellValues() {
+  getCellsData() {
     return this.cells.map(cellRow => cellRow.map(cell => this.getCellValue(cell)));
   }
   
-  setCellValues(values) {
-    let cell, value;
-    for (let row = 0; row < this.props.size; row++) {
-      for (let col = 0; col < this.props.size; col++) {
-        cell = this.getCell(row, col);
-        value = values[row][col];
-        if (value !== '') {
-          cell.setState({cellValue: value});
-          this.setValueToCellsMapping(cell, value);
-        }
-      }
-    }
-  }
+  // setCellValues(values) {
+  //   let cell, value;
+  //   for (let row = 0; row < this.props.size; row++) {
+  //     for (let col = 0; col < this.props.size; col++) {
+  //       cell = this.getCell(row, col);
+  //       value = values[row][col];
+  //       if (value !== '') {
+  //         cell.setState({cellValue: value});
+  //         this.setValueToCellsMapping(cell, value);
+  //       }
+  //     }
+  //   }
+  // }
 
   static getSubgridNumber(row, col, gridSize) {
     const subgridSize = Math.sqrt(gridSize);
@@ -684,9 +696,16 @@ class Grid extends React.PureComponent {
     }
   }
 
+  shouldComponentUpdate(nextProps, nextState) {
+    return false;
+  }
+
   render() {
     console.log('Grid rendered!');
-    let size = this.props.size;
+    const { 
+      size,
+      initCellsData=(new Array(size)).fill((new Array(size)).fill('')), 
+    } = this.props;
     let cells = [];
     let subgrid;
     for (let row = 0; row < size; row++) {
@@ -694,11 +713,12 @@ class Grid extends React.PureComponent {
         subgrid = Grid.getSubgridNumber(row, col, size);
         cells.push(
           <Cell
-            gridsize={this.props.size}
+            gridsize={size}
             ref={this.mapCellRef}
             key={`${row}-${col}`}
             row={row} col={col}
             subgrid={subgrid}
+            initValue={initCellsData[row][col]}
             handleCellClick={this.handleCellClick}
             handleCellDoubleClick={this.handleCellDoubleClick}
             handleKeyPress={this.handleKeyPress}
@@ -708,7 +728,7 @@ class Grid extends React.PureComponent {
     }
     
     return  (
-      <StyledGrid rows={this.props.size} cols={this.props.size}>
+      <StyledGrid rows={size} cols={size}>
         {cells}
       </StyledGrid>
     )

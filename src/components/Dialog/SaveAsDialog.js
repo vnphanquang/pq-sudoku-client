@@ -33,7 +33,7 @@ function SaveAsDialog({onSubmit, onCancel, data: sudoku}) {
       name, customFormat, 
       generateJSONDataURL({
         size: sudoku.size,
-        cellValues: window.sudoku.getCellValues()
+        cellsData: window.sudoku.getCellsData()
       })
     );
   }

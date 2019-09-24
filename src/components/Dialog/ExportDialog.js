@@ -162,7 +162,7 @@ function ExportDialog({onSubmit, onCancel, data:sudoku}) {
               id="sudoku-svg"
               svgRef={svgRef}
               name={name}
-              cellValues={window.sudoku.getCellValues()}
+              cellsData={window.sudoku.getCellsData()}
             />
           </div>
         </DialogContent>

@@ -14,13 +14,14 @@ export const SUDOKU_PENCIL_TOGGLE = 'PENCIL_MODE_TOGGLE';
 export function SudokuAddition({
   name='New Sudoku', 
   size=9, 
-  values=['1', '2', '3', '4', '5', '6', '7', '8', '9']
+  values=['1', '2', '3', '4', '5', '6', '7', '8', '9'],
+  cellsData=(new Array(size)).fill((new Array(size)).fill(''))
 }) {
   return {
     type: SUDOKU_ADD,
     payload: {
       id: uuidv1(),
-      name, size, values
+      name, size, values, cellsData,
     }
   }
 }

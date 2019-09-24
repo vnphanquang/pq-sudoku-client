@@ -18,50 +18,40 @@ import SudokuGrid from './Grid';
 class Sudoku extends React.Component {
   constructor(props) {
     super(props);
-    this.activeGrid = null;
+    this.grid = null;
     this.updateGridRef = this.updateGridRef.bind(this);
-    this.getActiveCellValues = this.getActiveCellValues.bind(this);
     this.clearCells = this.clearCells.bind(this);
   }
 
   componentDidMount() {
     window.sudoku = {
       ...window.sudoku,
-      getCellValues: this.getActiveCellValues,
+      getCellsData: () => this.grid.getCellsData(),
     }
   }
 
   componentDidUpdate() {
-    if (this.activeGrid) {
-      this.activeGrid.togglePencilMode(this.props.sudokus.pencil);
-      if (window.sudoku.loadedValues) {
-        this.activeGrid.setCellValues(window.sudoku.loadedValues);
-        window.sudoku.loadedValues = null;
-      }
-      setTimeout(this.activeGrid.focus, 50);
+    if (this.grid) {
+      this.grid.togglePencilMode(this.props.sudokus.pencil);
+      setTimeout(this.grid.focus, 50);
     }
   }
   
   updateGridRef(grid) {
-    this.activeGrid = grid;
-  }
-
-  getActiveCellValues() {
-    return this.activeGrid.getCellValues();
+    this.grid = grid;
   }
 
   clearCells() {
-    this.activeGrid.clear();
+    this.grid.clear();
   }
 
   render() {
     // console.log('Sudoku rendered');
-    const {sudokus, togglePencilMode} = this.props;
-    let isActive = false;
+    const {sudokus: {array, pencil, activeIndex}, togglePencilMode} = this.props;
     let pad = null;
-    if (sudokus.activeIndex !== null) {
-      const values = sudokus.array[sudokus.activeIndex].values;
-      const isPencil = sudokus.pencil;
+    let sudokuArray = null;
+    if (activeIndex !== null) {
+      const values = array[activeIndex].values;
       pad = (
         <PadContainer>
             <PadButtons>
@@ -72,12 +62,12 @@ class Sudoku extends React.Component {
                 >
                   <CreateIcon/>
                   <Typography 
-                    color={isPencil ? "primary" : "secondary"} 
+                    color={pencil ? "primary" : "secondary"} 
                     paragraph 
                     align="right"
                     style={{whiteSpace: 'pre'}}
                   >
-                    {isPencil ? `ON  ` : 'OFF'}
+                    {pencil ? `ON  ` : 'OFF'}
                   </Typography>
                 </Button>
               </Tooltip>
@@ -96,7 +86,7 @@ class Sudoku extends React.Component {
                 <Button 
                   key={`valuePad-${value}`}
                   variant="outlined"
-                  onClick={(e) => this.activeGrid.input(parseInt(index+1))}
+                  onClick={(e) => this.grid.input(parseInt(index+1))}
                 >
                   <Typography variant="h4">
                     {value}
@@ -106,69 +96,38 @@ class Sudoku extends React.Component {
             </PadValues>
         </PadContainer>
       )
-    }
-    const sudokusArray = sudokus.array.map(({id, size, values}, index) => {
-      // const colIndices = [];
-      // const rowIndices = [];
-      // for (let row = 0; row < size; row++) {
-      //   rowIndices.push(
-      //     <ButtonBase 
-      //       key={`${id}-row-index-${row+1}`} 
-      //       onClick={(e) => this.activeGrid.handleCellSelectionByIndex(e, row, DIRECTION.ROW)}
-      //     >
-      //       {row+1}
-      //     </ButtonBase>
-      //   )
-      //   colIndices.push(
-      //     <ButtonBase 
-      //       key={`${id}-col-index-${row+1}`} 
-      //       onClick={(e) => this.activeGrid.handleCellSelectionByIndex(e, row, DIRECTION.COL)}
-      //     >
-      //       {row+1}
-      //     </ButtonBase>
-      //   )
-      // }
+      
+      let isActive;
+      sudokuArray = array.map(({id, size, values, cellsData}, index) => {
+        isActive = activeIndex === index;
+        return (
+          <SudokuContainer 
+            hidden={!isActive} 
+            size={size}
+            key={`${id}-container}`}
+          >
+            {/* <ColIndices size={size}>{colIndices}</ColIndices>
+            <RowIndices size={size}>{rowIndices}</RowIndices> */}
+            <SudokuGrid 
+              {...isActive && {ref: this.updateGridRef}} 
+              size={size} 
+              values={values}
+              initCellsData={cellsData}
+            />
+          </SudokuContainer>
+        )
+      })
 
-      isActive = sudokus.activeIndex === index;
-      return (
-        <SudokuContainer 
-          hidden={!isActive} 
-          size={size}
-          key={`${id}-container}`}
-        >
-          {/* <ColIndices size={size}>{colIndices}</ColIndices>
-          <RowIndices size={size}>{rowIndices}</RowIndices> */}
-          <SudokuGrid {...isActive && {ref: this.updateGridRef}} size={size} values={values}/>
-        </SudokuContainer>
-      )
-    });
+    }
     
     return (
       <RootContainer >
-        {sudokusArray}
+        {sudokuArray}
         {pad}
       </RootContainer>
     )
   }
 }
-
-const PencilButton = styled((props) => <Button {...props}/>)(
-  ({theme, state}) => ({
-    '& svg::after': {
-      content: state ? '"ON"' : '"OFF"',
-      color: 'blue',
-      backgroundColor: theme.palette.primary,
-      display: 'inline-block',
-      position: 'absolute',
-      top: '-1px',
-      marginLeft: '2px',
-      padding: '1px 4px',
-      fontSize: 12,
-      borderRadius: 5,
-      transition: 'all .2s ease-in-out',
-    }
-  })
-)
 
 const RootContainer = styled((props) => <div {...props}/>)(
   ({theme}) => ({
@@ -240,7 +199,7 @@ const PadValues = styled((props) => <div {...props}/>)(
     }
   })
 )
-//TODO: dynamic sizing for font size to fit cell
+// TODO: dynamic sizing for font size to fit cell
 const SudokuContainer = styled(({...props}) => <div {...props} />)(
   ({theme, hidden, size}) => ({
     // overflow: 'hidden',
@@ -266,6 +225,8 @@ const SudokuContainer = styled(({...props}) => <div {...props} />)(
 
 const mapStateToProps = (state) => ({
   sudokus: state.sudokus,
+  // sudoku: state.sudokus.activeIndex !== null ? state.sudokus.array[state.sudokus.activeIndex] : null,
+  // pencil: state.sudokus.pencil,
 })
 
 const mapDispatchToProps = dispatch => ({
@@ -318,3 +279,29 @@ export default connect(mapStateToProps, mapDispatchToProps)(Sudoku);
 //     },
 //   })
 // )
+
+
+    // const sudokusArray = sudokus.array.map(({id, size, values}, index) => {
+      // const colIndices = [];
+      // const rowIndices = [];
+      // for (let row = 0; row < size; row++) {
+      //   rowIndices.push(
+      //     <ButtonBase 
+      //       key={`${id}-row-index-${row+1}`} 
+      //       onClick={(e) => this.grid.handleCellSelectionByIndex(e, row, DIRECTION.ROW)}
+      //     >
+      //       {row+1}
+      //     </ButtonBase>
+      //   )
+      //   colIndices.push(
+      //     <ButtonBase 
+      //       key={`${id}-col-index-${row+1}`} 
+      //       onClick={(e) => this.grid.handleCellSelectionByIndex(e, row, DIRECTION.COL)}
+      //     >
+      //       {row+1}
+      //     </ButtonBase>
+      //   )
+      // }
+
+
+    // });

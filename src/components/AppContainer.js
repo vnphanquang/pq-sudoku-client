@@ -8,7 +8,7 @@ import App from './App';
 
 class AppContainer extends React.PureComponent {
   render() {
-    // console.log('AppContainer rendered');
+    console.log('AppContainer rendered');
     let {theme} = this.props;
     theme = createMuiTheme({
       palette: {
@@ -30,8 +30,8 @@ class AppContainer extends React.PureComponent {
   }
 }
 
-const mapStateToProps = (state, ownProps=state) => ({
-  theme: (ownProps.theme.type === state.theme.type) ? ownProps.theme : state.theme
+const mapStateToProps = state => ({
+  theme: state.theme,
 })
 
 export default connect(mapStateToProps)(AppContainer);

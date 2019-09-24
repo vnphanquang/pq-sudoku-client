@@ -91,22 +91,4 @@ const styles = theme => ({
   },
 })
 
-// const mapStateToProps = state => ({
-//   sudokus: state.sudokus,
-// })
-
-// const mapDispatchToProps = (dispatch, ownProps) => ({
-//   changeTab: (index) => dispatch(TabChange(index)),
-//   removeTab: (index) => dispatch(TabRemoval(index)),
-// })
-
-// export default connect(
-//   mapStateToProps, 
-//   mapDispatchToProps,
-//   // (stateProps, dispatchProps, ownProps) => ({ ...ownProps, ...stateProps, ...dispatchProps }),
-//   // {
-//   //   pure: true
-//   // }
-// )(withStyles(styles)(TabsPQS));
-
 export default (withStyles(styles)(TabsPQS));

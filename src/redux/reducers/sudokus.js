@@ -15,14 +15,18 @@ const sudokusInitState = {
 export default function sudokus(state = sudokusInitState, {type, payload}) {
   switch (type) {
     case SUDOKU_ADD:
+      if (state.activeIndex !== null)
+        state.array[state.activeIndex].cellsData = window.sudoku.getCellsData();
       return {
         ...state,
         array: [...state.array, payload],
         activeIndex: state.array.length
       }
     case SUDOKU_TAB_CHANGE:
+      state.array[state.activeIndex].cellsData = window.sudoku.getCellsData();
       return {
         ...state,
+        array: [...state.array],
         activeIndex: payload
       }
     case SUDOKU_REMOVE:

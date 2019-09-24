@@ -64,12 +64,7 @@ class DialogPQS extends React.PureComponent {
   }
 
   openSudoku(name, sudokuData) {
-    const {cellValues, size} = sudokuData;
-    window.sudoku = {
-      ...window.sudoku,
-      loadedValues: cellValues
-    }
-    this.props.addTab({name, size});
+    this.props.addTab({name, ...sudokuData});
   }
 
   applySettings(type, settings) {
