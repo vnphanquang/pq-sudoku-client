@@ -14,7 +14,8 @@ import {
 } from '@material-ui/icons'
 import { withStyles } from '@material-ui/styles';
 
-import { DrawerToggle, TabChange, TabRemoval, ThemeTypeToggle } from '../../redux/actions';
+import { DrawerToggle, ThemeTypeToggle } from '../../redux/actions';
+import { SudokuTabChange, SudokuRemoval } from '../../redux/actions/sudokus';
 import { DialogAction } from '../../redux/actions/dialogs';
 import { APPBAR_HEIGHT } from '../utils';
 import { pqSudoku } from '../../lang';
@@ -37,7 +38,7 @@ class Navigator extends React.PureComponent {
       theme: {palette: {type: themeType}}, 
       toggleThemeType, 
       drawerOpen, toggleDrawer, 
-      tabs, removeTab, changeTab,
+      sudokus, removeTab, changeTab,
       dispatchDialog
     } = this.props;
     return (
@@ -56,7 +57,7 @@ class Navigator extends React.PureComponent {
             </Typography>
 
             <Tabs 
-              tabs={tabs}
+              tabs={sudokus}
               removeTab={removeTab}
               changeTab={changeTab}
             />
@@ -70,7 +71,7 @@ class Navigator extends React.PureComponent {
         </AppBar>
 
         <Drawer
-          sudokuActive={(tabs.activeIndex || tabs.activeIndex === 0) && true}
+          sudokuActive={(sudokus.activeIndex || sudokus.activeIndex === 0) && true}
           drawerOpen={drawerOpen}
           toggleDrawer={toggleDrawer}
           dispatchDialog={dispatchDialog}
@@ -107,14 +108,14 @@ const styles = theme => ({
 
 const mapStateToProps = state => ({
   drawerOpen: state.navigation.drawerOpen,
-  tabs: state.tabs,
+  sudokus: state.sudokus,
 })
 
 const mapDispatchToProps = dispatch => ({
   toggleThemeType: () => dispatch(ThemeTypeToggle()),
   toggleDrawer: () => dispatch(DrawerToggle()),
-  changeTab: (index) => dispatch(TabChange(index)),
-  removeTab: (index) => dispatch(TabRemoval(index)),
+  changeTab: (index) => dispatch(SudokuTabChange(index)),
+  removeTab: (index) => dispatch(SudokuRemoval(index)),
   dispatchDialog: (type, toggle) => batch(() => { 
     if (toggle) dispatch(DrawerToggle());
     dispatch(DialogAction(type)); 

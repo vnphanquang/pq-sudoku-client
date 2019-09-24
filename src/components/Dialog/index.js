@@ -2,10 +2,9 @@ import React from 'react';
 import {connect} from 'react-redux';
 
 import { 
-  TabAddition,
   ThemeReplacement,
 } from '../../redux/actions';
-
+import { SudokuAddition } from '../../redux/actions/sudokus';
 import {  
   DialogAction,
   DIALOG_CANCEL,
@@ -117,9 +116,9 @@ const mapStateToProps = state => {
   switch (type) {
     case DIALOG_SAVEAS:
     case DIALOG_EXPORT:
-      const activeIndex = state.tabs.activeIndex
+      const activeIndex = state.sudokus.activeIndex
       if ((activeIndex || activeIndex === 0) && true) {
-        data = state.tabs.array[activeIndex];
+        data = state.sudokus.array[activeIndex];
       }
       break;
     case DIALOG_SETTINGS:
@@ -136,7 +135,7 @@ const mapStateToProps = state => {
 
 const mapDispatchToProps = dispatch => ({
   cancelDialog: () => dispatch(DialogAction(DIALOG_CANCEL)),
-  addTab: (config) => dispatch(TabAddition(config)),
+  addTab: (config) => dispatch(SudokuAddition(config)),
   replaceTheme: (theme) => dispatch(ThemeReplacement(theme)),
 })
 

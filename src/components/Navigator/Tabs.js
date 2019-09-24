@@ -92,7 +92,7 @@ const styles = theme => ({
 })
 
 // const mapStateToProps = state => ({
-//   tabs: state.tabs,
+//   sudokus: state.sudokus,
 // })
 
 // const mapDispatchToProps = (dispatch, ownProps) => ({
