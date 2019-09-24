@@ -676,12 +676,16 @@ class Grid extends React.PureComponent {
     return subgridRow + subgridCol * subgridSize;
   }
 
-  togglePencilMode() {
-    this.pencilMode = !this.pencilMode;
+  togglePencilMode(state) {
+    if (state !== undefined) {
+      this.pencilMode = state;
+    } else {
+      this.pencilMode = !this.pencilMode;
+    }
   }
 
   render() {
-    // console.log('Grid rendered!');
+    console.log('Grid rendered!');
     let size = this.props.size;
     let cells = [];
     let subgrid;

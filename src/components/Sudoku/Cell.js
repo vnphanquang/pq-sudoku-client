@@ -3,6 +3,9 @@ import PropTypes from 'prop-types'
 import PencilLayer from './PencilLayer'
 import {STYLE_STATES} from '../utils';
 import {styled} from '@material-ui/styles';
+import {
+  ButtonBase,
+} from '@material-ui/core';
 
 class Cell extends React.PureComponent {
   
@@ -73,11 +76,12 @@ class Cell extends React.PureComponent {
         onDoubleClick={this.handleDoubleClick}
         onKeyDown={this.handleKeyPress}
         focused={this.state.focused}
+        
       >
         { this.state.showPencils && <PencilLayer pencils={this.state.pencils} />}
-        <button ref={this.inputRef}>
+        <ButtonBase buttonRef={this.inputRef}>
           {this.state.cellValue}
-        </button>
+        </ButtonBase>
       </StyledCell>
     )
   }

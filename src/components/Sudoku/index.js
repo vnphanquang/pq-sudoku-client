@@ -1,13 +1,12 @@
 import React from 'react';
 import {connect} from 'react-redux';
+import {SudokuPencilToggle} from '../../redux/actions/sudokus';
+
 import {styled} from '@material-ui/styles';
 import {
-  ButtonBase,
-  Box,
-  Grid,
   Button,
-  Badge,
   Typography,
+  Tooltip,
 } from '@material-ui/core';
 import {
   Create as CreateIcon,
@@ -16,14 +15,12 @@ import {
 
 import SudokuGrid from './Grid';
 
-import { DIRECTION } from '../utils';
 class Sudoku extends React.Component {
   constructor(props) {
-    super(props)
+    super(props);
     this.activeGrid = null;
     this.updateGridRef = this.updateGridRef.bind(this);
     this.getActiveCellValues = this.getActiveCellValues.bind(this);
-    this.togglePencilMode = this.togglePencilMode.bind(this);
     this.clearCells = this.clearCells.bind(this);
   }
 
@@ -36,6 +33,7 @@ class Sudoku extends React.Component {
 
   componentDidUpdate() {
     if (this.activeGrid) {
+      this.activeGrid.togglePencilMode(this.props.sudokus.pencil);
       if (window.sudoku.loadedValues) {
         this.activeGrid.setCellValues(window.sudoku.loadedValues);
         window.sudoku.loadedValues = null;
@@ -52,20 +50,64 @@ class Sudoku extends React.Component {
     return this.activeGrid.getCellValues();
   }
 
-  togglePencilMode() {
-    this.activeGrid.togglePencilMode();
-    this.activeGrid.focus();
-  }
-
   clearCells() {
     this.activeGrid.clear();
   }
 
   render() {
     // console.log('Sudoku rendered');
-
+    const {sudokus, togglePencilMode} = this.props;
     let isActive = false;
-    const sudokus = this.props.tabs.array.map(({id, size, values}, index) => {
+    let pad = null;
+    if (sudokus.activeIndex !== null) {
+      const values = sudokus.array[sudokus.activeIndex].values;
+      const isPencil = sudokus.pencil;
+      pad = (
+        <PadContainer>
+            <PadButtons>
+              <Tooltip title="Toggle pencil">
+                <Button
+                  variant="outlined" 
+                  onClick={togglePencilMode}
+                >
+                  <CreateIcon/>
+                  <Typography 
+                    color={isPencil ? "primary" : "secondary"} 
+                    paragraph 
+                    align="right"
+                    style={{whiteSpace: 'pre'}}
+                  >
+                    {isPencil ? `ON  ` : 'OFF'}
+                  </Typography>
+                </Button>
+              </Tooltip>
+              <Tooltip title="Clear cell(s)">
+                <Button 
+                  variant="outlined" 
+                  onClick={this.clearCells}
+                >
+                  <DeleteSweepIcon/>
+                </Button>
+              </Tooltip>
+            </PadButtons>
+
+            <PadValues xs={8} size={values.length} >
+              {values.map((value, index) => (
+                <Button 
+                  key={`valuePad-${value}`}
+                  variant="outlined"
+                  onClick={(e) => this.activeGrid.input(parseInt(index+1))}
+                >
+                  <Typography variant="h4">
+                    {value}
+                  </Typography>
+                </Button>
+              ))}
+            </PadValues>
+        </PadContainer>
+      )
+    }
+    const sudokusArray = sudokus.array.map(({id, size, values}, index) => {
       // const colIndices = [];
       // const rowIndices = [];
       // for (let row = 0; row < size; row++) {
@@ -87,54 +129,46 @@ class Sudoku extends React.Component {
       //   )
       // }
 
-      isActive = this.props.tabs.activeIndex === index;
+      isActive = sudokus.activeIndex === index;
       return (
-        <RootContainer key={`${id}-container}`} >
-          <SudokuContainer 
-            hidden={!isActive} 
-            size={size}
-          >
-            {/* <ColIndices size={size}>{colIndices}</ColIndices>
-            <RowIndices size={size}>{rowIndices}</RowIndices> */}
-            <SudokuGrid {...isActive && {ref: this.updateGridRef}} size={size} values={values}/>
-          </SudokuContainer>
-
-          <PadContainer>
-            <PadButtons>
-              <Button variant="outlined" onClick={this.togglePencilMode}>
-                <CreateIcon/>
-              </Button>
-              <Button variant="outlined" onClick={this.clearCells}>
-                <DeleteSweepIcon/>
-              </Button>
-            </PadButtons>
-
-            <PadValues xs={8} size={values.length} >
-              {values.map((value, index) => (
-                <Button 
-                  key={`${id}-valuePad-${value}`}
-                  variant="outlined"
-                  onClick={(e) => this.activeGrid.input(parseInt(index+1))}
-                >
-                  <Typography variant="h4">
-                    {value}
-                  </Typography>
-                </Button>
-              ))}
-            </PadValues>
-          </PadContainer>
-        </RootContainer>
+        <SudokuContainer 
+          hidden={!isActive} 
+          size={size}
+          key={`${id}-container}`}
+        >
+          {/* <ColIndices size={size}>{colIndices}</ColIndices>
+          <RowIndices size={size}>{rowIndices}</RowIndices> */}
+          <SudokuGrid {...isActive && {ref: this.updateGridRef}} size={size} values={values}/>
+        </SudokuContainer>
       )
     });
     
     return (
-      <React.Fragment>
-        {sudokus}
-        {/* <button onClick={() => console.log(this.getActiveCellValues())}>CellValue</button> */}
-      </React.Fragment>
+      <RootContainer >
+        {sudokusArray}
+        {pad}
+      </RootContainer>
     )
   }
 }
+
+const PencilButton = styled((props) => <Button {...props}/>)(
+  ({theme, state}) => ({
+    '& svg::after': {
+      content: state ? '"ON"' : '"OFF"',
+      color: 'blue',
+      backgroundColor: theme.palette.primary,
+      display: 'inline-block',
+      position: 'absolute',
+      top: '-1px',
+      marginLeft: '2px',
+      padding: '1px 4px',
+      fontSize: 12,
+      borderRadius: 5,
+      transition: 'all .2s ease-in-out',
+    }
+  })
+)
 
 const RootContainer = styled((props) => <div {...props}/>)(
   ({theme}) => ({
@@ -206,8 +240,41 @@ const PadValues = styled((props) => <div {...props}/>)(
     }
   })
 )
-
 //TODO: dynamic sizing for font size to fit cell
+const SudokuContainer = styled(({...props}) => <div {...props} />)(
+  ({theme, hidden, size}) => ({
+    // overflow: 'hidden',
+    display: hidden ? 'none' : 'flex',
+    justifyContent: 'center',
+    width: `calc(100vw - 10px)`,
+    height: `calc(100vw - 10px)`,
+    [theme.breakpoints.up('sm')]: {
+      // display: hidden ? 'none' : 'grid',
+      width: '550px',
+      height: '550px',
+      // gridTemplateColumns: `1fr ${size}fr`,
+      // gridTemplateRows: `1fr ${size}fr`,
+      // gridTemplateAreas: `". col-indices" "row-indices sudoku-grid"`,
+    },
+    [theme.breakpoints.up('lg')]: {
+      width: '700px',
+      height: '700px',
+    },
+  })
+)
+
+
+const mapStateToProps = (state) => ({
+  sudokus: state.sudokus,
+})
+
+const mapDispatchToProps = dispatch => ({
+  togglePencilMode: () => dispatch(SudokuPencilToggle())
+})
+
+export default connect(mapStateToProps, mapDispatchToProps)(Sudoku);
+
+
 // const Indices = styled(({...props}) => <div {...props}/>)(
 //   ({theme}) => ({
 //     display: 'grid',
@@ -251,32 +318,3 @@ const PadValues = styled((props) => <div {...props}/>)(
 //     },
 //   })
 // )
-
-const SudokuContainer = styled(({...props}) => <div {...props} />)(
-  ({theme, hidden, size}) => ({
-    // overflow: 'hidden',
-    display: hidden ? 'none' : 'flex',
-    justifyContent: 'center',
-    width: `calc(100vw - 10px)`,
-    height: `calc(100vw - 10px)`,
-    [theme.breakpoints.up('sm')]: {
-      // display: hidden ? 'none' : 'grid',
-      width: '550px',
-      height: '550px',
-      // gridTemplateColumns: `1fr ${size}fr`,
-      // gridTemplateRows: `1fr ${size}fr`,
-      // gridTemplateAreas: `". col-indices" "row-indices sudoku-grid"`,
-    },
-    [theme.breakpoints.up('lg')]: {
-      width: '700px',
-      height: '700px',
-    },
-  })
-)
-
-
-const mapStateToProps = (state) => {
-  return {tabs: state.tabs};
-}
-
-export default connect(mapStateToProps)(Sudoku);
