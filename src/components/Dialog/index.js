@@ -1,5 +1,5 @@
 import React from 'react';
-import {connect} from 'react-redux';
+import {connect, batch} from 'react-redux';
 
 import { 
   ThemeReplacement,
@@ -24,6 +24,7 @@ import SaveAsDialog from './SaveAsDialog';
 import OpenDialog from './OpenDialog';
 import SettingsDialog from './SettingsDialog';
 import AboutDialog from './AboutDialog';
+import FeedbackDialog from './FeedbackDialog';
 
 const dialogVariants = {
   [DIALOG_ADD_TAB]: AddTabDialog,
@@ -32,6 +33,7 @@ const dialogVariants = {
   [DIALOG_OPEN]: OpenDialog,
   [DIALOG_SETTINGS]: SettingsDialog,
   [DIALOG_ABOUT]: AboutDialog,
+  [DIALOG_FEEDBACK]: FeedbackDialog,
 }
 
 const submitVariants = {
@@ -40,8 +42,8 @@ const submitVariants = {
   [DIALOG_SAVEAS]: (thisArg) => thisArg.exportFile.bind(thisArg),
   [DIALOG_OPEN]: (thisArg) => thisArg.openSudoku.bind(thisArg),
   [DIALOG_SETTINGS]: (thisArg) => thisArg.applySettings.bind(thisArg),
+  [DIALOG_FEEDBACK]: (thisArg) => thisArg.sendFeedback.bind(thisArg),
   [DIALOG_ABOUT]: () => null,
-  
 }
 
 class DialogPQS extends React.PureComponent {
@@ -61,10 +63,14 @@ class DialogPQS extends React.PureComponent {
     this.aRef.download = `${name}.${format}`;
     this.aRef.click();
     setTimeout(() => URL.revokeObjectURL(url), 1000)
+    this.props.cancelDialog();
   }
 
   openSudoku(name, sudokuData) {
-    this.props.addTab({name, ...sudokuData});
+    batch(() => {
+      this.props.cancelDialog();
+      this.props.addTab({name, ...sudokuData});
+    })
   }
 
   applySettings(type, settings) {
@@ -75,6 +81,10 @@ class DialogPQS extends React.PureComponent {
       default:
         break
     }
+  }
+
+  sendFeedback(data) {
+    console.log(data);
   }
 
   render() {
@@ -130,8 +140,14 @@ const mapStateToProps = state => {
 
 const mapDispatchToProps = dispatch => ({
   cancelDialog: () => dispatch(DialogAction(DIALOG_CANCEL)),
-  addTab: (config) => dispatch(SudokuAddition(config)),
-  replaceTheme: (theme) => dispatch(ThemeReplacement(theme)),
+  addTab: (config) => batch(() => {
+    dispatch(DialogAction(DIALOG_CANCEL));
+    dispatch(SudokuAddition(config));
+  }),
+  replaceTheme: (theme) => batch(() => {
+    dispatch(DialogAction(DIALOG_CANCEL));
+    dispatch(ThemeReplacement(theme));
+  }),
 })
 
 export default connect(mapStateToProps, mapDispatchToProps)(DialogPQS);

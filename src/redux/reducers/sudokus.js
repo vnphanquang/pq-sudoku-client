@@ -3,6 +3,7 @@ import {
   SUDOKU_TAB_CHANGE,
   SUDOKU_REMOVE,
   SUDOKU_PENCIL_TOGGLE,
+  SUDOKU_VALUE_MAPPING,
 } 
 from '../actions/sudokus';
 
@@ -45,6 +46,12 @@ export default function sudokus(state = sudokusInitState, {type, payload}) {
       return {
         ...state,
         pencil: !state.pencil
+      }
+    case SUDOKU_VALUE_MAPPING:
+      state.array[state.activeIndex].values = payload;
+      return {
+        ...state,
+        array: [...state.array]
       }
     default:
       return state;

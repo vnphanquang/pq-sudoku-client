@@ -33,6 +33,19 @@ export const dialogLabels = {
   about: drawerLabels.about,
   source: 'Source',
   close: 'Close',
+  feedback: drawerLabels.feedback,
+  general: 'General',
+  bugReport: 'Bug Report',
+  title: 'Title',
+  details: 'Details',
+  send: 'Send',
+  feedbackAboutHint: 'Select a tag',
+  feedbackGeneralHint: 'Tell us more...',
+  feedbackBugReportHint: 'Include steps to reproduce, expected vs actual results, ...',
+  sudokus: {
+    sizeHint: 'Grid size',
+    valueMapping: 'Value Mapping',
+  }
 }
 
 export const pqSudoku = 'pqSudoku';

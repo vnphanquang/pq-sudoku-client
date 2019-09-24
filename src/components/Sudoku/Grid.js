@@ -20,10 +20,15 @@ function ValueToCellsMap(values) {
   return new Map(entries);
 }
 
+export const valueKeyStrokes = [
+  '1', '2', '3', '4', '5', '6', '7', '8', '9', 
+  'q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o',
+  'a', 's', 'd', 'f', 'g', 'h', 'j'
+]
 function ValueMap(values) {
   const entries = [];
   for (let i = 0; i < values.length; i++) {
-    entries.push([i+1, values[i]])
+    entries.push([valueKeyStrokes[i], values[i]])
   }
   return new Map(entries);
 }
@@ -110,8 +115,8 @@ class Grid extends React.Component {
     }
   }
 
-  input(keyIndex) {
-    let inputValue = this.valueMap.get(keyIndex);
+  input(key) {
+    let inputValue = this.valueMap.get(key);
     if (this.pencilMode) {
       this.selection.cells.forEach(cell => {
         this.updateCellValue(cell, '');
@@ -119,7 +124,7 @@ class Grid extends React.Component {
           // pencilMap: st.pencilMap.set(key, st.pencilMap.get(key) ? false : inputValue)
           showPencils: true,
           pencils: st.pencils.map((value, index) => {
-            if (index + 1 === keyIndex) {
+            if (index === this.props.values.findIndex((v) => v === inputValue)) {
               return value ? false : inputValue;
             } else {
               return value;
@@ -153,15 +158,8 @@ class Grid extends React.Component {
   }
 
   handleKeyPress(e, targetCell) {
-    let {ctrlKey, key} = e
-    let keyIndex = parseInt(key);
-    if (this.valueMap.has(keyIndex)) {
-      this.input(keyIndex);
-    } else if (KEYS_STROKES.ARROWS.includes(key)) {
-      this.keyNavigate(e);
-    } else if (KEYS_STROKES.DELETES.includes(key)) {
-      this.clear();
-    } else if (ctrlKey) {
+    let {ctrlKey, key} = e;
+    if (ctrlKey) {
       switch(key) {
         case 'a':
           e.preventDefault();
@@ -188,6 +186,14 @@ class Grid extends React.Component {
         default:
           break;
       }
+    } else {
+      if (this.valueMap.has(key)) {
+        this.input(key);
+      } else if (KEYS_STROKES.ARROWS.includes(key)) {
+        this.keyNavigate(e);
+      } else if (KEYS_STROKES.DELETES.includes(key)) {
+        this.clear();
+      } 
     }
   }
 

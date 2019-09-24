@@ -193,7 +193,7 @@ class AppearancePanel extends React.Component {
             </Typography>
             {cellColorInputs}
           </Grid>
-          <Grid className={classes.gridDemo} xs={12} sm={6} md={3} item>
+          <Grid className={classes.demoGrid} xs={12} sm={6} md={3} item>
             <Box width={200} height={200} >
               <StyledGrid theme={mockedTheme} rows={4} cols={4}> 
                 {demoCells}
@@ -265,7 +265,7 @@ const styles = theme => ({
     flexDirection: 'column',
     justifyContent: 'space-between',
   },
-  gridDemo: {
+  demoGrid: {
     display: 'flex',
     justifyContent: 'center',
   },

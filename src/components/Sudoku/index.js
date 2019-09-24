@@ -3,17 +3,22 @@ import {connect} from 'react-redux';
 import {SudokuPencilToggle} from '../../redux/actions/sudokus';
 
 import {styled} from '@material-ui/styles';
-import {
-  Button,
-  Typography,
-  Tooltip,
-} from '@material-ui/core';
-import {
-  Create as CreateIcon,
-  DeleteSweep as DeleteSweepIcon,
-} from '@material-ui/icons';
 
+// import {
+//   Button,
+//   Typography,
+//   Tooltip,
+// } from '@material-ui/core';
+
+// import {
+//   Create as CreateIcon,
+//   DeleteSweep as DeleteSweepIcon,
+// } from '@material-ui/icons';
+
+import {APPBAR_HEIGHT} from '../utils';
+// import SudokuGrid, {valueKeyStrokes} from './Grid';
 import SudokuGrid from './Grid';
+import Pad from './Pad';
 
 class Sudoku extends React.Component {
   constructor(props) {
@@ -21,6 +26,7 @@ class Sudoku extends React.Component {
     this.grid = null;
     this.updateGridRef = this.updateGridRef.bind(this);
     this.clearCells = this.clearCells.bind(this);
+    this.inputValue = this.inputValue.bind(this);
   }
 
   componentDidMount() {
@@ -44,58 +50,71 @@ class Sudoku extends React.Component {
   clearCells() {
     this.grid.clear();
   }
+  
+  inputValue(key) {
+    this.grid.input(key);
+  }
 
   render() {
-    // console.log('Sudoku rendered');
+    console.log('Sudoku rendered');
     const {sudokus: {array, pencil, activeIndex}, togglePencilMode} = this.props;
     let pad = null;
     let sudokuArray = null;
     if (activeIndex !== null) {
-      const values = array[activeIndex].values;
       pad = (
-        <PadContainer>
-            <PadButtons>
-              <Tooltip title="Toggle pencil">
-                <Button
-                  variant="outlined" 
-                  onClick={togglePencilMode}
-                >
-                  <CreateIcon/>
-                  <Typography 
-                    color={pencil ? "primary" : "secondary"} 
-                    paragraph 
-                    align="right"
-                    style={{whiteSpace: 'pre'}}
-                  >
-                    {pencil ? `ON  ` : 'OFF'}
-                  </Typography>
-                </Button>
-              </Tooltip>
-              <Tooltip title="Clear cell(s)">
-                <Button 
-                  variant="outlined" 
-                  onClick={this.clearCells}
-                >
-                  <DeleteSweepIcon/>
-                </Button>
-              </Tooltip>
-            </PadButtons>
-
-            <PadValues xs={8} size={values.length} >
-              {values.map((value, index) => (
-                <Button 
-                  key={`valuePad-${value}`}
-                  variant="outlined"
-                  onClick={(e) => this.grid.input(parseInt(index+1))}
-                >
-                  <Typography variant="h4">
-                    {value}
-                  </Typography>
-                </Button>
-              ))}
-            </PadValues>
-        </PadContainer>
+        <Pad 
+          togglePencilMode={togglePencilMode}
+          pencil={pencil}
+          values={array[activeIndex].values}
+          inputValue={this.inputValue}
+          clearCells={this.clearCells}
+        />
       )
+      // const values = array[activeIndex].values;
+      // pad = (
+      //   <PadContainer>
+      //       <PadButtons>
+      //         <Tooltip title="Toggle pencil">
+      //           <Button
+      //             variant="outlined" 
+      //             onClick={togglePencilMode}
+      //           >
+      //             <CreateIcon/>
+      //             <Typography 
+      //               color={pencil ? "primary" : "secondary"} 
+      //               paragraph 
+      //               align="right"
+      //               style={{whiteSpace: 'pre'}}
+      //             >
+      //               {pencil ? `ON  ` : 'OFF'}
+      //             </Typography>
+      //           </Button>
+      //         </Tooltip>
+      //         <Tooltip title="Clear cell(s)">
+      //           <Button 
+      //             variant="outlined" 
+      //             onClick={this.clearCells}
+      //           >
+      //             <DeleteSweepIcon/>
+      //           </Button>
+      //         </Tooltip>
+      //       </PadButtons>
+
+      //       <PadValues size={values.length} >
+      //         {values.map((value, index) => (
+      //           <Button 
+      //             key={`valuePad-${value}`}
+      //             variant="outlined"
+      //             onClick={(e) => this.grid.input(valueKeyStrokes[index])}
+      //           >
+      //             <Typography variant="h4" style={{textTransform: 'none'}}>
+      //               {value}
+      //             </Typography>
+      //           </Button>
+      //         ))}
+      //       </PadValues>
+      //   </PadContainer>
+      // )
       
       let isActive;
       sudokuArray = array.map(({id, size, values, cellsData}, index) => {
@@ -103,7 +122,6 @@ class Sudoku extends React.Component {
         return (
           <SudokuContainer 
             hidden={!isActive} 
-            size={size}
             key={`${id}-container}`}
           >
             {/* <ColIndices size={size}>{colIndices}</ColIndices>
@@ -142,66 +160,66 @@ const RootContainer = styled((props) => <div {...props}/>)(
     },
   })
 )
-const PadContainer = styled((props) => <div {...props}/>)(
-  ({theme}) => ({
-    width: '100%',
-    display: 'flex',
-    flexDirection: 'column',
-    justifyContent: 'center',
-    marginTop: theme.spacing(2),
-    [theme.breakpoints.up('lg')]: {
-      width: 300,
-      marginTop: 0,
-      marginLeft: theme.spacing(2),
-    },
-    '& button': {
-      [theme.breakpoints.down('md')]: {
-        border: 'none',
-        height: 'auto',
-      },
-    },
-  })
-)
+// const PadContainer = styled((props) => <div {...props}/>)(
+//   ({theme}) => ({
+//     width: '100%',
+//     display: 'flex',
+//     flexDirection: 'column',
+//     justifyContent: 'center',
+//     marginTop: theme.spacing(2),
+//     [theme.breakpoints.up('lg')]: {
+//       width: 300,
+//       marginTop: 0,
+//       marginLeft: theme.spacing(2),
+//     },
+//     '& button': {
+//       [theme.breakpoints.down('md')]: {
+//         border: 'none',
+//         height: 'auto',
+//       },
+//     },
+//   })
+// )
 
-const PadButtons = styled((props) => <div {...props}/>)(
-  ({theme}) => ({
-    display: 'flex',
-    fontSize: theme.typography.h5.fontSize,
-    '& button': {
-      width: '50%',
-      '& svg': {
-        fontSize: '1.75rem',
-      },
-      [theme.breakpoints.up('lg')]: {
-        height: 80,
-      },
-    },
-  })
-)
+// const PadButtons = styled((props) => <div {...props}/>)(
+//   ({theme}) => ({
+//     display: 'flex',
+//     fontSize: theme.typography.h5.fontSize,
+//     '& button': {
+//       width: '50%',
+//       '& svg': {
+//         fontSize: '1.75rem',
+//       },
+//       [theme.breakpoints.up('lg')]: {
+//         height: 80,
+//       },
+//     },
+//   })
+// )
 
-const PadValues = styled((props) => <div {...props}/>)(
-  ({theme, size}) => ({
-      display: 'flex',
-      justifyContent: 'space-around',
-      marginTop: theme.spacing(2),
-    '& button': {
-      [theme.breakpoints.down('sm')]: {
-        minWidth: 0,
-        padding: 0,
-      },
-    },
-    [theme.breakpoints.up('lg')]: {
-      marginTop: 0,
-      height: 300,
-      display: 'grid',
-      gridTemplateRows: `repeat(${Math.sqrt(size)}, 1fr)`,
-      gridTemplateColumns: `repeat(${Math.sqrt(size)}, 1fr)`,
-    }
-  })
-)
+// const PadValues = styled((props) => <div {...props}/>)(
+//   ({theme, size}) => ({
+//     display: 'flex',
+//     justifyContent: 'space-around',
+//     marginTop: theme.spacing(2),
+//     '& button': {
+//       [theme.breakpoints.down('md')]: {
+//         minWidth: 0,
+//         padding: 0,
+//       },
+//     },
+//     [theme.breakpoints.up('lg')]: {
+//       marginTop: 0,
+//       height: 300,
+//       display: 'grid',
+//       gridTemplateRows: `repeat(${Math.sqrt(size)}, 1fr)`,
+//       gridTemplateColumns: `repeat(${Math.sqrt(size)}, 1fr)`,
+//     }
+//   })
+// )
 // TODO: dynamic sizing for font size to fit cell
 const SudokuContainer = styled(({...props}) => <div {...props} />)(
-  ({theme, hidden, size}) => ({
+  ({theme, hidden}) => ({
     // overflow: 'hidden',
     display: hidden ? 'none' : 'flex',
     justifyContent: 'center',
@@ -216,8 +234,10 @@ const SudokuContainer = styled(({...props}) => <div {...props} />)(
       // gridTemplateAreas: `". col-indices" "row-indices sudoku-grid"`,
     },
     [theme.breakpoints.up('lg')]: {
-      width: '700px',
-      height: '700px',
+      width: `calc(100vh - ${APPBAR_HEIGHT}px - 10px)`,
+      height: `calc(100vh - ${APPBAR_HEIGHT}px - 10px)`,
+      maxHeight: 800,
+      maxWidth: 800,
     },
   })
 )

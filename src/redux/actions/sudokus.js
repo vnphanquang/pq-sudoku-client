@@ -7,14 +7,23 @@ export const SUDOKU_ADD = 'SUDOKU_ADD';
 export const SUDOKU_TAB_CHANGE = 'SUDOKU_TAB_CHANGE';
 export const SUDOKU_REMOVE = 'SUDOKU_REMOVE';
 export const SUDOKU_PENCIL_TOGGLE = 'PENCIL_MODE_TOGGLE';
+export const SUDOKU_VALUE_MAPPING = 'SUDOKU_VALUE_MAPPING';
 
 /* 
 * Action Creators
 */
+
+export function generateDefaultValues(size) {
+  const values = [];
+  for (let i = 0; i < size; i++) {
+    values.push(`${(i+1).toString(size+1)}`);
+  }
+  return values;
+}
 export function SudokuAddition({
   name='New Sudoku', 
   size=9, 
-  values=['1', '2', '3', '4', '5', '6', '7', '8', '9'],
+  values=generateDefaultValues(size),
   cellsData=(new Array(size)).fill((new Array(size)).fill(''))
 }) {
   return {
@@ -43,5 +52,12 @@ export function SudokuRemoval(index) {
 export function SudokuPencilToggle() {
   return {
     type: SUDOKU_PENCIL_TOGGLE
+  }
+}
+
+export function SudokuValueMapping(valueMap) {
+  return {
+    type: SUDOKU_VALUE_MAPPING,
+    payload: valueMap
   }
 }
