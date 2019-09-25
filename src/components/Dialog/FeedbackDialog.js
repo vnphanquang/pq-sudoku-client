@@ -61,7 +61,6 @@ function FeedbackDialog({onSubmit, onCancel}) {
           <div className={classes.header}>
             <TextField
               fullWidth
-              autoFocus
               label={dialogLabels.title}
               type="text"
               variant="outlined"

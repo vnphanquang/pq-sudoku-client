@@ -120,7 +120,6 @@ function TabAdditionDialog({onSubmit, onCancel}) {
             error={settings.name.length === 0}
             required
             fullWidth
-            autoFocus
             label={dialogLabels.sudokuName.label}
             type="text"
             variant="outlined"

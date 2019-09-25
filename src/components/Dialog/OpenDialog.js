@@ -72,7 +72,6 @@ function OpenDialog({onSubmit, onCancel}) {
               error={name.length === 0}
               required
               fullWidth
-              autoFocus
               label={dialogLabels.sudokuName.label}
               type="text"
               variant="outlined"

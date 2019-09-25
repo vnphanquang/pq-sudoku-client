@@ -54,7 +54,6 @@ function SaveAsDialog({onSubmit, onCancel, data: sudoku}) {
             error={name.length === 0}
             required
             fullWidth
-            autoFocus
             label={dialogLabels.sudokuName.label}
             type="text"
             variant="outlined"
@@ -75,6 +74,7 @@ function SaveAsDialog({onSubmit, onCancel, data: sudoku}) {
 const useStyles = makeStyles(theme => ({
   paper: {
     minWidth: 250,
+    minHeight: 215,
     margin:  0
   },
   content: {
