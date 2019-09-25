@@ -197,7 +197,7 @@ class Grid extends React.Component {
   }
 
   handleCellClick(e, targetCell) {
-    const {ctrlKey, shiftKey, detail} = e;
+    const {ctrlKey, shiftKey, detail=1} = e;
     if (detail === 1) {
       let lastSelectedCell = this.selection.focus;
       if (this.selection.type === SELECTION.TYPES.SINGLE) {
@@ -430,7 +430,7 @@ class Grid extends React.Component {
   }
 
   keyNavigate(e) {
-    let {key, ctrlKey, shiftKey} = e
+    let {key, ctrlKey, shiftKey} = e;
     let targetCell = null;
     let lastSelectedCell = this.selection.focus;
     let {row, col} = lastSelectedCell.props;

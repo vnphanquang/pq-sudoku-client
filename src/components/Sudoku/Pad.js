@@ -75,8 +75,9 @@ const useStyles = makeStyles(theme => ({
       marginTop: 0,
       marginLeft: theme.spacing(2),
     },
-    '& button': {
-      [theme.breakpoints.down('md')]: {
+    [theme.breakpoints.down('md')]: {
+      // height: 105,
+      '& button': {
         border: 'none',
         height: 'auto',
       },
