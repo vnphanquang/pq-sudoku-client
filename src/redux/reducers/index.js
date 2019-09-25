@@ -1,6 +1,7 @@
 import {combineReducers} from 'redux';
 import { 
   TOGGLE_DRAWER, 
+  TOGGLE_SAVEAS_PROMPT_ON_TAB_CLOSE,
   SNACKBAR_CLOSE,
   SNACKBAR_NO_SUDOKU,
 } 
@@ -10,17 +11,22 @@ import dialog from './dialogs';
 import sudokus from './sudokus';
 import theme from './theme';
 
-const navigationInitState = {
-  drawerOpen: false
+const generalInitState = {
+  drawerOpen: false,
+  saveAsPromptOnTabClose: true,
 }
-
-function navigation(state = navigationInitState, {type, payload}) {
+function general(state = generalInitState, {type, payload}) {
   switch (type) {
     case TOGGLE_DRAWER:
       return { 
         ...state,
         drawerOpen: payload === undefined ? !state.drawerOpen : payload
       };
+    case TOGGLE_SAVEAS_PROMPT_ON_TAB_CLOSE:
+      return {
+        ...state,
+        saveAsPromptOnTabClose: payload === undefined ? !state.saveAsPromptOnTabClose : payload
+      }
     default:
       return state;
   }
@@ -51,7 +57,7 @@ function snackbar(state=snackbarInitState, {type, payload}) {
 
 const rootReducer = combineReducers({
   theme,
-  navigation,
+  general,
   sudokus,
   dialog,
   snackbar,

@@ -45,7 +45,10 @@ export const dialogLabels = {
   sudokus: {
     sizeHint: 'Grid size',
     valueMapping: 'Value Mapping',
-  }
+  },
+  saveYourWork: 'Save Your Work!',
+  saveAsOnTabClosePrompt: 'Closed tabs are not retrievable. Do you want to save your work to local disk?',
+  doNotShowAgain: 'Don\'t show again!',
 }
 
 export const pqSudoku = 'pqSudoku';

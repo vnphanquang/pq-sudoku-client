@@ -198,11 +198,7 @@ class Grid extends React.Component {
 
   handleCellClick(e, targetCell) {
     const {ctrlKey, shiftKey, detail} = e;
-    if (detail === 2) {
-      this.selectCellsBySubgrid(targetCell.props.subgrid);
-    } else if (detail === 3) {
-      this.selectAll();
-    } else {
+    if (detail === 1) {
       let lastSelectedCell = this.selection.focus;
       if (this.selection.type === SELECTION.TYPES.SINGLE) {
         if (ctrlKey && lastSelectedCell && !targetCell.isSameCell(lastSelectedCell)) {
@@ -261,6 +257,10 @@ class Grid extends React.Component {
         })
         this.singleSelectCell(targetCell);
       }
+    } else if (detail === 2) {
+      this.selectCellsBySubgrid(targetCell.props.subgrid);
+    } else if (detail === 3){
+      this.selectAll();
     }
   }
 

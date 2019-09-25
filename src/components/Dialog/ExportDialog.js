@@ -234,4 +234,4 @@ const useStyles = makeStyles(theme => ({
 
 }));
 
-export default ExportDialog;
+export default React.memo(ExportDialog);

@@ -68,10 +68,9 @@ class Cell extends React.PureComponent {
         row={this.props.row}
         col={this.props.col}
         styleState={this.state.styleState}
-        onClick={this.handleClick}
+        onMouseUp={this.handleClick}
         onKeyDown={this.handleKeyPress}
         focused={this.state.focused}
-        
       >
         { this.state.showPencils && <PencilLayer pencils={this.state.pencils} />}
         <ButtonBase buttonRef={this.inputRef}>

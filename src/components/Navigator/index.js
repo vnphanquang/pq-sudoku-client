@@ -15,8 +15,8 @@ import {
 import { withStyles } from '@material-ui/styles';
 
 import { DrawerToggle, ThemeTypeToggle } from '../../redux/actions';
-import { SudokuTabChange, SudokuRemoval } from '../../redux/actions/sudokus';
-import { DialogAction } from '../../redux/actions/dialogs';
+import { SudokuTabChange, SudokuClose } from '../../redux/actions/sudokus';
+import { DialogAction, DialogSaveAsOnTabClose } from '../../redux/actions/dialogs';
 import { APPBAR_HEIGHT } from '../utils';
 import { pqSudoku } from '../../lang';
 import Drawer from './Drawer';
@@ -30,6 +30,22 @@ const themeTypeIcon = {
 }
 
 class Navigator extends React.PureComponent {
+  constructor(props) {
+    super(props);
+    this.closeTab = this.closeTab.bind(this);
+  }
+  
+  closeTab(index) {
+    const {saveAsPromptOnTabClose, drawerToggle, closeTab, dispatch} = this.props;
+    if (saveAsPromptOnTabClose) {
+      batch(() => { 
+        if (drawerToggle) dispatch(DrawerToggle());
+        dispatch(DialogSaveAsOnTabClose(index)); 
+      })
+    } else {
+      closeTab(index);
+    }
+  }
   
   render() {
     // console.log('AppBar rendered')
@@ -38,7 +54,7 @@ class Navigator extends React.PureComponent {
       theme: {palette: {type: themeType}}, 
       toggleThemeType, 
       drawerOpen, toggleDrawer, 
-      sudokus, removeTab, changeTab,
+      sudokus, changeTab,
       dispatchDialog
     } = this.props;
     return (
@@ -58,7 +74,7 @@ class Navigator extends React.PureComponent {
 
             <Tabs 
               tabs={sudokus}
-              removeTab={removeTab}
+              closeTab={this.closeTab}
               changeTab={changeTab}
             />
 
@@ -107,7 +123,8 @@ const styles = theme => ({
 
 
 const mapStateToProps = state => ({
-  drawerOpen: state.navigation.drawerOpen,
+  drawerOpen: state.general.drawerOpen,
+  saveAsPromptOnTabClose: state.general.saveAsPromptOnTabClose,
   sudokus: state.sudokus,
 })
 
@@ -115,11 +132,12 @@ const mapDispatchToProps = dispatch => ({
   toggleThemeType: () => dispatch(ThemeTypeToggle()),
   toggleDrawer: () => dispatch(DrawerToggle()),
   changeTab: (index) => dispatch(SudokuTabChange(index)),
-  removeTab: (index) => dispatch(SudokuRemoval(index)),
+  closeTab: (index) => dispatch(SudokuClose(index)),
   dispatchDialog: (type, toggle) => batch(() => { 
     if (toggle) dispatch(DrawerToggle());
     dispatch(DialogAction(type)); 
   }),
+  dispatch,
 })
 
 export default connect(mapStateToProps, mapDispatchToProps)(withStyles(styles, {withTheme: true})(Navigator));

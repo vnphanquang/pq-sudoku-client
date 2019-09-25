@@ -36,7 +36,7 @@ const themeTypeIcon = {
 }
 
 //TODO: pull display texts from lang
-class AppearancePanel extends React.Component {
+class AppearancePanel extends React.PureComponent {
   constructor(props) {
     super(props);
     

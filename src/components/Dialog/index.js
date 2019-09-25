@@ -3,7 +3,10 @@ import {connect, batch} from 'react-redux';
 
 import { 
   ThemeReplacement,
+  SaveAsPromptOnTabCloseToggle,
 } from '../../redux/actions';
+import { SudokuClose } from '../../redux/actions/sudokus'
+
 import { SudokuAddition } from '../../redux/actions/sudokus';
 import {  
   DialogAction,
@@ -16,6 +19,7 @@ import {
   DIALOG_FEEDBACK,
   DIALOG_ABOUT,
   DIALOG_HELP,
+  DIALOG_SAVEAS_ON_TAB_CLOSE,
 } from '../../redux/actions/dialogs';
 
 import AddTabDialog from './AddTabDialog';
@@ -25,6 +29,7 @@ import OpenDialog from './OpenDialog';
 import SettingsDialog from './SettingsDialog';
 import AboutDialog from './AboutDialog';
 import FeedbackDialog from './FeedbackDialog';
+import SaveAsOnTabCloseDialog from './SaveAsOnTabCloseDialog';
 
 const dialogVariants = {
   [DIALOG_ADD_TAB]: AddTabDialog,
@@ -34,16 +39,33 @@ const dialogVariants = {
   [DIALOG_SETTINGS]: SettingsDialog,
   [DIALOG_ABOUT]: AboutDialog,
   [DIALOG_FEEDBACK]: FeedbackDialog,
+  [DIALOG_SAVEAS_ON_TAB_CLOSE]: SaveAsOnTabCloseDialog,
 }
 
-const submitVariants = {
-  [DIALOG_ADD_TAB]: (thisArg) => thisArg.props.addTab.bind(thisArg),
-  [DIALOG_EXPORT]: (thisArg) => thisArg.exportFile.bind(thisArg),
-  [DIALOG_SAVEAS]: (thisArg) => thisArg.exportFile.bind(thisArg),
-  [DIALOG_OPEN]: (thisArg) => thisArg.openSudoku.bind(thisArg),
-  [DIALOG_SETTINGS]: (thisArg) => thisArg.applySettings.bind(thisArg),
-  [DIALOG_FEEDBACK]: (thisArg) => thisArg.sendFeedback.bind(thisArg),
-  [DIALOG_ABOUT]: () => null,
+const actionVariants = {
+  [DIALOG_ADD_TAB]: (thisArg) => ({
+    onSubmit: thisArg.props.addSudoku,
+  }),
+  [DIALOG_EXPORT]: (thisArg) => ({
+    onSubmit: thisArg.exportFile.bind(thisArg),
+  }),
+  [DIALOG_SAVEAS]: (thisArg) => ({
+    onSubmit: thisArg.exportFile.bind(thisArg)
+  }),
+  [DIALOG_OPEN]: (thisArg) => ({
+    onSubmit: thisArg.openSudoku.bind(thisArg)
+  }),
+  [DIALOG_SETTINGS]: (thisArg) => ({
+    onSubmit: thisArg.applySettings.bind(thisArg)
+  }),
+  [DIALOG_FEEDBACK]: (thisArg) => ({
+    onSubmit: thisArg.sendFeedback.bind(thisArg)
+  }),
+  [DIALOG_SAVEAS_ON_TAB_CLOSE]: (thisArg) => ({
+    onSave: () => thisArg.props.dispatchAnotherDialog(DIALOG_SAVEAS),
+    onClose: () => thisArg.props.closeSudoku(thisArg.props.data),
+    onToggleShowAgain: thisArg.props.toggleSaveAsPromptOnTabClose,
+  }),
 }
 
 class DialogPQS extends React.PureComponent {
@@ -69,7 +91,7 @@ class DialogPQS extends React.PureComponent {
   openSudoku(name, sudokuData) {
     batch(() => {
       this.props.cancelDialog();
-      this.props.addTab({name, ...sudokuData});
+      this.props.addSudoku({name, ...sudokuData});
     })
   }
 
@@ -91,14 +113,13 @@ class DialogPQS extends React.PureComponent {
     console.log('Dialog rendered')
     const {type, data, cancelDialog} = this.props;
     const Dialog = dialogVariants[type];
-    
     return (
       <React.Fragment>
         { 
           Dialog && 
           <Dialog 
-            onSubmit={submitVariants[type](this)}
             onCancel={cancelDialog}
+            {...(actionVariants[type] && actionVariants[type](this))}
             data={data}
           />
         }
@@ -116,7 +137,7 @@ class DialogPQS extends React.PureComponent {
 
 
 const mapStateToProps = state => {
-  const type = state.dialog;
+  const {type, payload} = state.dialog;
   let data = null;
   switch (type) {
     case DIALOG_SAVEAS:
@@ -129,6 +150,9 @@ const mapStateToProps = state => {
     case DIALOG_SETTINGS:
       data = {theme: state.theme};
       break;
+    case DIALOG_SAVEAS_ON_TAB_CLOSE:
+      data = payload;
+      break;
     default:
       break;
   }
@@ -140,13 +164,25 @@ const mapStateToProps = state => {
 
 const mapDispatchToProps = dispatch => ({
   cancelDialog: () => dispatch(DialogAction(DIALOG_CANCEL)),
-  addTab: (config) => batch(() => {
+  addSudoku: (config) => batch(() => {
     dispatch(DialogAction(DIALOG_CANCEL));
     dispatch(SudokuAddition(config));
+  }),
+  closeSudoku: (index) => batch(() => {
+    dispatch(DialogAction(DIALOG_CANCEL));
+    dispatch(SudokuClose(index));
   }),
   replaceTheme: (theme) => batch(() => {
     dispatch(DialogAction(DIALOG_CANCEL));
     dispatch(ThemeReplacement(theme));
+  }),
+  toggleSaveAsPromptOnTabClose: () => batch(() => {
+    dispatch(DialogAction(DIALOG_CANCEL));
+    dispatch(SaveAsPromptOnTabCloseToggle());
+  }),
+  dispatchAnotherDialog: (type) =>  batch(() => {
+    dispatch(DialogAction(DIALOG_CANCEL));
+    dispatch(DialogAction(type));
   }),
 })
 

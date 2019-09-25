@@ -50,7 +50,7 @@ function AboutDialog({onCancel}) {
           <Button>{dialogLabels.source}</Button>
         </Link>
         <Button onClick={onCancel}>{dialogLabels.close}</Button>
-    </DialogActions>
+      </DialogActions>
     </Dialog>
   )
 }
@@ -62,4 +62,4 @@ const useStyles = makeStyles(theme => ({
   },
 }));
 
-export default AboutDialog
+export default React.memo(AboutDialog);

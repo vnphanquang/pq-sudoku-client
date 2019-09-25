@@ -141,4 +141,4 @@ function SudokuSVG({
   )
 }
 
-export default SudokuSVG;
+export default React.memo(SudokuSVG);

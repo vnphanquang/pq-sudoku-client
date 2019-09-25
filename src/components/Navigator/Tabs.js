@@ -23,7 +23,7 @@ class TabsPQS extends React.PureComponent {
 
   render() {
     console.log('Tabs rendered')
-    const {classes, tabs, removeTab} = this.props;
+    const {classes, tabs, closeTab} = this.props;
     return (
       <Tabs
         className={classes.tabs}
@@ -46,7 +46,11 @@ class TabsPQS extends React.PureComponent {
                   </Typography>
                   { 
                     tabs.activeIndex === index &&
-                    <IconButton className={classes.tabCloseBtn} component='div' onClick={(e) => removeTab(index)}>
+                    <IconButton 
+                      className={classes.tabCloseBtn}
+                      component='div' 
+                      onClick={(e) => closeTab(index)}
+                    >
                       <CloseIcon />
                     </IconButton>
                   }

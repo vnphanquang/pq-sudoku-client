@@ -129,4 +129,4 @@ const useStyles = makeStyles(theme => ({
   }
 }));
 
-export default FeedbackDialog;
+export default React.memo(FeedbackDialog);

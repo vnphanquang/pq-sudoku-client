@@ -10,12 +10,6 @@ import {
 
 function DrawerIcon({drawerOpen, onClick, ...others}) {
   console.log('DrawerIcon rendered');
-  // const drawerOpen = useSelector(state => state.navigation.drawerOpen, shallowEqual);
-  // const dispatch = useDispatch();
-  // const toggleDrawer = React.useCallback(
-  //   () => dispatch(DrawerToggle()),
-  //   [dispatch]
-  // );
 
   return (
     <IconButton

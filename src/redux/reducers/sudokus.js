@@ -1,7 +1,8 @@
 import { 
   SUDOKU_ADD, 
   SUDOKU_TAB_CHANGE,
-  SUDOKU_REMOVE,
+  SUDOKU_SAVE,
+  SUDOKU_CLOSE,
   SUDOKU_PENCIL_TOGGLE,
   SUDOKU_VALUE_MAPPING,
 } 
@@ -30,9 +31,9 @@ export default function sudokus(state = sudokusInitState, {type, payload}) {
         array: [...state.array],
         activeIndex: payload
       }
-    case SUDOKU_REMOVE:
-      let sudokus = state.array;
-      let length = state.array.length;
+    case SUDOKU_CLOSE:
+      const sudokus = state.array;
+      const length = state.array.length;
       let activeIndex;
       if (length === 1) activeIndex = null;
       else if (payload === length - 1) activeIndex = payload - 1;
@@ -41,6 +42,12 @@ export default function sudokus(state = sudokusInitState, {type, payload}) {
         ...state,
         array: [...sudokus.slice(0, payload), ...sudokus.slice(payload + 1, length)],
         activeIndex
+      }
+    case SUDOKU_SAVE:
+      state.array[state.activeIndex].cellsData = window.sudoku.getCellsData();
+      return {
+        ...state,
+        array: [...state.array],
       }
     case SUDOKU_PENCIL_TOGGLE:
       return {

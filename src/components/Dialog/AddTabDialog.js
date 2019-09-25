@@ -203,4 +203,4 @@ const useStyles = makeStyles(theme => ({
 }));
 
 
-export default TabAdditionDialog
+export default React.memo(TabAdditionDialog);

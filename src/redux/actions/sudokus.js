@@ -5,10 +5,10 @@ import uuidv1 from 'uuid/v1';
 */
 export const SUDOKU_ADD = 'SUDOKU_ADD';
 export const SUDOKU_TAB_CHANGE = 'SUDOKU_TAB_CHANGE';
-export const SUDOKU_REMOVE = 'SUDOKU_REMOVE';
+export const SUDOKU_CLOSE = 'SUDOKU_CLOSE';
 export const SUDOKU_PENCIL_TOGGLE = 'PENCIL_MODE_TOGGLE';
 export const SUDOKU_VALUE_MAPPING = 'SUDOKU_VALUE_MAPPING';
-
+export const SUDOKU_SAVE = 'SUDOKU_SAVE';
 /* 
 * Action Creators
 */
@@ -42,10 +42,16 @@ export function SudokuTabChange(index) {
   }
 }
 
-export function SudokuRemoval(index) {
+export function SudokuClose(index) {
   return {
-    type: SUDOKU_REMOVE,
+    type: SUDOKU_CLOSE,
     payload: index
+  }
+}
+
+export function SudokuSave() {
+  return {
+    type: SUDOKU_SAVE,
   }
 }
 

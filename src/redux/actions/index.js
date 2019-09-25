@@ -3,6 +3,7 @@ import {messages} from '../../lang';
 * Action Types
 */
 export const TOGGLE_DRAWER = 'TOGGLE_DRAWER';
+export const TOGGLE_SAVEAS_PROMPT_ON_TAB_CLOSE = 'TOGGLE_SAVEAS_PROMPT_ON_TAB_CLOSE';
 
 export const SNACKBAR_CLOSE = 'SNACKBAR_CLOSE';
 export const SNACKBAR_NO_SUDOKU = 'SNACKBAR_NO_SUDOKU';
@@ -34,6 +35,12 @@ export function DrawerToggle(state) {
   };
 }
 
+export function SaveAsPromptOnTabCloseToggle(state) {
+  return {
+    type: TOGGLE_SAVEAS_PROMPT_ON_TAB_CLOSE,
+    payload: state,
+  }
+}
 
 export function SnackbarClose() {
   return {

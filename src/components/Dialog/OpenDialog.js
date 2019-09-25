@@ -109,4 +109,4 @@ const useStyles = makeStyles(theme => ({
   }
 }));
 
-export default OpenDialog
+export default React.memo(OpenDialog);
