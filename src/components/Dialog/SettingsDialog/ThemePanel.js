@@ -8,6 +8,7 @@ import {
   Grid,
   IconButton,
   Typography,
+  Tooltip,
 } from '@material-ui/core';
 import {
   Brightness3 as Brightness3Icon,
@@ -36,13 +37,13 @@ const themeTypeIcon = {
 }
 
 //TODO: pull display texts from lang
-class AppearancePanel extends React.PureComponent {
+class ThemePanel extends React.PureComponent {
   constructor(props) {
     super(props);
     
     this.cellColorInputRefs = {};
     this.appBarColorInputRef = null;
-    this.state = props.theme;
+    this.state = props.settings;
     this.handleCellColorInput = this.handleCellColorInput.bind(this);
     this.handleOtherColorInput = this.handleOtherColorInput.bind(this);
     this.toggleThemeType = this.toggleThemeType.bind(this);
@@ -174,14 +175,18 @@ class AppearancePanel extends React.PureComponent {
       <div className={classes.root} hidden={this.props.hidden} theme={mockedTheme}>
         <Box my={2} className={classes.theme}>
           <Typography variant="body1">Toggle theme: </Typography>
-          <IconButton className={clsx(classes.themeIcon, themeType !== 'light' && classes.themeTypeOff)} onClick={this.toggleThemeType}>
-                {themeTypeIcon['light']}
-          </IconButton>
-          <IconButton className={clsx(classes.themeIcon, themeType !== 'dark' && classes.themeTypeOff)} onClick={this.toggleThemeType}>
-                {themeTypeIcon['dark']}
-          </IconButton>
+          <Tooltip title="Light mode">
+            <IconButton className={clsx(classes.themeIcon, themeType !== 'light' && classes.themeTypeOff)} onClick={this.toggleThemeType}>
+                  {themeTypeIcon['light']}
+            </IconButton>
+          </Tooltip>
+          <Tooltip title="Dark mode">
+            <IconButton className={clsx(classes.themeIcon, themeType !== 'dark' && classes.themeTypeOff)} onClick={this.toggleThemeType}>
+                  {themeTypeIcon['dark']}
+            </IconButton>
+          </Tooltip>
         </Box>
-        <Divider/>
+        <Divider className={classes.divider}/>
         <Grid container>
           <Grid className={classes.cellColorInputs} xs={12} sm={6} md={3} item>
             <Typography variant="body1" component="label">
@@ -201,7 +206,7 @@ class AppearancePanel extends React.PureComponent {
             </Box>
           </Grid>
         </Grid>
-        <Divider />
+        <Divider className={classes.divider}/>
         <Typography variant="body1" component="label">
           Navigation Bar
         </Typography>
@@ -282,6 +287,9 @@ const styles = theme => ({
   themeTypeOff: {
     opacity: '.25',
   },
+  divider: {
+    margin: theme.spacing(2, 0),
+  },
 })
 
-export default withStyles(styles)(AppearancePanel);
+export default withStyles(styles)(ThemePanel);

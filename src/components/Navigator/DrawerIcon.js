@@ -1,6 +1,4 @@
 import React from 'react';
-// import {DrawerToggle} from '../../redux/actions';
-// import {useSelector, useDispatch, shallowEqual} from 'react-redux';
 
 import IconButton from '@material-ui/core/IconButton';
 import {

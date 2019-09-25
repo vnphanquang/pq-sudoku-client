@@ -1,15 +1,10 @@
-import {  DIALOG_ACTIONS, DIALOG_CANCEL } from '../actions/dialogs';
+import {  InitState, DIALOG_ACTIONS, DIALOG_CANCEL } from '../actions/dialogs';
 
-const dialogInitState = {
-  type: null,
-  payload: null,
-}
-
-export default  function dialog(state = dialogInitState, {type, payload}) {
+export default  function dialog(state = InitState, {type, payload}) {
   if (DIALOG_ACTIONS.includes(type)) {
     return {type, payload};
   } else if (type === DIALOG_CANCEL) {
-    return dialogInitState;
+    return InitState;
   } else {
     return state;
   }

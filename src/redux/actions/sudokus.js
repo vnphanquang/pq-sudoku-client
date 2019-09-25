@@ -1,6 +1,15 @@
 import uuidv1 from 'uuid/v1';
 
 /* 
+* Initial State
+*/
+export const InitState = {
+  activeIndex: null,
+  array: [],
+  pencil: false,
+}
+
+/* 
 * Action Types
 */
 export const SUDOKU_ADD = 'SUDOKU_ADD';

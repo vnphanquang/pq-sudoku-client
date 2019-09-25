@@ -1,10 +1,8 @@
 import React from 'react';
 import {connect, batch} from 'react-redux';
 
-import { 
-  ThemeReplacement,
-  SaveAsPromptOnTabCloseToggle,
-} from '../../redux/actions';
+import { ThemeReplacement } from '../../redux/actions/theme';
+import { SaveAsPromptOnTabCloseToggle } from '../../redux/actions/general';
 import { SudokuClose } from '../../redux/actions/sudokus'
 
 import { SudokuAddition } from '../../redux/actions/sudokus';
@@ -95,10 +93,10 @@ class DialogPQS extends React.PureComponent {
     })
   }
 
-  applySettings(type, settings) {
+  applySettings({type, settings}) {
     switch(type) {
       case 'theme':
-        this.props.replaceTheme(settings.theme);
+        this.props.replaceTheme(settings);
         break;
       default:
         break
@@ -172,10 +170,11 @@ const mapDispatchToProps = dispatch => ({
     dispatch(DialogAction(DIALOG_CANCEL));
     dispatch(SudokuClose(index));
   }),
-  replaceTheme: (theme) => batch(() => {
-    dispatch(DialogAction(DIALOG_CANCEL));
-    dispatch(ThemeReplacement(theme));
-  }),
+  replaceTheme: (theme) => dispatch(ThemeReplacement(theme)),
+  // replaceTheme: (theme) => batch(() => {
+  //   dispatch(DialogAction(DIALOG_SETTINGS));
+  //   dispatch(ThemeReplacement(theme));
+  // }),
   toggleSaveAsPromptOnTabClose: () => batch(() => {
     dispatch(DialogAction(DIALOG_CANCEL));
     dispatch(SaveAsPromptOnTabCloseToggle());

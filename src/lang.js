@@ -47,12 +47,17 @@ export const dialogLabels = {
     valueMapping: 'Value Mapping',
   },
   saveYourWork: 'Save Your Work!',
-  saveAsOnTabClosePrompt: 'Closed tabs are not retrievable. Do you want to save your work to local disk?',
+  saveAsOnTabClosePrompt: 'Closed tabs are not retrievable. Save your work to local disk?',
   doNotShowAgain: 'Don\'t show again!',
+  settingsDefaultConfirmation: `Settings in this panel will be set temporarily to default! Click 'Apply' when ready to commit.`,
+  proceed: 'Proceed',
+  appearance: 'Appearance',
 }
 
 export const pqSudoku = 'pqSudoku';
 
 export const messages = {
-  noSudoku: 'No active sudoku!'
+  noSudoku: 'No active sudoku!',
 }
+
+//TODO: refactor & organize

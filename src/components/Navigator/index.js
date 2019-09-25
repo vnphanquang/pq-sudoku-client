@@ -14,7 +14,8 @@ import {
 } from '@material-ui/icons'
 import { withStyles } from '@material-ui/styles';
 
-import { DrawerToggle, ThemeTypeToggle } from '../../redux/actions';
+import { ThemeTypeToggle } from '../../redux/actions/theme';
+import { DrawerToggle } from '../../redux/actions/general';
 import { SudokuTabChange, SudokuClose } from '../../redux/actions/sudokus';
 import { DialogAction, DialogSaveAsOnTabClose } from '../../redux/actions/dialogs';
 import { APPBAR_HEIGHT } from '../utils';

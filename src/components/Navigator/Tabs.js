@@ -1,6 +1,4 @@
 import React from 'react';
-// import {connect} from 'react-redux';
-// import { TabChange, TabRemoval } from '../../redux/actions'
 import {withStyles} from '@material-ui/styles'
 import {
   Tabs,

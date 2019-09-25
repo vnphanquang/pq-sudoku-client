@@ -1,4 +1,5 @@
 import { 
+  InitState,
   SUDOKU_ADD, 
   SUDOKU_TAB_CHANGE,
   SUDOKU_SAVE,
@@ -8,13 +9,7 @@ import {
 } 
 from '../actions/sudokus';
 
-const sudokusInitState = {
-  activeIndex: null,
-  array: [],
-  pencil: false,
-}
-
-export default function sudokus(state = sudokusInitState, {type, payload}) {
+export default function sudokus(state = InitState, {type, payload}) {
   switch (type) {
     case SUDOKU_ADD:
       if (state.activeIndex !== null)

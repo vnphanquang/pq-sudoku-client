@@ -1,4 +1,12 @@
 /* 
+* Initial State,
+*/
+export const InitState = {
+  type: null,
+  payload: null,
+}
+
+/* 
 * Dialog Action Types
 */
 export const DIALOG_CANCEL = 'DIALOG_CANCEL';

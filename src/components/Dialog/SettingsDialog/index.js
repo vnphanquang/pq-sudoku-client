@@ -13,6 +13,7 @@ import {
   Tabs,
   Toolbar,
   Typography,
+  Breadcrumbs,
 } from '@material-ui/core';
 import {
   Menu as MenuIcon,
@@ -20,34 +21,80 @@ import {
 } from '@material-ui/icons';
 import { makeStyles } from '@material-ui/styles';
 
-
+import { InitState as generalInitState } from '../../../redux/actions/general';
+import { InitState as themeInitState } from '../../../redux/actions/theme';
 import { dialogLabels } from '../../../lang';
-import AppearancePanel from './AppearancePanel';
+import ThemePanel from './ThemePanel';
+import ConfirmationDialog from '../ConfirmationDialog';
 
 const SlideTransition = React.forwardRef(function Transition(props, ref) {
   return <Slide direction="right" ref={ref} {...props} />;
 });
 
-function SettingsDialog({onSubmit, onCancel, data: {theme}}) {
+const defaultSettingsVariants = {
+  general: generalInitState,
+  theme: themeInitState,
+}
+
+const panelLabelVariants = {
+  general: dialogLabels.general,
+  theme: dialogLabels.appearance,
+}
+
+function SettingsDialog({onSubmit, onCancel, data}) {
   console.log('Settings Dialog rendered');
   const classes = useStyles();
-  const [activePanel, setActivePanel] = React.useState(0);
-  const [drawerOpen, setDrawerOpen] = React.useState(true);
-  const appearanceRef = React.useRef(null);
-  function changePanel(e, index) {
-    setActivePanel(index);
+  const [panelState, setPanelState] = React.useState({
+    type: 'theme',
+    defaultRequested: false,
+    defaultApplied: false,
+  })
+  const [drawerOpen, setDrawerOpen] = React.useState(window.innerWidth >= 600);
+  const panelRef = React.useRef(null);
+
+  React.useEffect(
+    () => {
+      if (panelState.defaultApplied) {
+        panelRef.current.setState(defaultSettingsVariants[panelState.type]);
+        setPanelState({...panelState, defaultApplied: false})
+      }
+    },
+    [panelState]
+  )
+
+  function changePanel(e, value) {
+    setPanelState({
+      ...panelState,
+      type: value,
+    });
   }
 
-  function submitThemeReplacement(e) {
-    onSubmit('theme', {
-      theme: appearanceRef.current.state,
+  function setDefault(e) {
+    setPanelState({
+      ...panelState,
+      defaultApplied: true,
+      defaultRequested: false,
     })
   }
 
-  //TODO: handle filling default settings
-  function defaultTheme(e) {
-    onSubmit('theme', {
-      theme: null
+  function requestDefault(e) {
+    setPanelState({
+      ...panelState,
+      defaultRequested: true,
+    })
+  }
+
+  function cancelDefaultRequest(e) {
+    setPanelState({
+      ...panelState,
+      defaultRequested: false,
+    })
+  }
+
+  function apply(e) {
+    onSubmit({
+      type: panelState.type,
+      settings: panelRef.current.state,
     })
   }
 
@@ -71,9 +118,14 @@ function SettingsDialog({onSubmit, onCancel, data: {theme}}) {
           >
             {drawerOpen ? <KeyboardArrowUpIcon /> : <MenuIcon />}
           </IconButton>
-          <Typography variant="h6" className={classes.title}>
-            {dialogLabels.settings}
-          </Typography>
+          <Breadcrumbs className={classes.title} component="div">
+            <Typography variant="subtitle1">
+              {dialogLabels.settings}
+            </Typography>
+            <Typography variant="subtitle1">
+              {panelLabelVariants[panelState.type]}
+            </Typography>
+          </Breadcrumbs>
         </Toolbar>
       </AppBar>
       <Drawer
@@ -84,24 +136,36 @@ function SettingsDialog({onSubmit, onCancel, data: {theme}}) {
           className={classes.tabLabels}
           orientation="vertical"
           variant="scrollable"
-          value={activePanel}
+          value={panelState.type}
           onChange={changePanel}
         >
-          <Tab label="Appearance" />
+          {Object.entries(panelLabelVariants).map(([key, value]) => (
+            <Tab key={`setting-tab-${value}`} label={value} value={key} />
+          ))}
         </Tabs>
       </Drawer>
       <div className={classes.content}>
         <div 
           className={clsx(classes.panels, drawerOpen ? classes.panelTransitionClose : classes.panelTransitionOpen)}
         >
-          <AppearancePanel ref={appearanceRef} hidden={activePanel !== 0} index={0} theme={theme}>1</AppearancePanel>
+          <ThemePanel 
+            {...(panelState.type === 'theme') && {ref: panelRef}} 
+            hidden={panelState.type !== 'theme'} 
+            settings={data[panelState.type]}
+          /> 
         </div>
         <DialogActions className={classes.actions}>
-          <Button onClick={defaultTheme}>{dialogLabels.default}</Button>
-          <Button onClick={onCancel}>{dialogLabels.cancel}</Button>
-          <Button onClick={submitThemeReplacement}>{dialogLabels.apply}</Button>
+          <Button onClick={onCancel}>{dialogLabels.close}</Button>
+          <Button onClick={requestDefault}>{dialogLabels.default}</Button>
+          <Button onClick={apply}>{dialogLabels.apply}</Button>
         </DialogActions>
       </div>
+      <ConfirmationDialog 
+        open={panelState.defaultRequested}
+        onSubmit={setDefault}
+        onCancel={cancelDefaultRequest}
+        message={dialogLabels.settingsDefaultConfirmation}
+      />
     </Dialog>
   )
 }
@@ -112,6 +176,7 @@ const useStyles = makeStyles(theme => ({
   root: {
   },
   appBar: {
+    backgroundColor: theme.colors.appBar[theme.palette.type],
     zIndex: theme.zIndex.drawer + 1,
   },
   title: {
@@ -154,4 +219,4 @@ const useStyles = makeStyles(theme => ({
   }
 }));
 
-export default SettingsDialog;
+export default React.memo(SettingsDialog);

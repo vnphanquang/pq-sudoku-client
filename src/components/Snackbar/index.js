@@ -18,7 +18,7 @@ import {
 import { makeStyles } from '@material-ui/styles';
 
 import { useDispatch, useSelector } from 'react-redux';
-import { SnackbarClose } from '../../redux/actions';
+import { SnackbarClose } from '../../redux/actions/snackbar';
 
 
 
