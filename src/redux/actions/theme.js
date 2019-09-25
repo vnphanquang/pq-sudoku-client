@@ -55,7 +55,7 @@ export const InitState = {
 * Action Types
 */
 export const THEME_TYPE_TOGGLE = 'THEME_TYPE_TOGGLE';
-export const THEME_REPLACE = 'THEME_REPLACE';
+export const THEME_SETTINGS = 'THEME_SETTINGS';
 
 /* 
 * Action Creators
@@ -66,9 +66,9 @@ export function ThemeTypeToggle() {
   }
 }
 
-export function ThemeReplacement(theme) {
+export function ThemeSettings(theme=InitState) {
   return {
-    type: THEME_REPLACE,
+    type: THEME_SETTINGS,
     payload: theme
   }
 }

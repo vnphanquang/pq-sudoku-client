@@ -1,7 +1,7 @@
 import { 
   InitState,
   THEME_TYPE_TOGGLE,
-  THEME_REPLACE,
+  THEME_SETTINGS,
 } 
 from '../actions/theme';
 
@@ -12,8 +12,8 @@ export default function theme(state=InitState, {type, payload}) {
         ...state,
         type: state.type === 'light' ? 'dark' : 'light',
       }
-    case THEME_REPLACE:
-      return payload || InitState;
+    case THEME_SETTINGS:
+      return payload;
     default:
       return state;
   }

@@ -23,8 +23,11 @@ import { makeStyles } from '@material-ui/styles';
 
 import { InitState as generalInitState } from '../../../redux/actions/general';
 import { InitState as themeInitState } from '../../../redux/actions/theme';
+import { generateDefaultValues } from '../../../redux/actions/sudokus';
 import { dialogLabels } from '../../../lang';
 import ThemePanel from './ThemePanel';
+import GeneralPanel from './GeneralPanel';
+import CurrentSudokuPanel from './CurrentSudokuPanel';
 import ConfirmationDialog from '../ConfirmationDialog';
 
 const SlideTransition = React.forwardRef(function Transition(props, ref) {
@@ -32,20 +35,32 @@ const SlideTransition = React.forwardRef(function Transition(props, ref) {
 });
 
 const defaultSettingsVariants = {
-  general: generalInitState,
-  theme: themeInitState,
+  sudoku: (currentSettings) => ({
+    ...currentSettings,
+    values: generateDefaultValues(currentSettings.size),
+  }),
+  general: () => generalInitState,
+  theme: () => themeInitState,
 }
 
 const panelLabelVariants = {
+  sudoku: dialogLabels.currentSudoku,
   general: dialogLabels.general,
   theme: dialogLabels.appearance,
 }
 
-function SettingsDialog({onSubmit, onCancel, data}) {
+const panelVariants = {
+  sudoku: CurrentSudokuPanel,
+  general: GeneralPanel,
+  theme: ThemePanel,
+}
+
+function SettingsDialog({onApply, onApplyAllAndClose, onCancel, data}) {
   console.log('Settings Dialog rendered');
   const classes = useStyles();
   const [panelState, setPanelState] = React.useState({
     type: 'theme',
+    settings: data,
     defaultRequested: false,
     defaultApplied: false,
   })
@@ -55,7 +70,11 @@ function SettingsDialog({onSubmit, onCancel, data}) {
   React.useEffect(
     () => {
       if (panelState.defaultApplied) {
-        panelRef.current.setState(defaultSettingsVariants[panelState.type]);
+        panelRef.current.setState(
+          defaultSettingsVariants[panelState.type](
+            panelState.settings[panelState.type]
+          )
+        );
         setPanelState({...panelState, defaultApplied: false})
       }
     },
@@ -65,6 +84,10 @@ function SettingsDialog({onSubmit, onCancel, data}) {
   function changePanel(e, value) {
     setPanelState({
       ...panelState,
+      settings: {
+        ...panelState.settings,
+        [panelState.type]: panelRef.current.state,
+      },
       type: value,
     });
   }
@@ -92,15 +115,24 @@ function SettingsDialog({onSubmit, onCancel, data}) {
   }
 
   function apply(e) {
-    onSubmit({
+    onApply({
       type: panelState.type,
       settings: panelRef.current.state,
     })
   }
 
+  function applyAllAndClose(e) {
+    onApplyAllAndClose({
+      ...panelState.settings,
+      [panelState.type]: panelRef.current.state,
+    });
+  }
+
   function toggleDrawer() {
     setDrawerOpen(!drawerOpen);
   }
+
+  const Panel = panelVariants[panelState.type];
 
   return (
     <Dialog
@@ -140,7 +172,7 @@ function SettingsDialog({onSubmit, onCancel, data}) {
           onChange={changePanel}
         >
           {Object.entries(panelLabelVariants).map(([key, value]) => (
-            <Tab key={`setting-tab-${value}`} label={value} value={key} />
+            <Tab key={`setting-tab-${key}`} label={value} value={key} />
           ))}
         </Tabs>
       </Drawer>
@@ -148,16 +180,16 @@ function SettingsDialog({onSubmit, onCancel, data}) {
         <div 
           className={clsx(classes.panels, drawerOpen ? classes.panelTransitionClose : classes.panelTransitionOpen)}
         >
-          <ThemePanel 
-            {...(panelState.type === 'theme') && {ref: panelRef}} 
-            hidden={panelState.type !== 'theme'} 
-            settings={data[panelState.type]}
-          /> 
+          <Panel 
+            ref={panelRef}
+            settings={panelState.settings[panelState.type]}
+          />
         </div>
         <DialogActions className={classes.actions}>
           <Button onClick={onCancel}>{dialogLabels.close}</Button>
           <Button onClick={requestDefault}>{dialogLabels.default}</Button>
           <Button onClick={apply}>{dialogLabels.apply}</Button>
+          <Button onClick={applyAllAndClose}>{dialogLabels.applyAllAndClose}</Button>
         </DialogActions>
       </div>
       <ConfirmationDialog 

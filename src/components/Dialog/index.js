@@ -1,9 +1,10 @@
 import React from 'react';
 import {connect, batch} from 'react-redux';
 
-import { ThemeReplacement } from '../../redux/actions/theme';
+import { ThemeSettings } from '../../redux/actions/theme';
+import { GeneralSettings } from '../../redux/actions/general';
 import { SaveAsPromptOnTabCloseToggle } from '../../redux/actions/general';
-import { SudokuClose } from '../../redux/actions/sudokus'
+import { SudokuClose, CurrentSudokuSettings } from '../../redux/actions/sudokus'
 
 import { SudokuAddition } from '../../redux/actions/sudokus';
 import {  
@@ -48,16 +49,17 @@ const actionVariants = {
     onSubmit: thisArg.exportFile.bind(thisArg),
   }),
   [DIALOG_SAVEAS]: (thisArg) => ({
-    onSubmit: thisArg.exportFile.bind(thisArg)
+    onSubmit: thisArg.exportFile.bind(thisArg),
   }),
   [DIALOG_OPEN]: (thisArg) => ({
-    onSubmit: thisArg.openSudoku.bind(thisArg)
+    onSubmit: thisArg.openSudoku.bind(thisArg),
   }),
   [DIALOG_SETTINGS]: (thisArg) => ({
-    onSubmit: thisArg.applySettings.bind(thisArg)
+    onApply: thisArg.props.applySettings,
+    onApplyAllAndClose: thisArg.props.applyAllSettingsAndClose,
   }),
   [DIALOG_FEEDBACK]: (thisArg) => ({
-    onSubmit: thisArg.sendFeedback.bind(thisArg)
+    onSubmit: thisArg.sendFeedback.bind(thisArg),
   }),
   [DIALOG_SAVEAS_ON_TAB_CLOSE]: (thisArg) => ({
     onSave: () => thisArg.props.dispatchAnotherDialog(DIALOG_SAVEAS),
@@ -91,16 +93,6 @@ class DialogPQS extends React.PureComponent {
       this.props.cancelDialog();
       this.props.addSudoku({name, ...sudokuData});
     })
-  }
-
-  applySettings({type, settings}) {
-    switch(type) {
-      case 'theme':
-        this.props.replaceTheme(settings);
-        break;
-      default:
-        break
-    }
   }
 
   sendFeedback(data) {
@@ -141,12 +133,17 @@ const mapStateToProps = state => {
     case DIALOG_SAVEAS:
     case DIALOG_EXPORT:
       const activeIndex = state.sudokus.activeIndex
-      if ((activeIndex || activeIndex === 0) && true) {
+      // if ((activeIndex || activeIndex === 0) && true) {
+        if (activeIndex !== null) {
         data = state.sudokus.array[activeIndex];
       }
       break;
     case DIALOG_SETTINGS:
-      data = {theme: state.theme};
+      data = {
+        general: state.general,
+        theme: state.theme,
+        sudoku: state.sudokus.activeIndex !== null ? state.sudokus.array[state.sudokus.activeIndex] : null,
+      };
       break;
     case DIALOG_SAVEAS_ON_TAB_CLOSE:
       data = payload;
@@ -160,6 +157,12 @@ const mapStateToProps = state => {
   }
 }
 
+const settingsActionVariants = {
+  theme: ThemeSettings,
+  general: GeneralSettings,
+  sudoku: CurrentSudokuSettings,
+}
+
 const mapDispatchToProps = dispatch => ({
   cancelDialog: () => dispatch(DialogAction(DIALOG_CANCEL)),
   addSudoku: (config) => batch(() => {
@@ -170,11 +173,13 @@ const mapDispatchToProps = dispatch => ({
     dispatch(DialogAction(DIALOG_CANCEL));
     dispatch(SudokuClose(index));
   }),
-  replaceTheme: (theme) => dispatch(ThemeReplacement(theme)),
-  // replaceTheme: (theme) => batch(() => {
-  //   dispatch(DialogAction(DIALOG_SETTINGS));
-  //   dispatch(ThemeReplacement(theme));
-  // }),
+  applySettings: ({type, settings}) => dispatch(settingsActionVariants[type](settings)),
+  applyAllSettingsAndClose: ({theme, general, sudoku}) => batch(() => {
+    dispatch(DialogAction(DIALOG_CANCEL));
+    dispatch(CurrentSudokuSettings(sudoku));
+    dispatch(ThemeSettings(theme));
+    dispatch(GeneralSettings(general));
+  }),
   toggleSaveAsPromptOnTabClose: () => batch(() => {
     dispatch(DialogAction(DIALOG_CANCEL));
     dispatch(SaveAsPromptOnTabCloseToggle());

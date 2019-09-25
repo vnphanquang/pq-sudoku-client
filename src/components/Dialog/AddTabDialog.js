@@ -17,10 +17,10 @@ import {
   Typography,
 } from '@material-ui/core';
 
+import { generateDefaultValues } from '../../redux/actions/sudokus';
 import { dialogLabels } from '../../lang';
 import { StyledGrid } from '../Sudoku/Grid';
 import { StyledCell } from '../Sudoku/Cell';
-import { generateDefaultValues } from '../../redux/actions/sudokus';
 import { STYLE_STATES} from '../utils';
 
 const sizeVariant = {
@@ -30,54 +30,54 @@ const sizeVariant = {
   25: '25x25'
 }
 
-const defaultData = {
+const defaultSettings = {
   size: '9',
   values: generateDefaultValues(9),
 }
 
 function TabAdditionDialog({onSubmit, onCancel}) {
   const classes = useStyles();
-  const [data, setData] = React.useState({
+  const [settings, setSettings] = React.useState({
     name: '',
-    ...defaultData,
+    ...defaultSettings,
   });
 
   function submit(e) {
     e.preventDefault();
     onSubmit({
-      ...data,
-      size: parseInt(data.size),
+      ...settings,
+      size: parseInt(settings.size),
     });
     //TODO: add size parameter & value mapping option
   }
   function setDefault() {
-    setData({...data, ...defaultData});
+    setSettings({...settings, ...defaultSettings});
   }
 
-  function updateData(e) {
-    setData({...data, [e.target.name]: e.target.value});
+  function updateSettings(e) {
+    setSettings({...settings, [e.target.name]: e.target.value});
   }
 
   function updateSize(e) {
-    setData({
-      ...data,
+    setSettings({
+      ...settings,
       size: e.target.value,
       values: generateDefaultValues(parseInt(e.target.value))
     })
   }
 
   function updateValue(e) {
-    if (!data.values.some(value => value === e.target.value)) {
-      data.values[parseInt(e.target.name)] = e.target.value;
-      setData({
-        ...data,
-        values: [...data.values]
+    if (!settings.values.some(value => value === e.target.value)) {
+      settings.values[parseInt(e.target.name)] = e.target.value;
+      setSettings({
+        ...settings,
+        values: [...settings.values]
       })
     }
   }
 
   const demoCells = [];
-  const subgridSize = Math.sqrt(data.size);
+  const subgridSize = Math.sqrt(settings.size);
   let index = 0;
   for (let row = 0; row < subgridSize; row++) {
     for (let col = 0; col < subgridSize; col++) {
@@ -85,17 +85,17 @@ function TabAdditionDialog({onSubmit, onCancel}) {
         <StyledCell
             key={`demo-cell-${row}-${col}`}
             row={row} col={col}
-            styleState={data.values[index].length !== 1 && STYLE_STATES.CONFLICTING}
+            styleState={settings.values[index].length === 0 && STYLE_STATES.CONFLICTING}
           >
             <Tooltip className={classes.demoCellWrapper} title={`insert label #${index+1}`}>
               <Input
                 required
                 disableUnderline
-                value={data.values[index]}
+                value={settings.values[index]}
                 name={`${index}`}
                 onChange={updateValue}
                 type="text"
-                inputProps={{maxLength: 1, minLength: 1}}
+                inputProps={{maxLength: 2, minLength: 1}}
               />
             </Tooltip>
         </StyledCell>
@@ -117,7 +117,7 @@ function TabAdditionDialog({onSubmit, onCancel}) {
       >
         <DialogContent className={classes.content} dividers>
           <TextField
-            error={data.name.length === 0}
+            error={settings.name.length === 0}
             required
             fullWidth
             autoFocus
@@ -126,13 +126,13 @@ function TabAdditionDialog({onSubmit, onCancel}) {
             variant="outlined"
             placeholder={dialogLabels.sudokuName.placeholder}
             name="name"
-            value={data.name}
-            onChange={updateData}
+            value={settings.name}
+            onChange={updateSettings}
           />
           <FormControl fullWidth>
             <FormHelperText>{dialogLabels.sudokus.sizeHint}</FormHelperText>
             <Select
-              value={data.size}
+              value={settings.size}
               onChange={updateSize}
               name="size"
               variant="outlined"
@@ -154,6 +154,12 @@ function TabAdditionDialog({onSubmit, onCancel}) {
             >
               {dialogLabels.sudokus.valueMapping}
             </Typography>
+            <Typography
+                variant="body2"
+                component="label"
+              >
+                {dialogLabels.sudokus.valueMappingHint}
+              </Typography>
             <StyledGrid className={classes.demoGrid} rows={subgridSize} cols={subgridSize}>
               {demoCells}
             </StyledGrid>

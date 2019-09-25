@@ -6,6 +6,7 @@ import {
   SUDOKU_CLOSE,
   SUDOKU_PENCIL_TOGGLE,
   SUDOKU_VALUE_MAPPING,
+  CURRENT_SUDOKU_SETTINGS,
 } 
 from '../actions/sudokus';
 
@@ -51,6 +52,12 @@ export default function sudokus(state = InitState, {type, payload}) {
       }
     case SUDOKU_VALUE_MAPPING:
       state.array[state.activeIndex].values = payload;
+      return {
+        ...state,
+        array: [...state.array]
+      }
+    case CURRENT_SUDOKU_SETTINGS:
+      state.array[state.activeIndex] = payload;
       return {
         ...state,
         array: [...state.array]

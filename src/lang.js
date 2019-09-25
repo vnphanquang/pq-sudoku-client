@@ -17,6 +17,7 @@ export const dialogLabels = {
     label: 'Name',
     placeholder: 'Sudoku Name'
   },
+  name: 'Name',
   cancel: 'Cancel',
   create: 'Create',
   format: 'Format',
@@ -45,6 +46,7 @@ export const dialogLabels = {
   sudokus: {
     sizeHint: 'Grid size',
     valueMapping: 'Value Mapping',
+    valueMappingHint: 'Insert any UTF-16 character',
   },
   saveYourWork: 'Save Your Work!',
   saveAsOnTabClosePrompt: 'Closed tabs are not retrievable. Save your work to local disk?',
@@ -52,6 +54,8 @@ export const dialogLabels = {
   settingsDefaultConfirmation: `Settings in this panel will be set temporarily to default! Click 'Apply' when ready to commit.`,
   proceed: 'Proceed',
   appearance: 'Appearance',
+  applyAllAndClose: 'Apply All & Close',
+  currentSudoku: 'Current Sudoku',
 }
 
 export const pqSudoku = 'pqSudoku';

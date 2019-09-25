@@ -172,8 +172,8 @@ class ThemePanel extends React.PureComponent {
     }
 
     return (
-      <div className={classes.root} hidden={this.props.hidden} theme={mockedTheme}>
-        <Box my={2} className={classes.theme}>
+      <div className={classes.root}>
+        <div className={classes.theme}>
           <Typography variant="body1">Toggle theme: </Typography>
           <Tooltip title="Light mode">
             <IconButton className={clsx(classes.themeIcon, themeType !== 'light' && classes.themeTypeOff)} onClick={this.toggleThemeType}>
@@ -185,10 +185,10 @@ class ThemePanel extends React.PureComponent {
                   {themeTypeIcon['dark']}
             </IconButton>
           </Tooltip>
-        </Box>
+        </div>
         <Divider className={classes.divider}/>
         <Grid container>
-          <Grid className={classes.cellColorInputs} xs={12} sm={6} md={3} item>
+          <Grid className={classes.cellColorInputs} xs={6} md={3} item>
             <Typography variant="body1" component="label">
               Cell Colors
             </Typography>
@@ -198,12 +198,10 @@ class ThemePanel extends React.PureComponent {
             </Typography>
             {cellColorInputs}
           </Grid>
-          <Grid className={classes.demoGrid} xs={12} sm={6} md={3} item>
-            <Box width={200} height={200} >
-              <StyledGrid theme={mockedTheme} rows={4} cols={4}> 
-                {demoCells}
-              </StyledGrid>
-            </Box>
+          <Grid className={classes.demoGridWrapper}  xs={6} md={3} item>
+            <StyledGrid className={classes.demoGrid} theme={mockedTheme} rows={4} cols={4}> 
+              {demoCells}
+            </StyledGrid>
           </Grid>
         </Grid>
         <Divider className={classes.divider}/>
@@ -227,7 +225,7 @@ class ThemePanel extends React.PureComponent {
             onClick={() => this.appBarColorInputRef.click()}
           >
             <Box mx={2}><MenuIcon/></Box>
-            <Typography variant="h5">SudokuPQ</Typography>
+            <Typography variant="h5">pqSudoku</Typography>
           </AppBarDemo>
         </Grid>
       </div>
@@ -246,8 +244,9 @@ const AppBarDemo = styled((props) => <ButtonBase {...props} />)(
 
 const styles = theme => ({
   root: {
-    display: ({hidden}) => hidden ? 'none' : 'flex',
+    display: 'flex',
     flexDirection: 'column',
+    padding: theme.spacing(2, 0),
   },
   colorInput: {
     display: 'flex',
@@ -270,9 +269,20 @@ const styles = theme => ({
     flexDirection: 'column',
     justifyContent: 'space-between',
   },
-  demoGrid: {
+  demoGridWrapper: {
     display: 'flex',
     justifyContent: 'center',
+    alignItems: 'center',
+  },
+  demoGrid: {
+    width: 200,
+    height: 200,
+    [theme.breakpoints.only('xs')]: {
+      minWidth: 150,
+      minHeight: 150,
+      width: 180,
+      height: 180,
+    }
   },
   hidden: {
     display: 'none'

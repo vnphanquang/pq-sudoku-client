@@ -8,7 +8,6 @@ export const InitState = {
   array: [],
   pencil: false,
 }
-
 /* 
 * Action Types
 */
@@ -18,10 +17,11 @@ export const SUDOKU_CLOSE = 'SUDOKU_CLOSE';
 export const SUDOKU_PENCIL_TOGGLE = 'PENCIL_MODE_TOGGLE';
 export const SUDOKU_VALUE_MAPPING = 'SUDOKU_VALUE_MAPPING';
 export const SUDOKU_SAVE = 'SUDOKU_SAVE';
+export const CURRENT_SUDOKU_SETTINGS = 'CURRENT_SUDOKU_SETTINGS';
+
 /* 
 * Action Creators
 */
-
 export function generateDefaultValues(size) {
   const values = [];
   for (let i = 0; i < size; i++) {
@@ -29,6 +29,7 @@ export function generateDefaultValues(size) {
   }
   return values;
 }
+
 export function SudokuAddition({
   name='New Sudoku', 
   size=9, 
@@ -74,5 +75,12 @@ export function SudokuValueMapping(valueMap) {
   return {
     type: SUDOKU_VALUE_MAPPING,
     payload: valueMap
+  }
+}
+
+export function CurrentSudokuSettings(sudoku) {
+  return {
+    type: CURRENT_SUDOKU_SETTINGS,
+    payload: sudoku
   }
 }

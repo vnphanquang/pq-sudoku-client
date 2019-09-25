@@ -705,6 +705,25 @@ class Grid extends React.Component {
   }
 
   shouldComponentUpdate(nextProps, nextState) {
+    const newValues = nextProps.values;
+    const oldValues = this.props.values;
+    let newValue, oldValue;
+    let cells;
+    for (let i = 0; i < newValues.length; i++) {
+      newValue = newValues[i];
+      oldValue = oldValues[i];
+      if (newValue !== oldValue) {
+        cells = this.valueToCellsMap.get(oldValue);
+        // eslint-disable-next-line no-unused-vars
+        for (let cell of cells) {
+          cell.setState({cellValue: newValue});
+        }
+        this.valueToCellsMap.set(newValue, cells);
+        this.valueToCellsMap.delete(oldValue);
+        this.valueMap.set(valueKeyStrokes[i], newValue);
+        
+      }
+    }
     return false;
   }
 
