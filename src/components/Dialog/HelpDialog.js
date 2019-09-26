@@ -19,7 +19,11 @@ import {dialogLabels } from '../../lang';
 //TODO: refactors & language separation!
 const helpData = [
   ['"Double click" or "Alt+G"', 'Cell/Grid', 'Select all cells within current subgrid'],
-  ['"Triple click" or "Ctrl+A', 'Cell/Grid', 'Select all cells within current grid'],
+  ['"Triple click" or "Ctrl+A"', 'Cell/Grid', 'Select all cells within current grid'],
+  ['"Delete" or "Backspace"', 'Cell/Grid', 'Clear cell(s)'],
+  ['"Arrow Keys"', 'Cell/Grid', 'Navigate within grid'],
+  ['"Ctrl+Click" or "Ctrl+Arrow" or "Shift+Arrow"', 'Cell/Grid', 'Add cell to selection'],
+  ['"Shift+Click"', 'Cell/Grid', 'Add cell(s) to selection based on locations of focused cell and clicked cell'],
   ['"Alt+R"', 'Cell/Grid', 'Select all cells within current row'],
   ['"Alt+C"', 'Cell/Grid', 'Select all cells within current column'],
   ['"Alt+P"', 'Workspace', 'Toggle pencil mode'],

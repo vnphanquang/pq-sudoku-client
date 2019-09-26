@@ -158,20 +158,25 @@ class Grid extends React.Component {
 
   handleKeyPress(e, targetCell) {
     let {ctrlKey, altKey, key} = e;
+    //TODO: refactors shift or ctrl + arrow
     if (ctrlKey) {
-      switch(key) {
-        case 'a':
-          e.stopPropagation();
-          this.selectAll();
-          break;
-        case 'z':
-          //TODO: implement undo
-          break;
-        case 'y':
-          //TODO: implement redo
-          break;
-        default:
-          break;
+      if (KEYS_STROKES.ARROWS.includes(key)) {
+        this.keyNavigate(e);
+      } else {
+        switch(key) {
+          case 'a':
+            e.stopPropagation();
+            this.selectAll();
+            break;
+          case 'z':
+            //TODO: implement undo
+            break;
+          case 'y':
+            //TODO: implement redo
+            break;
+          default:
+            break;
+        }
       }
     } else if (altKey) {
       switch(key) {
