@@ -7,8 +7,6 @@ import {
   DialogActions,
   DialogContent,
   Button,
-  Typography,
-  Link,
   Table,
   TableBody,
   TableCell,
