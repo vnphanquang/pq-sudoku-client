@@ -1,18 +1,17 @@
-import {messages} from '../../lang';
-
 /* 
 * Initial State
 */
 export const InitState = {
   type: null,
-  message: "",
+  payload: null,
 }
+
+export const SNACKBAR_GENERIC_ERROR = 'SNACKBAR_GENERIC_ERROR';
 
 /* 
 * Action Types
 */
 export const SNACKBAR_CLOSE = 'SNACKBAR_CLOSE';
-export const SNACKBAR_NO_SUDOKU = 'SNACKBAR_NO_SUDOKU';
 
 /* 
 * Action Creators
@@ -23,9 +22,9 @@ export function SnackbarClose() {
   }
 }
 
-export function SnackbarNoSudoku() {
+export function SnackbarGenericError(error) {
   return {
-    type: SNACKBAR_NO_SUDOKU,
-    payload: messages.noSudoku
+    type: 'SNACKBAR_GENERIC_ERROR',
+    payload: error
   }
 }

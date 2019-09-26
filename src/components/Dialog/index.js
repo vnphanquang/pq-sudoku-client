@@ -5,7 +5,6 @@ import { ThemeSettings } from '../../redux/actions/theme';
 import { GeneralSettings } from '../../redux/actions/general';
 import { SaveAsPromptOnTabCloseToggle } from '../../redux/actions/general';
 import { SudokuClose, CurrentSudokuSettings } from '../../redux/actions/sudokus'
-
 import { SudokuAddition } from '../../redux/actions/sudokus';
 import {  
   DialogAction,
@@ -20,6 +19,9 @@ import {
   DIALOG_HELP,
   DIALOG_SAVEAS_ON_TAB_CLOSE,
 } from '../../redux/actions/dialogs';
+import NoActiveSudokuError from '../../errors/NoActiveSudokuError';
+import { SnackbarGenericError } from '../../redux/actions/snackbar';
+
 
 import AddTabDialog from './AddTabDialog';
 import ExportDialog from './ExportDialog';
@@ -70,14 +72,14 @@ const actionVariants = {
   }),
 }
 
-class DialogPQS extends React.PureComponent {
+class DialogPQS extends React.Component {
 
   constructor(props) {
     super(props)
     this.aRef = null;
     this.updateARef = this.updateARef.bind(this);
   }
-  
+
   updateARef(node) {
     this.aRef = node;
   }
@@ -101,43 +103,56 @@ class DialogPQS extends React.PureComponent {
     console.log(data);
   }
 
+  componentDidUpdate() {
+    if (this.props.error) {
+      //TODO: handle error generically, React's ErrorBoundary?
+      this.props.snackbarGenericError(this.props.error);
+    }
+  }
+
   render() {
     console.log('Dialog rendered')
-    const {type, data, cancelDialog} = this.props;
-    const Dialog = dialogVariants[type];
-    return (
-      <React.Fragment>
-        { 
-          Dialog && 
-          <Dialog 
-            onCancel={cancelDialog}
-            {...(actionVariants[type] && actionVariants[type](this))}
-            data={data}
-          />
-        }
-        <a 
-          style={{display: 'none'}}
-          href="/"
-          ref={this.updateARef}
-        >
-          (hidden)Export
-        </a>
-      </React.Fragment>
-    )
+    const {type, data, cancelDialog, error} = this.props;
+    if (error) {
+      return null;
+    } else {
+      const Dialog = dialogVariants[type];
+      return (
+        <React.Fragment>
+          { 
+            Dialog && 
+            <Dialog 
+              onCancel={cancelDialog}
+              {...(actionVariants[type] && actionVariants[type](this))}
+              data={data}
+            />
+          }
+          <a 
+            style={{display: 'none'}}
+            href="/"
+            ref={this.updateARef}
+          >
+            (hidden)Export
+          </a>
+        </React.Fragment>
+      )
+    }
   }
 }
-
 
 const mapStateToProps = state => {
   const {type, payload} = state.dialog;
   let data = null;
+  let error = null;
   switch (type) {
     case DIALOG_SAVEAS:
     case DIALOG_EXPORT:
       const activeIndex = state.sudokus.activeIndex
       // if ((activeIndex || activeIndex === 0) && true) {
-        if (activeIndex !== null) {
+      if (activeIndex !== null) {
         data = state.sudokus.array[activeIndex];
+      } else {
+        error = new NoActiveSudokuError();
       }
       break;
     case DIALOG_SETTINGS:
@@ -155,7 +170,8 @@ const mapStateToProps = state => {
   }
   return {
     type,
-    data
+    data,
+    error,
   }
 }
 
@@ -190,6 +206,10 @@ const mapDispatchToProps = dispatch => ({
     dispatch(DialogAction(DIALOG_CANCEL));
     dispatch(DialogAction(type));
   }),
+  snackbarGenericError: (error) => batch(() => {
+    dispatch(DialogAction(DIALOG_CANCEL));
+    dispatch(SnackbarGenericError(error));
+  })
 })
 
 export default connect(mapStateToProps, mapDispatchToProps)(DialogPQS);

@@ -1,6 +1,6 @@
 {
-  "short_name": "pq-sudoku",
-  "name": "PQ-Sudoku Playgound",
+  "short_name": "pqSudoku",
+  "name": "pqSudoku - Sudoku & Grid-based Puzzle Playground",
   "icons": [
     {
       "src": "favicon.ico",

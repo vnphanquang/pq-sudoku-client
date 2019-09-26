@@ -65,4 +65,8 @@ export const messages = {
   noSudoku: 'No active sudoku!',
 }
 
+export const errorMessages = {
+  noActiveSudoku: 'No active sudoku!',
+}
+
 //TODO: refactor & organize

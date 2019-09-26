@@ -34,6 +34,10 @@ class Navigator extends React.PureComponent {
   constructor(props) {
     super(props);
     this.closeTab = this.closeTab.bind(this);
+
+    this.hotkeyHandlers = {
+      TOGGLE_DRAWER: this.props.toggleDrawer,
+    }
   }
   
   closeTab(index) {

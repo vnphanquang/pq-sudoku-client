@@ -20,9 +20,6 @@ import { makeStyles } from '@material-ui/styles';
 import { useDispatch, useSelector } from 'react-redux';
 import { SnackbarClose } from '../../redux/actions/snackbar';
 
-
-
-
 const variantIcon = {
   success: CheckCircleIcon,
   warning: WarningIcon,
@@ -33,14 +30,11 @@ const variantIcon = {
 const SlideTransition = React.forwardRef(function Transition(props, ref) {
   return <Slide direction="right" ref={ref} {...props} />;
 });
-// function SlideTransition(props) {
-//   return <Slide {...props} direction="right" />;
-// }
 
-
+//TODO: refactor, use HoC & Connect
 function SnackbarPQS() {
   const classes = useStyles();
-  const {type, message} = useSelector(state => state.snackbar);
+  const {type, payload:error} = useSelector(state => state.snackbar);
   const dispatch = useDispatch();
 
   function handleClose(e, reason) {
@@ -51,33 +45,37 @@ function SnackbarPQS() {
 
   const Icon = variantIcon[type];
 
-  return (
-    <Snackbar
-      open={type !== null}
-      onClose={handleClose}
-      TransitionComponent={SlideTransition}
-      anchorOrigin={{
-        vertical: 'bottom',
-        horizontal: 'left',
-      }}
-      autoHideDuration={5000}
-    >
-      <SnackbarContent
-        className={clsx(classes[type], classes.content)}
-        message={
-          <span className={classes.message}>
-            {Icon && <Icon className={classes.icon}/>}
-            {message}
-          </span>
-        }
-        action={[
-          <IconButton key="snackbarCloseBtn" onClick={handleClose}>
-            <CloseIcon className={classes.closeBtn}/>
-          </IconButton>
-        ]}
-      />
-    </Snackbar>
-  )
+  if (type !== null) {
+    return (
+      <Snackbar
+        open={type !== null}
+        onClose={handleClose}
+        TransitionComponent={SlideTransition}
+        anchorOrigin={{
+          vertical: 'bottom',
+          horizontal: 'left',
+        }}
+        autoHideDuration={5000}
+      >
+        <SnackbarContent
+          className={clsx(classes[type], classes.content)}
+          message={
+            <span className={classes.message}>
+              {Icon && <Icon className={classes.icon}/>}
+              {error.message}
+            </span>
+          }
+          action={[
+            <IconButton key="snackbarCloseBtn" onClick={handleClose}>
+              <CloseIcon className={classes.closeBtn}/>
+            </IconButton>
+          ]}
+        />
+      </Snackbar>
+    )
+  } else {
+    return null;
+  }
 }
 
 const useStyles = makeStyles(theme => ({

@@ -4,19 +4,7 @@ import {SudokuPencilToggle} from '../../redux/actions/sudokus';
 
 import {styled} from '@material-ui/styles';
 
-// import {
-//   Button,
-//   Typography,
-//   Tooltip,
-// } from '@material-ui/core';
-
-// import {
-//   Create as CreateIcon,
-//   DeleteSweep as DeleteSweepIcon,
-// } from '@material-ui/icons';
-
 import {APPBAR_HEIGHT} from '../utils';
-// import SudokuGrid, {valueKeyStrokes} from './Grid';
 import SudokuGrid from './Grid';
 import Pad from './Pad';
 
@@ -30,8 +18,8 @@ class Sudoku extends React.Component {
   }
 
   componentDidMount() {
-    window.sudoku = {
-      ...window.sudoku,
+    window.sudokus = {
+      ...window.sudokus,
       getCellsData: () => this.grid.getCellsData(),
     }
   }

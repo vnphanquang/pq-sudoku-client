@@ -12,12 +12,25 @@ import Dialog from './Dialog';
 import Snackbar from './Snackbar';
 import {APPBAR_HEIGHT, COLLAPSED_DRAWER_WIDTH} from './utils';
 
+import { HotKeys } from 'react-hotkeys';
+
 class App extends React.PureComponent {
+  constructor(props) {
+    super(props);
+    this.hotKeyRef = null;
+    this.updateRef = this.updateRef.bind(this);
+  }
+
+  updateRef(node) {
+    this.hotKeyRef = node;
+    this.hotKeyRef.focus();
+  }
+
   render() {
     // console.log('App rendered');
     let { classes } = this.props;
     return (
-      <React.Fragment>
+      <HotKeys innerRef={this.updateRef} handlers={this.props.hotkeyHandlers}>
         <div className={classes.root}>
           <Navigator />
           <div className={classes.sudokuWrapper}>
@@ -26,7 +39,7 @@ class App extends React.PureComponent {
           <Dialog />
           <Snackbar />
         </div>
-      </React.Fragment>
+      </HotKeys>
     )
   }
 }
