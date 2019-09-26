@@ -157,11 +157,11 @@ class Grid extends React.Component {
   }
 
   handleKeyPress(e, targetCell) {
-    let {ctrlKey, key} = e;
+    let {ctrlKey, altKey, key} = e;
     if (ctrlKey) {
       switch(key) {
         case 'a':
-          e.preventDefault();
+          e.stopPropagation();
           this.selectAll();
           break;
         case 'z':
@@ -170,16 +170,21 @@ class Grid extends React.Component {
         case 'y':
           //TODO: implement redo
           break;
+        default:
+          break;
+      }
+    } else if (altKey) {
+      switch(key) {
         case 'g':
-          e.preventDefault();
+          e.stopPropagation();
           this.selectCellsBySubgrid(targetCell.props.subgrid);
           break;
-        case 'q':
-          e.preventDefault();
+        case 'r':
+          e.stopPropagation();
           this.handleCellSelectionByIndex({shiftKey: false, ctrlKey: false}, targetCell.props.row, DIRECTION.ROW);
           break;
-        case 'f':
-          e.preventDefault();
+        case 'c':
+          e.stopPropagation();
           this.handleCellSelectionByIndex({shiftKey: false, ctrlKey: false}, targetCell.props.col, DIRECTION.COL);
           break;
         default:
