@@ -29,6 +29,7 @@ import SettingsDialog from './SettingsDialog';
 import AboutDialog from './AboutDialog';
 import FeedbackDialog from './FeedbackDialog';
 import SaveAsOnTabCloseDialog from './SaveAsOnTabCloseDialog';
+import HelpDialog from './HelpDialog';
 
 const dialogVariants = {
   [DIALOG_ADD_TAB]: AddTabDialog,
@@ -39,6 +40,7 @@ const dialogVariants = {
   [DIALOG_ABOUT]: AboutDialog,
   [DIALOG_FEEDBACK]: FeedbackDialog,
   [DIALOG_SAVEAS_ON_TAB_CLOSE]: SaveAsOnTabCloseDialog,
+  [DIALOG_HELP]: HelpDialog,
 }
 
 const actionVariants = {

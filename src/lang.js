@@ -56,6 +56,7 @@ export const dialogLabels = {
   appearance: 'Appearance',
   applyAllAndClose: 'Apply All & Close',
   currentSudoku: 'Current Sudoku',
+  help: drawerLabels.help,
 }
 
 export const pqSudoku = 'pqSudoku';
