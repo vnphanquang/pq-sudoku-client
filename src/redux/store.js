@@ -9,7 +9,7 @@ try {
     initState = JSON.parse(window.localStorage.state);
   }
 } catch(err) {
-
+  console.log(err);
 } finally {
   store = createStore(
     rootReducer,

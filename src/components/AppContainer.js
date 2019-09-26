@@ -36,6 +36,14 @@ const keyMap = {
 
 class AppContainer extends React.Component {
   
+  // componentDidMount() {
+  //   window.onbeforeunload = (e) => {
+  //     e.preventDefault();
+  //     window.localStorage.removeItem('open');
+  //     e.returnValue = '';
+  //   }
+  // }
+
   render() {
     console.log('AppContainer rendered');
     let {theme} = this.props;
