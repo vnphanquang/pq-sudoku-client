@@ -62,6 +62,8 @@ function SudokuSVG({
   let index = 0;
   let end = 0;
   let textXY = '';
+  let value = 0;
+  let valueXShift = 0;
   for (let row = 0; row < size; row++) {
     index = row + 1;
     end = startXY + baseCellSize*(index)
@@ -85,9 +87,10 @@ function SudokuSVG({
       y2={`${endXY}`}
       />
     )
-
     for (let col = 0; col < size; col++) {
-      textXY = `${baseTextX + baseCellSize * col} ${baseTextY + baseCellSize * row}`
+      value = cellsData[row][col];
+      if (value.length === 2) valueXShift = 10;
+      textXY = `${baseTextX + baseCellSize * col - valueXShift} ${baseTextY + baseCellSize * row}`
       values.push(
         <text
           key={`value-${row+1}-${col+1}`}
@@ -98,6 +101,7 @@ function SudokuSVG({
           {cellsData[row][col]}
         </text>
       )
+      valueXShift = 0;
     }
   }
 
