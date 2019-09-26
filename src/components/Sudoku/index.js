@@ -58,51 +58,6 @@ class Sudoku extends React.Component {
           clearCells={this.clearCells}
         />
       )
-      // const values = array[activeIndex].values;
-      // pad = (
-      //   <PadContainer>
-      //       <PadButtons>
-      //         <Tooltip title="Toggle pencil">
-      //           <Button
-      //             variant="outlined" 
-      //             onClick={togglePencilMode}
-      //           >
-      //             <CreateIcon/>
-      //             <Typography 
-      //               color={pencil ? "primary" : "secondary"} 
-      //               paragraph 
-      //               align="right"
-      //               style={{whiteSpace: 'pre'}}
-      //             >
-      //               {pencil ? `ON  ` : 'OFF'}
-      //             </Typography>
-      //           </Button>
-      //         </Tooltip>
-      //         <Tooltip title="Clear cell(s)">
-      //           <Button 
-      //             variant="outlined" 
-      //             onClick={this.clearCells}
-      //           >
-      //             <DeleteSweepIcon/>
-      //           </Button>
-      //         </Tooltip>
-      //       </PadButtons>
-
-      //       <PadValues size={values.length} >
-      //         {values.map((value, index) => (
-      //           <Button 
-      //             key={`valuePad-${value}`}
-      //             variant="outlined"
-      //             onClick={(e) => this.grid.input(valueKeyStrokes[index])}
-      //           >
-      //             <Typography variant="h4" style={{textTransform: 'none'}}>
-      //               {value}
-      //             </Typography>
-      //           </Button>
-      //         ))}
-      //       </PadValues>
-      //   </PadContainer>
-      // )
       
       let isActive;
       sudokuArray = array.map(({id, size, values, cellsData}, index) => {
@@ -112,8 +67,6 @@ class Sudoku extends React.Component {
             hidden={!isActive} 
             key={`${id}-container}`}
           >
-            {/* <ColIndices size={size}>{colIndices}</ColIndices>
-            <RowIndices size={size}>{rowIndices}</RowIndices> */}
             <SudokuGrid 
               {...isActive && {ref: this.updateGridRef}} 
               size={size} 
@@ -148,64 +101,7 @@ const RootContainer = styled((props) => <div {...props}/>)(
     },
   })
 )
-// const PadContainer = styled((props) => <div {...props}/>)(
-//   ({theme}) => ({
-//     width: '100%',
-//     display: 'flex',
-//     flexDirection: 'column',
-//     justifyContent: 'center',
-//     marginTop: theme.spacing(2),
-//     [theme.breakpoints.up('lg')]: {
-//       width: 300,
-//       marginTop: 0,
-//       marginLeft: theme.spacing(2),
-//     },
-//     '& button': {
-//       [theme.breakpoints.down('md')]: {
-//         border: 'none',
-//         height: 'auto',
-//       },
-//     },
-//   })
-// )
 
-// const PadButtons = styled((props) => <div {...props}/>)(
-//   ({theme}) => ({
-//     display: 'flex',
-//     fontSize: theme.typography.h5.fontSize,
-//     '& button': {
-//       width: '50%',
-//       '& svg': {
-//         fontSize: '1.75rem',
-//       },
-//       [theme.breakpoints.up('lg')]: {
-//         height: 80,
-//       },
-//     },
-//   })
-// )
-
-// const PadValues = styled((props) => <div {...props}/>)(
-//   ({theme, size}) => ({
-//     display: 'flex',
-//     justifyContent: 'space-around',
-//     marginTop: theme.spacing(2),
-//     '& button': {
-//       [theme.breakpoints.down('md')]: {
-//         minWidth: 0,
-//         padding: 0,
-//       },
-//     },
-//     [theme.breakpoints.up('lg')]: {
-//       marginTop: 0,
-//       height: 300,
-//       display: 'grid',
-//       gridTemplateRows: `repeat(${Math.sqrt(size)}, 1fr)`,
-//       gridTemplateColumns: `repeat(${Math.sqrt(size)}, 1fr)`,
-//     }
-//   })
-// )
-// TODO: dynamic sizing for font size to fit cell
 const SudokuContainer = styled(({...props}) => <div {...props} />)(
   ({theme, hidden}) => ({
     // overflow: 'hidden',
@@ -229,7 +125,6 @@ const SudokuContainer = styled(({...props}) => <div {...props} />)(
     },
   })
 )
-
 
 const mapStateToProps = (state) => ({
   sudokus: state.sudokus,

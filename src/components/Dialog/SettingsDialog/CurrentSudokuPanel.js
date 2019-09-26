@@ -16,7 +16,7 @@ import { StyledCell } from '../../Sudoku/Cell';
 import { STYLE_STATES} from '../../utils';
 import { dialogLabels } from '../../../lang';
 
-class GeneralPanel extends React.PureComponent {
+class CurrentSudokuPanel extends React.PureComponent {
   constructor(props) {
     super(props);
   
@@ -160,4 +160,4 @@ const styles = theme => ({
   },
 })
 
-export default withStyles(styles)(GeneralPanel);
+export default withStyles(styles)(CurrentSudokuPanel);

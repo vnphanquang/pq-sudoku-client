@@ -12,6 +12,8 @@ import {
 } from '@material-ui/core';
 
 import {dialogLabels, pqSudoku } from '../../lang';
+
+//TODO: refactor display text -> lang
 function AboutDialog({onCancel}) {
   const classes = useStyles();
   return (

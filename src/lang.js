@@ -57,6 +57,8 @@ export const dialogLabels = {
   applyAllAndClose: 'Apply All & Close',
   currentSudoku: 'Current Sudoku',
   help: drawerLabels.help,
+  alreadyOpenMessage: 'Another pqSudoku application has already been open. You can utilize pqSudoku\'s multi-tab functionality for better experience.',
+  alreadyOpen: 'Already Open?'
 }
 
 export const pqSudoku = 'pqSudoku';

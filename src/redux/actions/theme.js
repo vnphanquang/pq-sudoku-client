@@ -2,7 +2,7 @@
 * Initial State
 */
 export const InitState = {
-  type: 'dark',
+  type: 'light',
   colors: {
     appBar: {
       light: '#4169E1',

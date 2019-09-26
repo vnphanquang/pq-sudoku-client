@@ -36,7 +36,7 @@ const helpData = [
   ['"F1"', 'Workspace', 'Help'],
 ]
 
-function AboutDialog({onCancel}) {
+function HelpDialog({onCancel}) {
   const classes = useStyles();
   return (
     <Dialog
@@ -87,4 +87,4 @@ const useStyles = makeStyles(theme => ({
   },
 }));
 
-export default React.memo(AboutDialog);
+export default React.memo(HelpDialog);
