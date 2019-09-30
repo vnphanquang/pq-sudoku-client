@@ -20,6 +20,7 @@ import {
   Help as HelpIcon,
   Info as InfoIcon,
   Feedback as FeedbackIcon,
+  CloudDownload as CloudDownloadIcon,
 } from '@material-ui/icons';
 
 
@@ -38,7 +39,6 @@ import {
   DIALOG_ABOUT,
 } from '../../redux/actions/dialogs';
 
-
 class DrawerPQS extends React.PureComponent {
   // constructor(props) {
   //   super(props);
@@ -46,7 +46,7 @@ class DrawerPQS extends React.PureComponent {
   
   render() {
     console.log('Drawer rendered');
-    const {classes, drawerOpen, dispatchDialog, toggleDrawer, sudokuActive} = this.props;
+    const {classes, drawerOpen, dispatchDialog, saveCurrentSudoku, toggleDrawer, sudokuActive} = this.props;
     return (
       <React.Fragment>
         <Drawer
@@ -74,10 +74,19 @@ class DrawerPQS extends React.PureComponent {
             <ListItem 
               button 
               className={classes.drawerItem} 
-              onClick={() => dispatchDialog(DIALOG_SAVEAS, drawerOpen)}
+              onClick={() => saveCurrentSudoku(drawerOpen)}
               disabled={!sudokuActive}
             >
               <ListItemIcon><SaveIcon /></ListItemIcon>
+              <ListItemText primary={drawerLabels.save} />
+            </ListItem>
+            <ListItem 
+              button 
+              className={classes.drawerItem} 
+              onClick={() => dispatchDialog(DIALOG_SAVEAS, drawerOpen)}
+              disabled={!sudokuActive}
+            >
+              <ListItemIcon><SaveAltIcon /></ListItemIcon>
               <ListItemText primary={drawerLabels.saveAs + '...'} />
             </ListItem>
             <ListItem 
@@ -86,7 +95,7 @@ class DrawerPQS extends React.PureComponent {
               onClick={() => dispatchDialog(DIALOG_EXPORT, drawerOpen)}
               disabled={!sudokuActive}
             >
-              <ListItemIcon><SaveAltIcon /></ListItemIcon>
+              <ListItemIcon><CloudDownloadIcon /></ListItemIcon>
               <ListItemText primary={drawerLabels.export + '...'} />
             </ListItem>
             <ListItem 
@@ -125,7 +134,7 @@ class DrawerPQS extends React.PureComponent {
               <ListItemText primary={drawerLabels.about} />
             </ListItem>
           </List>
-        </Drawer>
+        </Drawer >
         <Backdrop
           open={drawerOpen}
           onClick={toggleDrawer}
@@ -159,7 +168,7 @@ const styles = theme => ({
   },
 
   drawerItem: {
-    padding: '21px 16px 21px 20px'
+    padding: '21px 16px 16px 20px'
   },
 
   toolbarIcon: {

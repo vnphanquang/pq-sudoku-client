@@ -20,6 +20,7 @@ export const DIALOG_SETTINGS = 'DIALOG_SETTINGS';
 export const DIALOG_FEEDBACK = 'DIALOG_FEEDBACK';
 export const DIALOG_HELP = 'DIALOG_HELP';
 export const DIALOG_ABOUT = 'DIALOG_ABOUT';
+export const DIALOG_WELCOME = 'DIALOG_WELCOME';
 // Helper array
 export const DIALOG_ACTIONS = [
   DIALOG_ADD_TAB, 
@@ -32,6 +33,7 @@ export const DIALOG_ACTIONS = [
   DIALOG_HELP,
   DIALOG_ABOUT,
   DIALOG_SAVEAS_ON_TAB_CLOSE,
+  DIALOG_WELCOME,
 ];
 
 /* 

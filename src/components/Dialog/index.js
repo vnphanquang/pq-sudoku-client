@@ -1,7 +1,7 @@
 import React from 'react';
 import {connect, batch} from 'react-redux';
 
-import { ThemeSettings } from '../../redux/actions/theme';
+import { ThemeSettings, ThemeTypeToggle } from '../../redux/actions/theme';
 import { GeneralSettings } from '../../redux/actions/general';
 import { SaveAsPromptOnTabCloseToggle } from '../../redux/actions/general';
 import { SudokuClose, CurrentSudokuSettings } from '../../redux/actions/sudokus'
@@ -18,6 +18,7 @@ import {
   DIALOG_ABOUT,
   DIALOG_HELP,
   DIALOG_SAVEAS_ON_TAB_CLOSE,
+  DIALOG_WELCOME,
 } from '../../redux/actions/dialogs';
 import NoActiveSudokuError from '../../errors/NoActiveSudokuError';
 import { SnackbarGenericError } from '../../redux/actions/snackbar';
@@ -32,6 +33,7 @@ import AboutDialog from './AboutDialog';
 import FeedbackDialog from './FeedbackDialog';
 import SaveAsOnTabCloseDialog from './SaveAsOnTabCloseDialog';
 import HelpDialog from './HelpDialog';
+import WelcomeDialog from './WelcomeDialog';
 
 const dialogVariants = {
   [DIALOG_ADD_TAB]: AddTabDialog,
@@ -43,6 +45,7 @@ const dialogVariants = {
   [DIALOG_FEEDBACK]: FeedbackDialog,
   [DIALOG_SAVEAS_ON_TAB_CLOSE]: SaveAsOnTabCloseDialog,
   [DIALOG_HELP]: HelpDialog,
+  [DIALOG_WELCOME]: WelcomeDialog,
 }
 
 const actionVariants = {
@@ -69,6 +72,13 @@ const actionVariants = {
     onSave: () => thisArg.props.dispatchAnotherDialog(DIALOG_SAVEAS),
     onClose: () => thisArg.props.closeSudoku(thisArg.props.data),
     onToggleShowAgain: thisArg.props.toggleSaveAsPromptOnTabClose,
+  }),
+  [DIALOG_WELCOME]: (thisArg) => ({
+    onOpenAddDialog: () => thisArg.props.dispatchAnotherDialog(DIALOG_ADD_TAB),
+    onToggleThemeType: thisArg.props.toggleThemeType,
+  }),
+  [DIALOG_ABOUT]: (thisArg) => ({
+    onTour: () => thisArg.props.dispatchAnotherDialog(DIALOG_WELCOME),
   }),
 }
 
@@ -165,6 +175,9 @@ const mapStateToProps = state => {
     case DIALOG_SAVEAS_ON_TAB_CLOSE:
       data = payload;
       break;
+    case DIALOG_WELCOME:
+      data = state.theme;
+      break;
     default:
       break;
   }
@@ -209,7 +222,8 @@ const mapDispatchToProps = dispatch => ({
   snackbarGenericError: (error) => batch(() => {
     dispatch(DialogAction(DIALOG_CANCEL));
     dispatch(SnackbarGenericError(error));
-  })
+  }),
+  toggleThemeType: () => dispatch(ThemeTypeToggle()),
 })
 
 export default connect(mapStateToProps, mapDispatchToProps)(DialogPQS);

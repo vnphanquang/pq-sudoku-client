@@ -7,6 +7,10 @@ export const InitState = {
     appBar: {
       light: '#4169E1',
       dark: '#696969',
+    },
+    bg: {
+      light: '#ffffff',
+      dark: '#212121'
     }
   },
   sudoku: {
@@ -60,9 +64,10 @@ export const THEME_SETTINGS = 'THEME_SETTINGS';
 /* 
 * Action Creators
 */
-export function ThemeTypeToggle() {
+export function ThemeTypeToggle(themeType) {
   return {
-    type: THEME_TYPE_TOGGLE
+    type: THEME_TYPE_TOGGLE,
+    payload: themeType
   }
 }
 

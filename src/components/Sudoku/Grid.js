@@ -781,7 +781,7 @@ export const StyledGrid = styled(({...props}) => <div {...props} />)(
     gridTemplateColumns: `repeat(${cols}, 1fr)`,
     gridTemplateRows: `repeat(${rows}, 1fr)`,
     gridGap: '1px 1px',
-    backgroundColor: `${theme.sudoku.color[theme.palette.type]}`,
+    backgroundColor: theme.sudoku.color[theme.palette.type],
     border: '4px solid',
     borderRadius: '3px',
     boxShadow: `1px 1px 6px ${theme.sudoku.shadow[theme.palette.type]}`,

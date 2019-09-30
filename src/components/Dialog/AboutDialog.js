@@ -14,7 +14,7 @@ import {
 import {dialogLabels, pqSudoku } from '../../lang';
 
 //TODO: refactor display text -> lang
-function AboutDialog({onCancel}) {
+function AboutDialog({onCancel, onTour}) {
   const classes = useStyles();
   return (
     <Dialog
@@ -51,6 +51,7 @@ function AboutDialog({onCancel}) {
         >
           <Button>{dialogLabels.source}</Button>
         </Link>
+        <Button onClick={onTour}>{dialogLabels.tour}</Button>
         <Button onClick={onCancel}>{dialogLabels.close}</Button>
       </DialogActions>
     </Dialog>

@@ -17,8 +17,9 @@ import {
   DIALOG_OPEN,
   DIALOG_SETTINGS,
   DIALOG_HELP,
+  DIALOG_WELCOME,
 } from '../redux/actions/dialogs';
-import { SudokuPencilToggle } from '../redux/actions/sudokus';
+import { SudokuPencilToggle, SudokuSave } from '../redux/actions/sudokus';
 import { DrawerToggle } from '../redux/actions/general';
 import { ThemeTypeToggle } from '../redux/actions/theme';
 
@@ -28,7 +29,8 @@ const keyMap = {
   TOGGLE_THEME_TYPE: "alt+t",
   ADD: "alt+n",
   OPEN: "ctrl+o",
-  SAVEAS: "ctrl+s",
+  SAVE: "ctrl+s",
+  SAVEAS: "ctrl+shift+s",
   EXPORT: "ctrl+e",
   SETTINGS: "ctrl+p",
   HELP: "f1",
@@ -36,13 +38,12 @@ const keyMap = {
 
 class AppContainer extends React.Component {
   
-  // componentDidMount() {
-  //   window.onbeforeunload = (e) => {
-  //     e.preventDefault();
-  //     window.localStorage.removeItem('open');
-  //     e.returnValue = '';
-  //   }
-  // }
+  componentDidMount() {
+    if (window.localStorage.getItem('visited') !== 'true') {
+      window.localStorage.setItem('visited', 'true');
+      this.props.openTour();
+    }
+  }
 
   render() {
     console.log('AppContainer rendered');
@@ -75,6 +76,7 @@ const mapStateToProps = state => ({
 
 //TODO: Globalize Hotkeys to Redux?
 const mapDispatchToProps = (dispatch, ownProps) => ({
+  openTour: () => dispatch(DialogAction(DIALOG_WELCOME)),
   hotkeyHandlers: {
     TOGGLE_DRAWER: (e) => {
       e.preventDefault();
@@ -100,6 +102,11 @@ const mapDispatchToProps = (dispatch, ownProps) => ({
       e.preventDefault();
       e.stopPropagation();
       dispatch(DialogAction(DIALOG_OPEN));
+    },
+    SAVE: (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      dispatch(SudokuSave());
     },
     SAVEAS: (e) => {
       e.preventDefault();

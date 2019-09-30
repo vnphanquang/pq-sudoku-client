@@ -127,7 +127,8 @@ function SudokuSVG({
           width={baseCellSize * size} 
           height={baseCellSize * size} 
           rx="3"
-          fill={backgroundColor}
+          // fill={backgroundColor}
+          fill="transparent"
         />
         <g id="horizontals">
           {horizontals}

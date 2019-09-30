@@ -10,7 +10,7 @@ export default function theme(state=InitState, {type, payload}) {
     case THEME_TYPE_TOGGLE:
       return {
         ...state,
-        type: state.type === 'light' ? 'dark' : 'light',
+        type: payload || (state.type === 'light' ? 'dark' : 'light'),
       }
     case THEME_SETTINGS:
       return payload;

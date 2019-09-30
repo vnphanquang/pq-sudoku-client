@@ -16,7 +16,7 @@ import { withStyles } from '@material-ui/styles';
 
 import { ThemeTypeToggle } from '../../redux/actions/theme';
 import { DrawerToggle } from '../../redux/actions/general';
-import { SudokuTabChange, SudokuClose } from '../../redux/actions/sudokus';
+import { SudokuTabChange, SudokuClose, SudokuSave } from '../../redux/actions/sudokus';
 import { DialogAction, DialogSaveAsOnTabClose } from '../../redux/actions/dialogs';
 import { APPBAR_HEIGHT } from '../utils';
 import { pqSudoku } from '../../lang';
@@ -58,7 +58,7 @@ class Navigator extends React.PureComponent {
       classes, 
       theme: {palette: {type: themeType}}, 
       toggleThemeType, 
-      drawerOpen, toggleDrawer, 
+      drawerOpen, toggleDrawer, saveCurrentSudoku,
       sudokus, changeTab,
       dispatchDialog
     } = this.props;
@@ -96,6 +96,7 @@ class Navigator extends React.PureComponent {
           drawerOpen={drawerOpen}
           toggleDrawer={toggleDrawer}
           dispatchDialog={dispatchDialog}
+          saveCurrentSudoku={saveCurrentSudoku}
         />
       </React.Fragment>
     )
@@ -141,6 +142,10 @@ const mapDispatchToProps = dispatch => ({
   dispatchDialog: (type, toggle) => batch(() => { 
     if (toggle) dispatch(DrawerToggle());
     dispatch(DialogAction(type)); 
+  }),
+  saveCurrentSudoku: (toggle) => batch(() => { 
+    if (toggle) dispatch(DrawerToggle());
+    dispatch(SudokuSave()); 
   }),
   dispatch,
 })

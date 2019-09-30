@@ -42,10 +42,7 @@ export default function sudokus(state = InitState, {type, payload}) {
       }
     case SUDOKU_SAVE:
       state.array[state.activeIndex].cellsData = window.sudokus.getCellsData();
-      return {
-        ...state,
-        array: [...state.array],
-      }
+      return state;
     case SUDOKU_PENCIL_TOGGLE:
       return {
         ...state,

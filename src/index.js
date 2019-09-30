@@ -11,7 +11,9 @@ const rootNode = document.getElementById('root');
 //TODO: Handle synchronization across multiple tabs => ServiceWorker??
 window.onbeforeunload = (e) => {
   e.preventDefault();
-  store.dispatch(SudokuSave());
+  if (store.getState().sudokus.activeIndex !== null) {
+    store.dispatch(SudokuSave());
+  }
   const stateJSON = JSON.stringify(store.getState());
   window.localStorage.setItem('state', stateJSON);
   e.returnValue = '';

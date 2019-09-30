@@ -69,6 +69,8 @@ const useStyles = makeStyles(theme => ({
     display: 'flex',
     flexDirection: 'column',
     justifyContent: 'center',
+    backgroundColor: theme.colors.bg[theme.palette.type],
+    boxShadow: `1px 1px 6px ${theme.sudoku.shadow[theme.palette.type]}`,
     marginTop: theme.spacing(2),
     [theme.breakpoints.up('lg')]: {
       width: 300,
@@ -78,7 +80,6 @@ const useStyles = makeStyles(theme => ({
     [theme.breakpoints.down('md')]: {
       // height: 105,
       '& button': {
-        border: 'none',
         height: 'auto',
       },
     },
@@ -87,7 +88,8 @@ const useStyles = makeStyles(theme => ({
     display: 'flex',
     fontSize: theme.typography.h5.fontSize,
     '& button': {
-      width: '50%',
+      flexBasis: 1,
+      flexGrow: 1,
       '& svg': {
         fontSize: '1.75rem',
       },
@@ -99,9 +101,10 @@ const useStyles = makeStyles(theme => ({
   values: {
     display: 'flex',
     justifyContent: 'space-around',
-    marginTop: theme.spacing(2),
     '& button': {
       [theme.breakpoints.down('md')]: {
+        flexBasis: 1,
+        flexGrow: 1,
         minWidth: 0,
         padding: 0,
       },
