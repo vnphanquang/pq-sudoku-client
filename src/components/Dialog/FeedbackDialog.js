@@ -18,12 +18,14 @@ import {dialogLabels} from '../../lang';
 
 const aboutVariant = {
   general: dialogLabels.general,
-  bugReport: dialogLabels.bugReport
+  bugReport: dialogLabels.bugReport,
+  featureRequest: dialogLabels.featureRequest,
 }
 
 const detailsHintVariant = {
   general: dialogLabels.feedbackGeneralHint,
-  bugReport: dialogLabels.feedbackBugReportHint
+  bugReport: dialogLabels.feedbackBugReportHint,
+  featureRequest: dialogLabels.feedbackGeneralHint,
 }
 
 function FeedbackDialog({onSubmit, onCancel}) {
@@ -39,6 +41,7 @@ function FeedbackDialog({onSubmit, onCancel}) {
     e.preventDefault();
     onSubmit({
       ...data,
+      userAgent: window.navigator.userAgent
     });
   }
 
@@ -93,6 +96,7 @@ function FeedbackDialog({onSubmit, onCancel}) {
             required
             fullWidth
             multiline
+            rows={2}
             label={dialogLabels.details}
             type="text"
             variant="outlined"

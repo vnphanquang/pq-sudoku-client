@@ -37,6 +37,7 @@ export const dialogLabels = {
   feedback: drawerLabels.feedback,
   general: 'General',
   bugReport: 'Bug Report',
+  featureRequest: 'Feature Request',
   title: 'Title',
   details: 'Details',
   send: 'Send',

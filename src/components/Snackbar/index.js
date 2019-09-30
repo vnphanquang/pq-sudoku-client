@@ -34,7 +34,7 @@ const SlideTransition = React.forwardRef(function Transition(props, ref) {
 //TODO: refactor, use HoC & Connect
 function SnackbarPQS() {
   const classes = useStyles();
-  const {type, payload:error} = useSelector(state => state.snackbar);
+  const {type, payload} = useSelector(state => state.snackbar);
   const dispatch = useDispatch();
 
   function handleClose(e, reason) {
@@ -62,7 +62,7 @@ function SnackbarPQS() {
           message={
             <span className={classes.message}>
               {Icon && <Icon className={classes.icon}/>}
-              {error.message}
+              {payload.message}
             </span>
           }
           action={[

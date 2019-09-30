@@ -21,7 +21,7 @@ import {
   DIALOG_WELCOME,
 } from '../../redux/actions/dialogs';
 import NoActiveSudokuError from '../../errors/NoActiveSudokuError';
-import { SnackbarGenericError } from '../../redux/actions/snackbar';
+import { SnackbarGenericError, SnackbarGenericSuccess } from '../../redux/actions/snackbar';
 
 
 import AddTabDialog from './AddTabDialog';
@@ -66,7 +66,10 @@ const actionVariants = {
     onApplyAllAndClose: thisArg.props.applyAllSettingsAndClose,
   }),
   [DIALOG_FEEDBACK]: (thisArg) => ({
-    onSubmit: thisArg.sendFeedback.bind(thisArg),
+    onSubmit: (data) => {
+      thisArg.sendFeedback.call(thisArg, data);
+      thisArg.props.cancelDialog();
+    },
   }),
   [DIALOG_SAVEAS_ON_TAB_CLOSE]: (thisArg) => ({
     onSave: () => thisArg.props.dispatchAnotherDialog(DIALOG_SAVEAS),
@@ -109,14 +112,35 @@ class DialogPQS extends React.Component {
     })
   }
 
-  sendFeedback(data) {
-    console.log(data);
+  async sendFeedback(data) {
+    const res = await fetch('/api/feedback', {
+      method: 'POST',
+      credentials: 'same-origin',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(data),
+    });
+    const {message} = await res.json();
+    switch(res.status) {
+      case 200:
+        this.props.snackbarGenericSuccess({message: message || 'Feedback received!'});
+        break;
+      case 500:
+        this.props.snackbarGenericError({message: message || 'Something went wrong, try again later...'})
+        break;
+      default:
+        break;
+    }
   }
 
   componentDidUpdate() {
     if (this.props.error) {
       //TODO: handle error generically, React's ErrorBoundary?
-      this.props.snackbarGenericError(this.props.error);
+      batch(() => {
+        this.props.cancelDialog();
+        this.props.snackbarGenericError(this.props.error);
+      })
     }
   }
 
@@ -219,10 +243,8 @@ const mapDispatchToProps = dispatch => ({
     dispatch(DialogAction(DIALOG_CANCEL));
     dispatch(DialogAction(type));
   }),
-  snackbarGenericError: (error) => batch(() => {
-    dispatch(DialogAction(DIALOG_CANCEL));
-    dispatch(SnackbarGenericError(error));
-  }),
+  snackbarGenericError: (error) => dispatch(SnackbarGenericError(error)),
+  snackbarGenericSuccess: ({message}) => dispatch(SnackbarGenericSuccess({message})),
   toggleThemeType: () => dispatch(ThemeTypeToggle()),
 })
 
