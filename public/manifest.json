@@ -1,6 +1,9 @@
 {
+  "homepage_url": "https://sudoku.phanvn.com",
   "short_name": "pqSudoku",
   "name": "pqSudoku - Sudoku & Grid-based Puzzle Playground",
+  "version": "0.1.0",
+  "author": "Quang Phan",
   "icons": [
     {
       "src": "favicon.ico",

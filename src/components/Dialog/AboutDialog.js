@@ -28,7 +28,7 @@ function AboutDialog({onCancel, onTour}) {
         {pqSudoku}
       </Typography>
       <Typography variant="body2" align="center">
-        {`Version ${'0.1.1'}. ${'© 2019 Quang Phan'}`}
+        {`Version ${'0.1.0'}. ${'© 2019 Quang Phan'}`}
       </Typography>
     </DialogTitle>
       <DialogContent dividers>
