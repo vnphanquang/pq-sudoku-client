@@ -148,7 +148,7 @@ class DialogPQS extends React.Component {
   }
 
   render() {
-    console.log('Dialog rendered')
+    // console.log('Dialog rendered')
     const {type, data, cancelDialog, error} = this.props;
     if (error) {
       return null;

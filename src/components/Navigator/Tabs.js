@@ -20,7 +20,7 @@ class TabsPQS extends React.PureComponent {
   }
 
   render() {
-    console.log('Tabs rendered')
+    // console.log('Tabs rendered')
     const {classes, tabs, closeTab} = this.props;
     return (
       <Tabs

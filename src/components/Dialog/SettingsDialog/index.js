@@ -56,7 +56,7 @@ const panelVariants = {
 }
 
 function SettingsDialog({onApply, onApplyAllAndClose, onCancel, data}) {
-  console.log('Settings Dialog rendered');
+  // console.log('Settings Dialog rendered');
   const classes = useStyles();
   const [panelState, setPanelState] = React.useState({
     type: 'theme',

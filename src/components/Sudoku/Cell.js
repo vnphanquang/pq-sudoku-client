@@ -61,7 +61,7 @@ class Cell extends React.PureComponent {
   }
 
   render() {
-    console.log('Cell rendered');
+    // console.log('Cell rendered');
     return (
       <StyledCell
         gridsize={this.props.gridsize}

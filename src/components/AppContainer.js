@@ -46,7 +46,7 @@ class AppContainer extends React.Component {
   }
 
   render() {
-    console.log('AppContainer rendered');
+    // console.log('AppContainer rendered');
     let {theme} = this.props;
     theme = createMuiTheme({
       palette: {

@@ -86,7 +86,7 @@ class ThemePanel extends React.PureComponent {
   }
 
   render() {
-    console.log('Appearance Panel rendered');
+    // console.log('Appearance Panel rendered');
 
     const classes = this.props.classes;
     const themeType = this.state.type;

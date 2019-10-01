@@ -7,7 +7,7 @@ import {
 } from '@material-ui/icons/';
 
 function DrawerIcon({drawerOpen, onClick, ...others}) {
-  console.log('DrawerIcon rendered');
+  // console.log('DrawerIcon rendered');
 
   return (
     <IconButton

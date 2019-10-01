@@ -44,7 +44,7 @@ class Sudoku extends React.Component {
   }
 
   render() {
-    console.log('Sudoku rendered');
+    // console.log('Sudoku rendered');
     const {sudokus: {array, pencil, activeIndex}, togglePencilMode} = this.props;
     let pad = null;
     let sudokuArray = null;

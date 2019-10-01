@@ -738,7 +738,7 @@ class Grid extends React.Component {
   }
 
   render() {
-    console.log('Grid rendered!');
+    // console.log('Grid rendered!');
     const { 
       size,
       initCellsData=(new Array(size)).fill((new Array(size)).fill('')), 

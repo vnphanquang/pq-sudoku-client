@@ -45,7 +45,7 @@ class DrawerPQS extends React.PureComponent {
   // }
   
   render() {
-    console.log('Drawer rendered');
+    // console.log('Drawer rendered');
     const {classes, drawerOpen, dispatchDialog, saveCurrentSudoku, toggleDrawer, sudokuActive} = this.props;
     return (
       <React.Fragment>

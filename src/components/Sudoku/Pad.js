@@ -15,7 +15,7 @@ import {
 import {valueKeyStrokes} from './Grid';
 
 function Pad(props) {
-  console.log('Pad rendered!')
+  // console.log('Pad rendered!')
   const classes = useStyles(props);
   const {togglePencilMode, inputValue, pencil, values, clearCells} = props;
   return (
