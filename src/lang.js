@@ -2,7 +2,7 @@ export const drawerLabels = {
   new: 'New',
   open: 'Open',
   save: 'Save',
-  saveAs: 'Save As',
+  saveAs: 'SaveAs',
   export: 'Export',
   theme: 'Theme',
   settings: 'Settings',

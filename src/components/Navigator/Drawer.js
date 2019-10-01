@@ -168,7 +168,7 @@ const styles = theme => ({
   },
 
   drawerItem: {
-    padding: '21px 16px 16px 20px'
+    padding: '16px 20px',
   },
 
   toolbarIcon: {
