@@ -24,16 +24,16 @@ import { DrawerToggle } from '../redux/actions/general';
 import { ThemeTypeToggle } from '../redux/actions/theme';
 
 const keyMap = {
-  TOGGLE_DRAWER: "ctrl+b",
-  TOGGLE_PENCIL: "alt+p",
-  TOGGLE_THEME_TYPE: "alt+t",
-  ADD: "alt+n",
-  OPEN: "ctrl+o",
-  SAVE: "ctrl+s",
-  SAVEAS: "ctrl+shift+s",
-  EXPORT: "ctrl+e",
-  SETTINGS: "ctrl+p",
-  HELP: "f1",
+  TOGGLE_DRAWER: ['ctrl+b', 'command+b'],
+  TOGGLE_PENCIL: 'alt+p',
+  TOGGLE_THEME_TYPE: 'alt+t',
+  ADD: 'alt+n',
+  OPEN: ['ctrl+o', 'command+o'],
+  SAVE: ['ctrl+s', 'command+s'],
+  SAVEAS: ['ctrl+shift+s', 'command+shift+s'],
+  EXPORT: ['ctrl+e', 'command+e'],
+  SETTINGS: ['ctrl+p', 'command+p'],
+  HELP: 'f1',
 }
 
 class AppContainer extends React.Component {

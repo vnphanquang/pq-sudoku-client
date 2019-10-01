@@ -12,6 +12,7 @@ import {
 } from '@material-ui/core';
 
 import {dialogLabels, pqSudoku } from '../../lang';
+import {CLIENT_SOURCE_LINK} from '../utils';
 
 //TODO: refactor display text -> lang
 function AboutDialog({onCancel, onTour}) {
@@ -45,7 +46,7 @@ function AboutDialog({onCancel, onTour}) {
       <DialogActions>
         <Link
           color="inherit"
-          href="https://github.com/vnphanquang/pq-sudoku"
+          href={CLIENT_SOURCE_LINK}
           target="_blank"
           underline="none"
         >

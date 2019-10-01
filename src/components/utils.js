@@ -29,4 +29,6 @@ export const KEYS_STROKES = {
   ARROWS: ['ArrowUp', 'ArrowRight', 'ArrowDown', 'ArrowLeft'],
 }
 
+export const CLIENT_SOURCE_LINK = 'https://github.com/vnphanquang/pq-sudoku-client';
+
 

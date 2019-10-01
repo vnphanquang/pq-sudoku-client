@@ -14,7 +14,7 @@ function CreativeDemo({themeType}) {
   return (
     <React.Fragment>
       <Typography className={classes.text} variant="body1">
-        In the near future, We plan to introduce more grid templates, 
+        In the near future, we plan to introduce more grid templates, 
         better support and customization for SVG export, 
         auto-generation & solution algorithms, and much more. 
         Feel free to reach out for any error report or feature request. 

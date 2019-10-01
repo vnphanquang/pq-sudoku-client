@@ -157,9 +157,9 @@ class Grid extends React.Component {
   }
 
   handleKeyPress(e, targetCell) {
-    let {ctrlKey, altKey, key} = e;
+    let {ctrlKey, metaKey, altKey, key} = e;
     //TODO: refactors shift or ctrl + arrow
-    if (ctrlKey) {
+    if (ctrlKey || metaKey) {
       if (KEYS_STROKES.ARROWS.includes(key)) {
         this.keyNavigate(e);
       } else {
@@ -186,11 +186,11 @@ class Grid extends React.Component {
           break;
         case 'r':
           e.stopPropagation();
-          this.handleCellSelectionByIndex({shiftKey: false, ctrlKey: false}, targetCell.props.row, DIRECTION.ROW);
+          this.handleCellSelectionByIndex({}, targetCell.props.row, DIRECTION.ROW);
           break;
         case 'c':
           e.stopPropagation();
-          this.handleCellSelectionByIndex({shiftKey: false, ctrlKey: false}, targetCell.props.col, DIRECTION.COL);
+          this.handleCellSelectionByIndex({}, targetCell.props.col, DIRECTION.COL);
           break;
         default:
           break;
@@ -207,11 +207,11 @@ class Grid extends React.Component {
   }
 
   handleCellClick(e, targetCell) {
-    const {ctrlKey, shiftKey, detail=1} = e;
+    const {ctrlKey, metaKey, shiftKey, detail=1} = e;
     if (detail === 1) {
       let lastSelectedCell = this.selection.focus;
       if (this.selection.type === SELECTION.TYPES.SINGLE) {
-        if (ctrlKey && lastSelectedCell && !targetCell.isSameCell(lastSelectedCell)) {
+        if ((ctrlKey || metaKey) && lastSelectedCell && !targetCell.isSameCell(lastSelectedCell)) {
           this.clearSelection();
           this.selectCell(lastSelectedCell);
           this.selection.type = SELECTION.TYPES.MULTI;
@@ -243,7 +243,7 @@ class Grid extends React.Component {
           }
         }
       } else if (this.selection.type === SELECTION.TYPES.MULTI) {
-        if (ctrlKey) {
+        if (ctrlKey || metaKey) {
           if (targetCell.isSelected()) {
             this.unselectCell(targetCell);
           } else {
@@ -274,13 +274,13 @@ class Grid extends React.Component {
     }
   }
 
-  handleCellSelectionByIndex({shiftKey, ctrlKey}, targetIndex, direction) {
+  handleCellSelectionByIndex({shiftKey, ctrlKey, metaKey}, targetIndex, direction) {
     if (this.selection.type !== direction){
       this.clearSelection();
       this.selection.type = SELECTION.TYPES[direction.toUpperCase()];
       this.selection.position = targetIndex;
       this.selectCellsByIndex(targetIndex, direction);
-    } else if (ctrlKey) {
+    } else if (ctrlKey || metaKey) {
       let row = targetIndex;
         let col = targetIndex;
         if (direction === DIRECTION.ROW) {
@@ -380,7 +380,7 @@ class Grid extends React.Component {
       this.getCellsBySubgrid(subgrid).forEach(cell => this.selectCell(cell));
       this.selection.focus.input.focus();
     } else {
-      this.handleCellClick({ctrlKey: false, shiftKey: false}, this.selection.focus);
+      this.handleCellClick({}, this.selection.focus);
     }
   }
 
@@ -395,7 +395,7 @@ class Grid extends React.Component {
         });
         if (selectedCells.length === 0) {
           if (this.selection.focus) {
-            this.handleCellClick({ctrlKey: false, shiftKey: false}, this.selection.focus);
+            this.handleCellClick({}, this.selection.focus);
           } else {
             this.selection.type = SELECTION.TYPES.SINGLE;
             this.selection.cells = [];
@@ -440,7 +440,7 @@ class Grid extends React.Component {
   }
 
   keyNavigate(e) {
-    let {key, ctrlKey, shiftKey} = e;
+    let {key, ctrlKey, metaKey, shiftKey} = e;
     let targetCell = null;
     let lastSelectedCell = this.selection.focus;
     let {row, col} = lastSelectedCell.props;
@@ -471,14 +471,14 @@ class Grid extends React.Component {
     }
     if (targetCell) {
       let isMultiSelection = this.selection.type === SELECTION.TYPES.MULTI;
-      if ((ctrlKey || shiftKey) && isMultiSelection) {
+      if ((ctrlKey || metaKey || shiftKey) && isMultiSelection) {
         if (!targetCell.isSelected()) {
           this.selectCell(targetCell);
         }
         this.focusCell(targetCell)
         targetCell.input.focus();
       } else {
-        this.handleCellClick({ctrlKey, shiftKey}, targetCell);
+        this.handleCellClick({ctrlKey, metaKey, shiftKey}, targetCell);
       }
     }
   }
@@ -629,7 +629,7 @@ class Grid extends React.Component {
     } else {
       let center = parseInt(this.props.size / 2);
       let cell = this.getCell(center, center)
-      this.handleCellClick({ctrlKey: false, shiftKey: false}, cell);
+      this.handleCellClick({}, cell);
     }
   }
   isFocused() {
