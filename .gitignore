@@ -26,3 +26,4 @@ yarn-error.log*
 gitignore
 
 .vscode/
+/.vscode/settings.json
