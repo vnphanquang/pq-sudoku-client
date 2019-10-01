@@ -113,24 +113,27 @@ class DialogPQS extends React.Component {
   }
 
   async sendFeedback(data) {
-    const res = await fetch('/api/feedback', {
-      method: 'POST',
-      credentials: 'same-origin',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(data),
-    });
-    const {message} = await res.json();
-    switch(res.status) {
-      case 200:
-        this.props.snackbarGenericSuccess({message: message || 'Feedback received!'});
-        break;
-      case 500:
-        this.props.snackbarGenericError({message: message || 'Something went wrong, try again later...'})
-        break;
-      default:
-        break;
+    try {
+      const res = await fetch('/api/feedback', {
+        method: 'POST',
+        credentials: 'same-origin',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(data),
+      });
+      const {message} = await res.json();
+      switch(res.status) {
+        case 200:
+          //TODO: refactors display texts into lang.js
+          this.props.snackbarGenericSuccess({message: message || 'Feedback received!'});
+          break;
+        default:
+          this.props.snackbarGenericError({message: message || 'Something went wrong, try again later...'});
+      }
+    } catch (error) {
+      console.log(error);
+      this.props.snackbarGenericError({message: 'Something went wrong, try again later...'});
     }
   }
 
