@@ -39,8 +39,7 @@ const keyMap = {
 class AppContainer extends React.Component {
   
   componentDidMount() {
-    if (window.localStorage.getItem('visited') !== 'true') {
-      window.localStorage.setItem('visited', 'true');
+    if (this.props.new) {
       this.props.openTour();
     }
   }

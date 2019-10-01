@@ -21,7 +21,7 @@ window.onbeforeunload = (e) => {
 }
 ReactDOM.render(
   <Provider store={store}>
-    <AppContainer />
+    <AppContainer new={store.getState().sudokus.activeIndex === null}/>
   </Provider>,
   rootNode
 );
