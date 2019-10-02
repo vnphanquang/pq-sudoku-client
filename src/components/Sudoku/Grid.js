@@ -165,6 +165,7 @@ class Grid extends React.Component {
       } else {
         switch(key) {
           case 'a':
+            e.preventDefault();
             e.stopPropagation();
             this.selectAll();
             break;
@@ -181,14 +182,17 @@ class Grid extends React.Component {
     } else if (altKey) {
       switch(key) {
         case 'g':
+          e.preventDefault();
           e.stopPropagation();
           this.selectCellsBySubgrid(targetCell.props.subgrid);
           break;
         case 'r':
+          e.preventDefault();
           e.stopPropagation();
           this.handleCellSelectionByIndex({}, targetCell.props.row, DIRECTION.ROW);
           break;
         case 'c':
+          e.preventDefault();
           e.stopPropagation();
           this.handleCellSelectionByIndex({}, targetCell.props.col, DIRECTION.COL);
           break;
