@@ -229,9 +229,8 @@ const mapDispatchToProps = dispatch => ({
       dispatch(SnackbarGenericInfo({
         message: 'For large grid, consider using devices with wider viewport.'
       }))
-    } else {
-      dispatch(DialogAction(DIALOG_CANCEL));
     }
+    dispatch(DialogAction(DIALOG_CANCEL));
     dispatch(SudokuAddition(config));
   }),
   closeSudoku: (index) => batch(() => {
