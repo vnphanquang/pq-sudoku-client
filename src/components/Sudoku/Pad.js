@@ -73,7 +73,7 @@ const useStyles = makeStyles(theme => ({
     boxShadow: `1px 1px 6px ${theme.sudoku.shadow[theme.palette.type]}`,
     marginTop: theme.spacing(2),
     [theme.breakpoints.up('lg')]: {
-      width: 300,
+      width: 350,
       marginTop: 0,
       marginLeft: theme.spacing(2),
     },
@@ -100,10 +100,12 @@ const useStyles = makeStyles(theme => ({
   },
   values: {
     display: 'flex',
+    flexWrap: 'wrap',
     justifyContent: 'space-around',
     '& button': {
       [theme.breakpoints.down('md')]: {
-        flexBasis: 1,
+        //TODO: adjust dynamic wrapping?
+        flexBasis: '11%',
         flexGrow: 1,
         minWidth: 0,
         padding: 0,

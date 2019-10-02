@@ -104,6 +104,9 @@ export const StyledCell = styled(({focused, styleState, row, col, ...other}) => 
       textAlign: 'center',
       textShadow: `1.5px 1.5px 2.5px ${theme.sudoku.shadow[theme.palette.type]}`,
       fontSize: '1.2rem',
+      [theme.breakpoints.down('md')]: {
+        fontSize: '1rem',
+      },
       backgroundColor: 'transparent'
     },
     '& button:focus': {
