@@ -21,7 +21,7 @@ import {
   DIALOG_WELCOME,
 } from '../../redux/actions/dialogs';
 import NoActiveSudokuError from '../../errors/NoActiveSudokuError';
-import { SnackbarGenericError, SnackbarGenericSuccess } from '../../redux/actions/snackbar';
+import { SnackbarGenericError, SnackbarGenericSuccess, SnackbarGenericInfo } from '../../redux/actions/snackbar';
 
 
 import AddTabDialog from './AddTabDialog';
@@ -224,7 +224,14 @@ const settingsActionVariants = {
 const mapDispatchToProps = dispatch => ({
   cancelDialog: () => dispatch(DialogAction(DIALOG_CANCEL)),
   addSudoku: (config) => batch(() => {
-    dispatch(DialogAction(DIALOG_CANCEL));
+    //TODO: discourage large grid on small device
+    if (config.size > 9 && window.innerWidth <= 960) {
+      dispatch(SnackbarGenericInfo({
+        message: 'For large grid, consider using devices with wider viewport.'
+      }))
+    } else {
+      dispatch(DialogAction(DIALOG_CANCEL));
+    }
     dispatch(SudokuAddition(config));
   }),
   closeSudoku: (index) => batch(() => {
@@ -248,6 +255,7 @@ const mapDispatchToProps = dispatch => ({
   }),
   snackbarGenericError: (error) => dispatch(SnackbarGenericError(error)),
   snackbarGenericSuccess: ({message}) => dispatch(SnackbarGenericSuccess({message})),
+  snackbarGenericInfo: ({message}) => dispatch(SnackbarGenericInfo({message})),
   toggleThemeType: () => dispatch(ThemeTypeToggle()),
 })
 

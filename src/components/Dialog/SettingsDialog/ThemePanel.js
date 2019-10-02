@@ -16,6 +16,7 @@ import {
   Menu as MenuIcon
 } from '@material-ui/icons';
 import { styled, withStyles } from '@material-ui/styles';
+import { createMuiTheme } from '@material-ui/core/styles';
 
 import { StyledCell } from '../../Sudoku/Cell';
 import { StyledGrid } from '../../Sudoku/Grid';
@@ -113,12 +114,12 @@ class ThemePanel extends React.PureComponent {
       )
     })
 
-    const mockedTheme = {
+    const mockedTheme = createMuiTheme({
       ...this.state,
       palette: {
         type: this.state.type,
       },
-    }
+    })
 
     const demoCells = [];
     let styleState;

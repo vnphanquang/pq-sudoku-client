@@ -55,7 +55,7 @@ function SnackbarPQS() {
           vertical: 'bottom',
           horizontal: 'left',
         }}
-        autoHideDuration={5000}
+        autoHideDuration={8000}
       >
         <SnackbarContent
           className={clsx(classes[type], classes.content)}
@@ -97,6 +97,7 @@ const useStyles = makeStyles(theme => ({
 
   content: {
     margin: theme.spacing(1),
+    flexWrap: 'nowrap',
   }, 
 
   message: {

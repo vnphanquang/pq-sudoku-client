@@ -3,6 +3,7 @@ import {
   SNACKBAR_CLOSE,
   SNACKBAR_GENERIC_ERROR,
   SNACKBAR_GENERIC_SUCCESS,
+  SNACKBAR_GENERIC_INFO,
 } from '../actions/snackbar';
 
 export default function snackbar(state=InitState, {type, payload}) {
@@ -11,6 +12,8 @@ export default function snackbar(state=InitState, {type, payload}) {
       return {type: 'error', payload};
     case SNACKBAR_GENERIC_SUCCESS: 
       return {type: 'success', payload};
+    case SNACKBAR_GENERIC_INFO:
+      return {type: 'info', payload};
     case SNACKBAR_CLOSE:
       return InitState;
     default:
