@@ -1,55 +1,85 @@
 import React from 'react';
-import {withStyles} from '@material-ui/styles';
+import { connect } from 'react-redux';
+import { ThemeProvider, styled } from '@material-ui/styles';
+import { CssBaseline } from '@material-ui/core';
+import { createMuiTheme } from '@material-ui/core/styles';
+import blue from '@material-ui/core/colors/blue';
 
-// import {
+import { GlobalHotKeys } from 'react-hotkeys';
 
-// } from '@material-ui/core';
+import {
+  DialogAction,
+  DIALOG_ADD_TAB, 
+  DIALOG_EXPORT, 
+  DIALOG_SAVEAS,
+  DIALOG_OPEN,
+  DIALOG_SETTINGS,
+  DIALOG_HELP,
+  DIALOG_WELCOME,
+} from '../redux/actions/dialogs';
+import { SudokuPencilToggle, SudokuSave } from '../redux/actions/sudokus';
+import { DrawerToggle } from '../redux/actions/general';
+import { ThemeTypeToggle } from '../redux/actions/theme';
 
 import Navigator from './Navigator';
-// import Drawer from './Drawer';
 import Sudoku from './Sudoku';
 import Dialog from './Dialog';
 import Snackbar from './Snackbar';
 import {APPBAR_HEIGHT, COLLAPSED_DRAWER_WIDTH} from './utils';
 
-import { HotKeys } from 'react-hotkeys';
+const keyMap = {
+  TOGGLE_DRAWER: ['ctrl+b', 'command+b'],
+  TOGGLE_PENCIL: 'alt+p',
+  TOGGLE_THEME_TYPE: 'alt+t',
+  ADD: 'alt+n',
+  OPEN: ['ctrl+o', 'command+o'],
+  SAVE: ['ctrl+s', 'command+s'],
+  SAVEAS: ['ctrl+shift+s', 'command+shift+s'],
+  EXPORT: ['ctrl+e', 'command+e'],
+  SETTINGS: ['ctrl+p', 'command+p'],
+  HELP: 'f1',
+}
 
-class App extends React.PureComponent {
-  constructor(props) {
-    super(props);
-    this.hotKeyRef = null;
-    this.updateRef = this.updateRef.bind(this);
-  }
-
-  updateRef(node) {
-    this.hotKeyRef = node;
-    this.hotKeyRef.focus();
+class App extends React.Component {
+  
+  componentDidMount() {
+    if (this.props.new) {
+      this.props.openTour();
+    }
   }
 
   render() {
-    // console.log('App rendered');
-    let { classes } = this.props;
+    // console.log('AppContainer rendered');
+    let {theme, hotkeyHandlers} = this.props;
+    theme = createMuiTheme({
+      palette: {
+        type: theme.type,
+        primary: blue
+      },
+      colors: theme.colors,
+      sudoku: theme.sudoku,
+    })
+
     return (
-      <HotKeys innerRef={this.updateRef} handlers={this.props.hotkeyHandlers}>
-        <div className={classes.root}>
+      <React.Fragment>
+        <ThemeProvider theme={theme}>
+          <CssBaseline />
+          <GlobalHotKeys keyMap={keyMap} handlers={hotkeyHandlers} />
           <Navigator />
-          <div className={classes.sudokuWrapper}>
+          <SudokuWrapper>
             <Sudoku />
-          </div>
+          </SudokuWrapper>
           <Dialog />
           <Snackbar />
-        </div>
-      </HotKeys>
+        </ThemeProvider>
+      </React.Fragment>
     )
   }
 }
 
-const styles = theme => ({
-  root: {
-    // position: 'absolute'
-  },
 
-  sudokuWrapper: {
+const SudokuWrapper = styled((props) => <div {...props}/>)(
+  ({theme}) => ({
     position: 'absolute',
     width: '100vw',
     height: `calc(100vh - ${APPBAR_HEIGHT}px)`,
@@ -63,7 +93,68 @@ const styles = theme => ({
       marginLeft: COLLAPSED_DRAWER_WIDTH,
       width: `calc(100vw - ${COLLAPSED_DRAWER_WIDTH}px)`,
     },
+  })
+)
+
+const mapStateToProps = state => ({
+  theme: state.theme,
+})
+
+//TODO: Globalize Hotkeys to Redux?
+const mapDispatchToProps = dispatch => ({
+  openTour: () => dispatch(DialogAction(DIALOG_WELCOME)),
+  hotkeyHandlers: {
+    TOGGLE_DRAWER: (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      dispatch(DrawerToggle());
+    },
+    TOGGLE_PENCIL: (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      dispatch(SudokuPencilToggle());
+    },
+    TOGGLE_THEME_TYPE: (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      dispatch(ThemeTypeToggle());
+    },
+    ADD: (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      dispatch(DialogAction(DIALOG_ADD_TAB));
+    },
+    OPEN: (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      dispatch(DialogAction(DIALOG_OPEN));
+    },
+    SAVE: (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      dispatch(SudokuSave());
+    },
+    SAVEAS: (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      dispatch(DialogAction(DIALOG_SAVEAS));
+    },
+    EXPORT: (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      dispatch(DialogAction(DIALOG_EXPORT));
+    },
+    SETTINGS: (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      dispatch(DialogAction(DIALOG_SETTINGS));
+    },
+    HELP: (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      dispatch(DialogAction(DIALOG_HELP));
+    },
   },
 })
 
-export default withStyles(styles)(App);
+export default connect(mapStateToProps, mapDispatchToProps)(App);
