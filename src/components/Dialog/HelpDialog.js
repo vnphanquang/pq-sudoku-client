@@ -18,17 +18,18 @@ import {dialogLabels } from '../../lang';
 
 //TODO: refactors & language separation!
 const helpData = [
-  ['"Double click" or "Alt+G"', 'Cell/Grid', 'Select all cells within current subgrid'],
+  ['"Double click" or "Shift+G"', 'Cell/Grid', 'Select all cells within current subgrid'],
   ['"Triple click" or "Ctrl+A"', 'Cell/Grid', 'Select all cells within current grid'],
   ['"Delete" or "Backspace"', 'Cell/Grid', 'Clear cell(s)'],
   ['"Arrow Keys"', 'Cell/Grid', 'Navigate within grid'],
   ['"Ctrl+Click" or "Ctrl+Arrow" or "Shift+Arrow"', 'Cell/Grid', 'Add cell to selection'],
   ['"Shift+Click"', 'Cell/Grid', 'Add cell(s) to selection based on locations of focused cell and clicked cell'],
-  ['"Alt+R"', 'Cell/Grid', 'Select all cells within current row'],
-  ['"Alt+C"', 'Cell/Grid', 'Select all cells within current column'],
-  ['"Alt+P"', 'Workspace', 'Toggle pencil mode'],
-  ['"Alt+T"', 'Workspace', 'Toggle dark/light theme'],
-  ['"Alt+N"', 'Workspace', 'Add (Ctrl+T & Ctrl+N are reserved by browser)'],
+  ['"Shift+R"', 'Cell/Grid', 'Select all cells within current row'],
+  ['"Shift+C"', 'Cell/Grid', 'Select all cells within current column'],
+  ['"Shift+V"', 'Cell/Grid', 'Select all cells of current value'],
+  ['"Shift+P"', 'Workspace', 'Toggle pencil mode'],
+  ['"Shift+T"', 'Workspace', 'Toggle dark/light theme'],
+  ['"Shift+N"', 'Workspace', 'Add (Ctrl+T & Ctrl+N are reserved by browser)'],
   ['"Ctrl+O"', 'Workspace', 'Open'],
   ['"Ctrl+S"', 'Workspace', 'Save'],
   ['"Ctrl+Shift+S"', 'Workspace', 'Save As'],
@@ -50,9 +51,9 @@ function HelpDialog({onCancel}) {
         <Table>
           <TableHead>
             <TableRow>
-              <TableCell>Action</TableCell>
+              <TableCell>Keybinding</TableCell>
               <TableCell>Location</TableCell>
-              <TableCell>Description</TableCell>
+              <TableCell>Action</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>

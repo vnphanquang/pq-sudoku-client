@@ -11,7 +11,7 @@ function SudokuSVG({
   id,
   name,
   size,
-  cellsData,
+  cellValues,
   outlineStrokeWidth=4, 
   outlineColor='#212121',
   subgridEdgeStrokeWidth=2.5, 
@@ -88,7 +88,7 @@ function SudokuSVG({
       />
     )
     for (let col = 0; col < size; col++) {
-      value = cellsData[row][col];
+      value = cellValues[row][col];
       if (value.length === 2) valueXShift = 10;
       textXY = `${baseTextX + baseCellSize * col - valueXShift} ${baseTextY + baseCellSize * row}`
       values.push(
@@ -98,7 +98,7 @@ function SudokuSVG({
           transform={`translate(${textXY})`}
           data-name="values"
         >
-          {cellsData[row][col]}
+          {cellValues[row][col]}
         </text>
       )
       valueXShift = 0;

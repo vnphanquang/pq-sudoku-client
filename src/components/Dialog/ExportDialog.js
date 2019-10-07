@@ -164,7 +164,7 @@ function ExportDialog({onSubmit, onCancel, data:sudoku}) {
               svgRef={svgRef}
               name={name}
               //FIXME: save cellsData to state!
-              cellsData={window.sudokus.getCellsData()}
+              cellValues={window.sudokus.getCellValues()}
               size={sudoku.size}
             />
           </div>

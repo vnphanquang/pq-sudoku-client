@@ -12,7 +12,7 @@ import {
   DeleteSweep as DeleteSweepIcon,
 } from '@material-ui/icons';
 
-import {valueKeyStrokes} from './Grid';
+import { valueKeyStrokes } from '../utils';
 
 function Pad(props) {
   // console.log('Pad rendered!')

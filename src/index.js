@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom';
 import { Provider } from 'react-redux'
 import App from './components/App';
 import store from './redux/store'
-import { SudokuSave} from './redux/actions/sudokus';
+import { SudokuSave } from './redux/actions/sudokus';
 
 const rootNode = document.getElementById('root');
 

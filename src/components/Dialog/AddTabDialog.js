@@ -21,7 +21,6 @@ import { generateDefaultValues } from '../../redux/actions/sudokus';
 import { dialogLabels } from '../../lang';
 import { StyledGrid } from '../Sudoku/Grid';
 import { StyledCell } from '../Sudoku/Cell';
-import { STYLE_STATES} from '../utils';
 
 const sizeVariant = {
   4: '4x4',
@@ -85,7 +84,7 @@ function TabAdditionDialog({onSubmit, onCancel}) {
         <StyledCell
             key={`demo-cell-${row}-${col}`}
             row={row} col={col}
-            styleState={settings.values[index].length === 0 && STYLE_STATES.CONFLICTING}
+            status={{conflicting: settings.values[index].length === 0}}
           >
             <Tooltip className={classes.demoCellWrapper} title={`insert label #${index+1}`}>
               <Input

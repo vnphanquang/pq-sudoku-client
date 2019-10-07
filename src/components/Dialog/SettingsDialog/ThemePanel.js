@@ -20,7 +20,6 @@ import { createMuiTheme } from '@material-ui/core/styles';
 
 import { StyledCell } from '../../Sudoku/Cell';
 import { StyledGrid } from '../../Sudoku/Grid';
-import { STYLE_STATES } from '../../utils';
 
 // const colorLabelVariants = {
 //   baseBg: 'Base',
@@ -122,27 +121,25 @@ class ThemePanel extends React.PureComponent {
     })
 
     const demoCells = [];
-    let styleState;
-    let focused;
+    let focused, selected, conflicting, spotted, lit;
     let value;
     let handleClick;
 
     for (let row = 0; row < 4; row++) {
       for (let col = 0; col < 4; col++) {
-        styleState = null;
-        focused = false;
+        focused = selected = conflicting = spotted = lit = false;
         value = '';
         handleClick = (e) => this.cellColorInputRefs['baseBg'].click();
         if (row === 1 || (col >= 0 && col <=2 && row !== 3) || (row === 3 && col === 1)) {
-          styleState = STYLE_STATES.LIT
+          lit = true;
           handleClick = (e) => this.cellColorInputRefs['litBg'].click();
         }
         if (col === 1 && row !== 3) {
-          styleState = STYLE_STATES.SELECTED;
+          selected = true;
           handleClick = (e) => this.cellColorInputRefs['selectedBg'].click();
         }
         if (row === 3 && col === 3) {
-          styleState = STYLE_STATES.SPOTTED;
+          spotted = true;
           handleClick = (e) => this.cellColorInputRefs['spottedBg'].click();
           value = 1;
         }
@@ -152,7 +149,7 @@ class ThemePanel extends React.PureComponent {
           value = 1;
         }
         else if (row === 0 && col === 2) {
-          styleState = STYLE_STATES.CONFLICTING;
+          conflicting = true;
           handleClick = (e) => this.cellColorInputRefs['conflictingBg'].click();
           value = 1;
         }
@@ -162,8 +159,7 @@ class ThemePanel extends React.PureComponent {
             key={`demo-cell-${row}-${col}`}
             theme={mockedTheme}
             row={row} col={col}
-            styleState={styleState}
-            focused={focused}
+            status={{focused, selected, conflicting, spotted, lit}}
             onClick={handleClick}
           >
             <button>{value}</button>

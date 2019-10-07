@@ -29,9 +29,9 @@ import {APPBAR_HEIGHT, COLLAPSED_DRAWER_WIDTH} from './utils';
 
 const keyMap = {
   TOGGLE_DRAWER: ['ctrl+b', 'command+b'],
-  TOGGLE_PENCIL: 'alt+p',
-  TOGGLE_THEME_TYPE: 'alt+t',
-  ADD: 'alt+n',
+  TOGGLE_PENCIL: 'shift+P',
+  TOGGLE_THEME_TYPE: 'shift+T',
+  ADD: 'Shift+N',
   OPEN: ['ctrl+o', 'command+o'],
   SAVE: ['ctrl+s', 'command+s'],
   SAVEAS: ['ctrl+shift+s', 'command+shift+s'],

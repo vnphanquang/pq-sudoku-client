@@ -34,13 +34,13 @@ export function SudokuAddition({
   name='New Sudoku', 
   size=9, 
   values=generateDefaultValues(size),
-  cellsData=(new Array(size)).fill((new Array(size)).fill(''))
+  cellValues,
 }) {
   return {
     type: SUDOKU_ADD,
     payload: {
       id: uuidv1(),
-      name, size, values, cellsData,
+      name, size, values, cellValues,
     }
   }
 }

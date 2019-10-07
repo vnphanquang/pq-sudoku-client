@@ -13,7 +13,6 @@ import { withStyles } from '@material-ui/styles';
 
 import { StyledGrid } from '../../Sudoku/Grid';
 import { StyledCell } from '../../Sudoku/Cell';
-import { STYLE_STATES} from '../../utils';
 import { dialogLabels } from '../../../lang';
 
 class CurrentSudokuPanel extends React.PureComponent {
@@ -62,7 +61,7 @@ class CurrentSudokuPanel extends React.PureComponent {
             <StyledCell
                 key={`demo-cell-${row}-${col}`}
                 row={row} col={col}
-                styleState={this.state.values[index].length === 0 && STYLE_STATES.CONFLICTING}
+                status={{conflicting: this.state.values[index].length === 0}}
               >
                 <Tooltip className={classes.demoCellWrapper} title={`insert label #${index+1}`}>
                   <Input

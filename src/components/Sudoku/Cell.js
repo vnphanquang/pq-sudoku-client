@@ -1,11 +1,12 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import PencilLayer from './PencilLayer'
-import {STYLE_STATES} from '../utils';
 import {styled} from '@material-ui/styles';
 import {
   ButtonBase,
 } from '@material-ui/core';
+
+import { mixColors } from '../utils';
 
 class Cell extends React.PureComponent {
   
@@ -18,22 +19,52 @@ class Cell extends React.PureComponent {
     subgrid: PropTypes.number.isRequired,
     initValue: PropTypes.string,
     handleCellClick: PropTypes.func.isRequired,
-    handleKeyPress: PropTypes.func.isRequired
   }
 
   constructor(props) {
     super(props)
+
+    this.conflicts = [];
+
     this.input = null;
     this.state = {
       cellValue: this.props.initValue || '',
       pencils: new Array(this.props.gridsize).fill(false),
       showPencils: false,
-      styleState: null,
-      focused: false
+      status: {
+        focused: false,
+        selected: false,
+        conflicting: false,
+        spotted: false,
+        lit: false,
+      },
+      selected: false,
     }
     this.inputRef = this.inputRef.bind(this);
     this.handleClick = this.handleClick.bind(this);
-    this.handleKeyPress = this.handleKeyPress.bind(this);
+  }
+
+  addConflict(cell) {
+    if (this.conflicts.findIndex((c) => c.isSameCell(cell)) === -1) {
+      this.conflicts.push(cell);
+    }
+  }
+
+  removeConflict(cell) {
+    this.conflicts = this.conflicts.filter((c) => !c.isSameCell(cell));
+  }
+
+  set status(status) {
+    this.setState(st => ({
+      status: {
+        ...st.status,
+        ...status
+      }
+    }))
+  }
+
+  get selected() {
+    return this.state.status.selected;
   }
 
   isSameCell(otherCell) {
@@ -44,10 +75,6 @@ class Cell extends React.PureComponent {
     )
   }
 
-  isSelected() {
-    return this.state.styleState === STYLE_STATES.SELECTED;
-  }
-
   inputRef(node) {
     this.input = node;
   }
@@ -56,10 +83,6 @@ class Cell extends React.PureComponent {
     this.props.handleCellClick(e, this);
   }
   
-  handleKeyPress(e) {
-    this.props.handleKeyPress(e, this);
-  }
-
   render() {
     // console.log('Cell rendered');
     return (
@@ -67,10 +90,8 @@ class Cell extends React.PureComponent {
         gridsize={this.props.gridsize}
         row={this.props.row}
         col={this.props.col}
-        styleState={this.state.styleState}
+        status={this.state.status}
         onMouseUp={this.handleClick}
-        onKeyDown={this.handleKeyPress}
-        focused={this.state.focused}
       >
         { this.state.showPencils && <PencilLayer pencils={this.state.pencils} />}
         <ButtonBase buttonRef={this.inputRef}>
@@ -81,10 +102,9 @@ class Cell extends React.PureComponent {
   }
 }
 
-
-export const StyledCell = styled(({focused, styleState, row, col, ...other}) => <div {...other} />)(
-  ({theme, row, col, gridsize, focused, styleState}) => ({
-    backgroundColor: getBgColor(focused, styleState, theme),
+export const StyledCell = styled((props) => <div {...props} />)(
+  ({theme, row, col, gridsize, status}) => ({
+    backgroundColor: getBgColor(status, theme),
     borderColor: `${theme.sudoku.color[theme.palette.type]}`,
     borderStyle: 'solid',
     borderWidth: getBorderWidth(row, col, gridsize),
@@ -115,20 +135,43 @@ export const StyledCell = styled(({focused, styleState, row, col, ...other}) => 
   }),
 )
 
-function getBgColor(focused, styleState, {sudoku: {cell}, palette: {type}}) {
-  switch(styleState) {
-    case STYLE_STATES.LIT:
-      return cell.litBg[type];
-    case STYLE_STATES.SPOTTED:
-      return cell.spottedBg[type];
-    case STYLE_STATES.CONFLICTING:
-      return cell.conflictingBg[type];
-    case STYLE_STATES.SELECTED:
-      if (focused) return cell.focusedBg[type];
-      else         return cell.selectedBg[type];
-    default:
-      return cell.baseBg[type];
+function getBgColor(status, theme) {
+  const {focused, selected, conflicting, spotted, lit} = status;
+  const {
+    sudoku: {
+      cell: {
+        litBg, spottedBg, conflictingBg, selectedBg, focusedBg, baseBg
+      }
+    }, 
+    palette: {type}
+  } = theme;
+
+  if (conflicting) {
+    if (focused) {
+      return mixColors(
+        [conflictingBg[type], 2], 
+        [focusedBg[type], 5]
+      );
+    } else if (selected) {
+      return mixColors(
+        [conflictingBg[type], 2], 
+        [selectedBg[type], 5]
+      );
+    } else {
+      return conflictingBg[type];
+    }
+  } else if (focused) {
+    return focusedBg[type];
+  } else if (selected) {
+    return selectedBg[type];
+  } else if (spotted) {
+    return spottedBg[type];
+  } else if (lit) {
+    return litBg[type];
+  } else {
+    return baseBg[type];
   }
+
 }
 
 function getBorderWidth(row, col, gridSize) {

@@ -15,13 +15,17 @@ class Sudoku extends React.Component {
     this.updateGridRef = this.updateGridRef.bind(this);
     this.clearCells = this.clearCells.bind(this);
     this.inputValue = this.inputValue.bind(this);
+    this.handleKeyInput = this.handleKeyInput.bind(this);
   }
 
   componentDidMount() {
     window.sudokus = {
       ...window.sudokus,
+      getCellValues: () => this.grid.getCellValues(),
       getCellsData: () => this.grid.getCellsData(),
+      getConflicts: () => this.grid.conflicts,
     }
+    this.componentDidUpdate();
   }
 
   componentDidUpdate() {
@@ -36,11 +40,17 @@ class Sudoku extends React.Component {
   }
 
   clearCells() {
-    this.grid.clear();
+    this.grid.clearCellsValue();
   }
   
   inputValue(key) {
-    this.grid.input(key);
+    this.grid.inputCellsValue(key);
+  }
+
+  handleKeyInput(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    this.grid.handleKeyInput(e);
   }
 
   render() {
@@ -60,7 +70,7 @@ class Sudoku extends React.Component {
       )
       
       let isActive;
-      sudokuArray = array.map(({id, size, values, cellsData}, index) => {
+      sudokuArray = array.map(({id, size, values, cellValues}, index) => {
         isActive = activeIndex === index;
         return (
           <SudokuContainer 
@@ -71,7 +81,7 @@ class Sudoku extends React.Component {
               {...isActive && {ref: this.updateGridRef}} 
               size={size} 
               values={values}
-              initCellsData={cellsData}
+              initCellValues={cellValues}
             />
           </SudokuContainer>
         )
@@ -80,7 +90,7 @@ class Sudoku extends React.Component {
     }
     
     return (
-      <RootContainer >
+      <RootContainer onKeyDown={this.handleKeyInput}>
         {sudokuArray}
         {pad}
       </RootContainer>

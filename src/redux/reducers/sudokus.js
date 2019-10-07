@@ -14,7 +14,7 @@ export default function sudokus(state = InitState, {type, payload}) {
   switch (type) {
     case SUDOKU_ADD:
       if (state.activeIndex !== null) {
-        state.array[state.activeIndex].cellsData = window.sudokus.getCellsData();
+        state.array[state.activeIndex].cellValues = window.sudokus.getCellValues();
       }
       return {
         ...state,
@@ -22,7 +22,7 @@ export default function sudokus(state = InitState, {type, payload}) {
         activeIndex: state.array.length
       }
     case SUDOKU_TAB_CHANGE:
-      state.array[state.activeIndex].cellsData = window.sudokus.getCellsData();
+      state.array[state.activeIndex].cellValues = window.sudokus.getCellValues();
       return {
         ...state,
         array: [...state.array],
@@ -42,7 +42,7 @@ export default function sudokus(state = InitState, {type, payload}) {
       }
     case SUDOKU_SAVE:
       if (state.activeIndex !== null) {
-        state.array[state.activeIndex].cellsData = window.sudokus.getCellsData();
+        state.array[state.activeIndex].cellValues = window.sudokus.getCellValues();
       }
       return state;
     case SUDOKU_PENCIL_TOGGLE:
