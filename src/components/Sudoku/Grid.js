@@ -1,52 +1,37 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import {SELECTION, KEYS_STROKES, DIRECTION, STYLE_STATES} from '../utils';
+
+import { styled } from '@material-ui/styles';
+
 import Cell from './Cell';
-import {styled} from '@material-ui/styles';
-
-function SubgridToCellsMap(gridSize) {
-  const entries = [];
-  for (let i = 0; i < gridSize; i++) {
-    entries.push([i, []]);
-  }
-  return new Map(entries);
-}
-
-function ValueToCellsMap(values) {
-  const entries = [];
-  for (let i = 0; i < values.length; i++) {
-    entries.push([values[i], []])
-  }
-  return new Map(entries);
-}
-
-export const valueKeyStrokes = [
-  '1', '2', '3', '4', '5', '6', '7', '8', '9', 
-  'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i',
-  'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r'
-]
-function ValueMap(values) {
-  const entries = [];
-  for (let i = 0; i < values.length; i++) {
-    entries.push([valueKeyStrokes[i], values[i]])
-  }
-  return new Map(entries);
-}
+import { 
+  SELECTION, 
+  DIRECTION, 
+  KEYS_STROKES, valueKeyStrokes,
+  SubgridToCellsMap, ValueToCellsMap, ValueMap 
+} from '../utils';
 
 class Grid extends React.Component {
-
   static propTypes = {
+    // rows: PropTypes.number.isRequired,
+    // cols: PropTypes.number.isRequired,
     size: PropTypes.number.isRequired,
     values: PropTypes.array.isRequired,
-    initCellsData: PropTypes.array,
+    initCellValues: PropTypes.array,
   }
 
   constructor(props) {
     super(props);
-    this.valueToCellsMap = ValueToCellsMap(this.props.values);
-    this.subgridToCellsMap = SubgridToCellsMap(this.props.size);
-    this.valueMap = ValueMap(this.props.values);
-    this.conflictCells = [];
+    const {values, size} = this.props;
+    // maps
+    this.valueToCellsMap = ValueToCellsMap(values);
+    this.subgridToCellsMap = SubgridToCellsMap(size);
+    this.valueMap = ValueMap(values);
+
+    // conflicts
+    this.conflicts = [];
+
+    // selection
     this.selectedCells = [null];
     this.selection = {
       type: SELECTION.TYPES.SINGLE,
@@ -54,400 +39,365 @@ class Grid extends React.Component {
       cells: [],
       focus: null
     }
+
+    // pencil mode
     this.pencilMode = false;
 
-    // Input & Navigation
-    this.handleKeyPress = this.handleKeyPress.bind(this);
+    // event handlers
+    this.handleKeyInput = this.handleKeyInput.bind(this);
     this.handleCellClick = this.handleCellClick.bind(this);
-    this.mapCellRef = this.mapCellRef.bind(this);
-    this.focus = this.focus.bind(this);
-    this.isFocused = this.isFocused.bind(this);
     
+    // cells
     this.cells = this.initGrid();
+    this.mapCellRef = this.mapCellRef.bind(this);
+
+    // exposed globally
+    this.focus = this.focus.bind(this);
   }
 
   initGrid() {
-    let refs = [];
-    let cellRow, cell;
-
+    let cells = [];
+    let cellRow;
     for (let row = 0; row < this.props.size; row++) {
       cellRow = [];
       for (let col = 0; col < this.props.size; col++) {
-        cell = null;
-        cellRow.push(cell);
+        cellRow.push(null);
       }
-      refs.push(cellRow);
+      cells.push(cellRow);
     }
-    return refs;
+    return cells;
   }
 
-  mapCellRef(targetCell) {
-    if (targetCell) {
-      const {row, col} = targetCell.props;
-      this.cells[row][col] = targetCell;
-      this.setSubgridToCellsMapping(targetCell);
-      const targetValue = this.props.initCellsData[row][col];
-      if (targetValue) {
-        this.setValueToCellsMapping(targetCell, targetValue)
-      }
+  componentDidMount() {
+    if (this.props.initCellValues) {
+      this.checkConflicts();
     }
-  }
-
-  updateCellValue(targetCell, newValue) {
-    let oldValue = this.getCellValue(targetCell);
-    if (newValue !== oldValue) {
-      targetCell.setState({cellValue: newValue, showPencils: false}, () => {
-        if (oldValue !== '') {
-          this.removeCellFromValueMap(targetCell, oldValue);
-          if (this.selection.type === SELECTION.TYPES.SINGLE) {
-            this.unspotMatchedCells(oldValue);
-            this.uncheckConflicts(targetCell);
-          }
-        }  
-        if (newValue !== '') {
-          this.setValueToCellsMapping(targetCell, newValue);
-          if (this.selection.type === SELECTION.TYPES.SINGLE) {
-            this.spotMatchedCellsAndConflicts(targetCell);
-          }
-        }
-      });  
-    }
-  }
-
-  input(key) {
-    let inputValue = this.valueMap.get(key);
-    if (this.pencilMode) {
-      this.selection.cells.forEach(cell => {
-        this.updateCellValue(cell, '');
-        cell.setState((st) => ({
-          // pencilMap: st.pencilMap.set(key, st.pencilMap.get(key) ? false : inputValue)
-          showPencils: true,
-          pencils: st.pencils.map((value, index) => {
-            if (index === this.props.values.findIndex((v) => v === inputValue)) {
-              return value ? false : inputValue;
-            } else {
-              return value;
-            }
-          })
-        }))
-      })
-    } else {
-      this.selection.cells.forEach(cell => {
-        this.updateCellValue(cell, inputValue !== cell.state.cellValue ? inputValue : '');
-      })
-    }
-    this.focus();
-  }
-
-  clear() {
-    this.selection.cells.forEach(cell => {
-      if (cell.state.cellValue !== '') {
-        this.updateCellValue(cell, '');
-        if (cell.state.pencils.some((pencil) => pencil)) {
-          cell.setState({showPencils: true});
-        }
-      } else {
-        cell.setState({
-          showPencils: false,
-          pencils: new Array(this.props.size).fill(false)
-        });
-      }
-    })
-    this.focus();
-  }
-
-  handleKeyPress(e, targetCell) {
-    let {ctrlKey, metaKey, altKey, key} = e;
-    //TODO: refactors shift or ctrl + arrow
-    if (ctrlKey) {
-      if (KEYS_STROKES.ARROWS.includes(key)) {
-        this.keyNavigate(e);
-      } else {
-        switch(key) {
-          case 'a':
-            e.preventDefault();
-            e.stopPropagation();
-            this.selectAll();
-            break;
-          case 'z':
-            //TODO: implement undo
-            break;
-          case 'y':
-            //TODO: implement redo
-            break;
-          default:
-            break;
-        }
-      }
-    } else if (altKey || metaKey) {
-      switch(key) {
-        case 'g':
-          e.preventDefault();
-          e.stopPropagation();
-          this.selectCellsBySubgrid(targetCell.props.subgrid);
-          break;
-        case 'r':
-          e.preventDefault();
-          e.stopPropagation();
-          this.handleCellSelectionByIndex({}, targetCell.props.row, DIRECTION.ROW);
-          break;
-        case 'c':
-          e.preventDefault();
-          e.stopPropagation();
-          this.handleCellSelectionByIndex({}, targetCell.props.col, DIRECTION.COL);
-          break;
-        default:
-          break;
-      }
-    } else {
-      if (this.valueMap.has(key)) {
-        this.input(key);
-      } else if (KEYS_STROKES.ARROWS.includes(key)) {
-        this.keyNavigate(e);
-      } else if (KEYS_STROKES.DELETES.includes(key)) {
-        this.clear();
-      } 
-    }
-  }
-
-  handleCellClick(e, targetCell) {
-    const {ctrlKey, shiftKey, detail=1} = e;
-    if (detail === 1) {
-      let lastSelectedCell = this.selection.focus;
-      if (this.selection.type === SELECTION.TYPES.SINGLE) {
-        if ((ctrlKey) && lastSelectedCell && !targetCell.isSameCell(lastSelectedCell)) {
-          this.clearSelection();
-          this.selectCell(lastSelectedCell);
-          this.selection.type = SELECTION.TYPES.MULTI;
-          this.selectCell(targetCell);
-          this.focusCell(targetCell);
-          targetCell.input.focus();
-        } else if (shiftKey && lastSelectedCell && !targetCell.isSameCell(lastSelectedCell)) {
-          this.clearSelection();
-          this.selection.type = SELECTION.TYPES.MULTI;
-          this.shiftSelectCell(lastSelectedCell, targetCell);
-          lastSelectedCell.input.focus();
-        } else {
-          if (!targetCell.isSameCell(lastSelectedCell)) {
-            if (lastSelectedCell) {
-              this.clearCellStyle(lastSelectedCell);
-              this.unlitRelatives(lastSelectedCell);
-              let lastSelectedValue = this.getCellValue(lastSelectedCell);
-              let targetValue = this.getCellValue(targetCell);
-              if (lastSelectedValue !== '') {
-                this.uncheckConflicts(targetCell);
-                if (targetValue !== lastSelectedValue) {
-                  this.unspotMatchedCells(lastSelectedValue);
-                }
-              }
-            }
-            this.singleSelectCell(targetCell);
-          } else {
-            lastSelectedCell.input.focus();
-          }
-        }
-      } else if (this.selection.type === SELECTION.TYPES.MULTI) {
-        if (ctrlKey) {
-          if (targetCell.isSelected()) {
-            this.unselectCell(targetCell);
-          } else {
-            this.selectCell(targetCell);
-            this.focusCell(targetCell);
-            targetCell.input.focus();
-          }
-        } else if (shiftKey &&  !targetCell.isSameCell(lastSelectedCell)) {
-          this.clearSelection();
-          this.shiftSelectCell(lastSelectedCell, targetCell);
-          lastSelectedCell.input.focus();
-        } else {
-          this.selection.cells.forEach(cell => {
-            this.clearCellStyle(cell);
-          })
-          this.singleSelectCell(targetCell);  
-        }
-      } else {
-        this.selection.cells.forEach(cell => {
-          this.clearCellStyle(cell);
-        })
-        this.singleSelectCell(targetCell);
-      }
-    } else if (detail === 2) {
-      this.selectCellsBySubgrid(targetCell.props.subgrid);
-    } else if (detail === 3){
-      this.selectAll();
-    }
-  }
-
-  handleCellSelectionByIndex({shiftKey, ctrlKey}, targetIndex, direction) {
-    if (this.selection.type !== direction){
-      this.clearSelection();
-      this.selection.type = SELECTION.TYPES[direction.toUpperCase()];
-      this.selection.position = targetIndex;
-      this.selectCellsByIndex(targetIndex, direction);
-    } else if (ctrlKey) {
-      let row = targetIndex;
-        let col = targetIndex;
-        if (direction === DIRECTION.ROW) {
-          col = 0;
-        } else {
-          row = 0;
-        }
-        if (!this.getCell(row, col).isSelected()) {
-          this.selectCellsByIndex(targetIndex, direction);
-          this.selection.position = targetIndex;
-        } else {
-          this.unselectCellsByIndex(targetIndex, direction);
-        }
-    } else if (shiftKey) {
-      this.clearSelection();
-      let increment = (targetIndex > this.selection.position) ? 1 : -1
-      targetIndex += increment;
-      let i = this.selection.position; 
-      do {
-        this.selectCellsByIndex(i, direction);
-        i += increment;
-      } while (i !== targetIndex);
-      this.selection.position = targetIndex - increment;
-    } else {
-      this.clearSelection();
-      this.selection.position = targetIndex;
-      this.selectCellsByIndex(targetIndex, direction);
-    }
-  }
-
-  selectCellsByIndex(targetIndex, direction) {
-    let coor = {
-      row: targetIndex,
-      col: targetIndex
-    }
-    let cursor = (direction === DIRECTION.ROW) ? DIRECTION.COL : DIRECTION.ROW;
-    for (coor[cursor] = 0; coor[cursor] < this.props.size; coor[cursor]++) {
-      this.selectCell(this.getCell(coor.row, coor.col));
-    }
-    let selectedCell = this.selection.focus;
-    selectedCell = (selectedCell) ? selectedCell : this.selection.cells[0];
-    selectedCell.input.focus();
   }
   
-// TODO: Selection methods ==> return false/true or selected/unselected cells
-  singleSelectCell(targetCell) {
-    this.litRelatives(targetCell);
-    this.spotMatchedCellsAndConflicts(targetCell);
-    this.selection.cells = [];
-    this.selection.type = SELECTION.TYPES.SINGLE;
-    this.selection.position = null;
-    this.selectCell(targetCell);
-    this.focusCell(targetCell);
-    targetCell.input.focus();
-  }
-
-  shiftSelectCell(originCell, targetCell) {
-    let {row: originRow, col: originCol} = originCell.props;
-    let {row: targetRow, col: targetCol} = targetCell.props;
-    let rowIncrement = (originRow <= targetRow) ? 1 : -1;
-    let colIncrement = (originCol <= targetCol) ? 1 : -1;
-    targetRow += rowIncrement;
-    targetCol += colIncrement;
-    for (let row = originRow; row !== targetRow; row += rowIncrement) {
-      for (let col = originCol; col !== targetCol; col += colIncrement) {
-        this.selectCell(this.getCell(row, col));
-      }
-    }
-  }
-
-  selectCell(targetCell) {
-    this.setCellStyle(targetCell, STYLE_STATES.SELECTED);
-    this.selection.cells.push(targetCell);
-  }
-
-  unselectCell(targetCell) {
-    let selectedCells = this.selection.cells;
-    this.clearCellStyle(targetCell);
-    selectedCells.splice(selectedCells.indexOf(targetCell), 1)
-    if (selectedCells.length === 0) {
-      this.selection.type = SELECTION.TYPES.SINGLE;
-      this.selection.cells = [];
-      this.selection.position = null;
-      this.selection.focus = null;
-    } else {
-      let lastSelected = selectedCells[selectedCells.length - 1];
-      this.focusCell(lastSelected);
-      lastSelected.input.focus();
-    }
-  }
-
-  selectCellsBySubgrid(subgrid) {
-    if (this.selection.type !== SELECTION.TYPES.SUBGRID) {
-      this.clearSelection();
-      this.selection.type = SELECTION.TYPES.SUBGRID;
-      this.selection.position = subgrid;
-      this.getCellsBySubgrid(subgrid).forEach(cell => this.selectCell(cell));
-      this.selection.focus.input.focus();
-    } else {
-      this.handleCellClick({}, this.selection.focus);
-    }
-  }
-
-  unselectCellsByIndex(targetIndex, direction) {
-    if (this.selection.type !== direction) return false;
-    let cursor = (direction === DIRECTION.ROW) ? DIRECTION.ROW : DIRECTION.COL;
-    let selectedCells = this.selection.cells;
-    for (let i = 0; i < selectedCells.length; i += this.props.size) {
-      if (selectedCells[i].props[cursor] === targetIndex) {
-        selectedCells.splice(i, this.props.size).forEach(cell => {
-          this.clearCellStyle(cell);
-        });
-        if (selectedCells.length === 0) {
-          if (this.selection.focus) {
-            this.handleCellClick({}, this.selection.focus);
-          } else {
-            this.selection.type = SELECTION.TYPES.SINGLE;
-            this.selection.cells = [];
-            this.selection.position = null;
-          }
+  shouldComponentUpdate(nextProps) {
+    const newValues = nextProps.values;
+    const oldValues = this.props.values;
+    let newValue, oldValue, cells;
+    for (let i = 0; i < newValues.length; i++) {
+      newValue = newValues[i];
+      oldValue = oldValues[i];
+      if (newValue !== oldValue) {
+        cells = this.valueToCellsMap.get(oldValue);
+        for (let cell of cells) {
+          cell.setState({cellValue: newValue});
         }
-        return true;
+        this.valueToCellsMap.set(newValue, cells);
+        this.valueToCellsMap.delete(oldValue);
+        this.valueMap.set(valueKeyStrokes[i], newValue);
       }
     }
     return false;
   }
 
-  selectAll() {
-    this.clearSelection();
-    this.selection.type = SELECTION.TYPES.MULTI;
-    this.selection.position = null;
-    for (let row = 0; row < this.props.size; row++) {
-      for (let col = 0; col < this.props.size; col++) {
-        this.selectCell(this.getCell(row, col));
+  render() {
+    const { size, initCellValues } = this.props;
+    const cells = [];
+    let subgrid;
+    for (let row = 0; row < size; row++) {
+      for (let col = 0; col < size; col++) {
+        subgrid = Grid.getSubgridNumber(row, col, size);
+        cells.push(
+          <Cell
+            key={`${subgrid}-${row}-${col}`}
+            ref={this.mapCellRef}
+            gridsize={size}
+            row={row} col={col}
+            subgrid={subgrid}
+            initValue={initCellValues ? initCellValues[row][col] : ''}
+            handleCellClick={this.handleCellClick}
+          />
+        );
       }
     }
-    this.selection.focus.input.focus();
+
+    return (
+      <StyledGrid rows={size} cols={size}>
+        {cells}
+      </StyledGrid>
+    )
   }
 
-  clearSelection() {
-    let lastSelectedCell = this.selection.focus;
-    if (this.selection.type !== SELECTION.TYPES.SINGLE) {
-      this.selection.cells.forEach(cell => {
-        this.clearCellStyle(cell);
+  mapCellRef(targetCell) {
+    if (targetCell) {
+      const { row, col } = targetCell.props;
+      this.cells[row][col] = targetCell;
+      this.setSubgridToCellsMapping(targetCell);
+      if (this.props.initCellValues) {
+        const targetValue = this.props.initCellValues[row][col];
+        this.setValueToCellsMapping(targetCell, targetValue);
+      }
+    }
+  }
+//--------------------------GETTERS & MAPPING------------------------------
+//TODO: Condition (targetCell) for all?
+  setSubgridToCellsMapping(targetCell) {
+      this.getCellsBySubgrid(targetCell.props.subgrid).push(targetCell);
+  }
+
+  setValueToCellsMapping(targetCell, targetValue) {
+    if (targetValue) {
+      this.getCellsByValue(targetValue).push(targetCell);
+    }
+  }
+  removeCellFromValueMap(targetCell, targetValue) {
+    let cells = this.getCellsByValue(targetValue);
+    cells = cells.filter(cell => !cell.isSameCell(targetCell));
+    this.valueToCellsMap.set(targetValue, cells);
+  }
+
+  getCellsByValue(value) {
+    return this.valueToCellsMap.get(value);
+  }
+
+  getCellsBySubgrid(subgrid) {
+    return this.subgridToCellsMap.get(subgrid);
+  }
+
+  getCell(row, col) {
+    return this.cells[row][col];
+  }
+
+  getCellValue(targetCell) {
+    return targetCell.state.cellValue;
+  }
+//-------------------------EVENT HANDLERS----------------------------
+  handleKeyInput(e) {
+    const {ctrlKey, metaKey, shiftKey, key} = e;
+    if (!['Control', 'Meta', 'Shift', 'Alt'].includes(key)) {
+      if (this.valueMap.has(key)) {
+        this.inputCellsValue(key);
+      } else if (KEYS_STROKES.ARROWS.includes(key)) {
+        this.keyNavigate(e);
+      } else if (KEYS_STROKES.DELETES.includes(key)) {
+        this.clearCellsValue();
+      } else {
+        if ((ctrlKey || metaKey) && key === 'a') {
+          this.clearSelection();
+          this.selectAllCells();
+        } else if (shiftKey) {
+          switch(key) {
+            case 'G':
+              if (this.selection.focus) {
+                this.clearSelection();
+                this.selectCellsBySubgrid(this.selection.focus.props.subgrid);
+              }
+              break;
+            case 'R':
+              if (this.selection.focus) {
+                this.clearSelection();
+                this.selectCellsByIndex(DIRECTION.ROW, this.selection.focus.props.row);
+              }
+              break;
+            case 'C':
+              if (this.selection.focus) {
+                this.clearSelection();
+                this.selectCellsByIndex(DIRECTION.COL, this.selection.focus.props.col);
+              }
+              break;
+            case 'V':
+              if (this.selection.focus) {
+                const targetValue = this.getCellValue(this.selection.focus);
+                if (targetValue) {
+                  this.clearSelection();
+                  this.selectCellsByValue(this.getCellValue(this.selection.focus));
+                }
+              }
+            default:
+              break;
+          }
+        }
+      }
+    }
+  }
+
+  handleCellClick(e, targetCell) {
+    const { detail=0 } = e;
+    switch(detail) {
+      case 0:
+      case 1: 
+        this.select(e, targetCell);
+        break;
+      case 2:
+        this.clearSelection();
+        this.selectCellsBySubgrid(targetCell.props.subgrid);
+        break;
+      case 3:
+        this.clearSelection();
+        this.selectAllCells();
+        break;
+      default:
+        break;
+    }
+  }
+//-------------------------KEY CELL VALUE INPUT------------------------------
+  inputCellsValue(key) {
+    const inputValue = this.valueMap.get(key);
+    if (this.pencilMode) {
+      let oldValue;
+      for (const cell of this.selection.cells) {
+        oldValue = this.getCellValue(cell);
+        if (oldValue) {
+          this.removeCellFromValueMap(cell, oldValue);
+          if (this.selection.type === SELECTION.TYPES.SINGLE) {
+            this.unspotCellsByValue(oldValue);
+          }
+          this.uncheckConflicts(cell);
+        }
+        cell.setState(st => ({
+          cellValue: '',
+          showPencils: true,
+          pencils: st.pencils.map((value, index) => {
+            if (index === this.props.values.indexOf(inputValue)) {
+              return value ? false : inputValue;
+            } else {
+              return value;
+            }
+          })
+        }));
+      }
+    } else {
+      for (const cell of this.selection.cells) {
+        this.updateCellValue(
+          cell, 
+          inputValue !== this.getCellValue(cell) ? inputValue : ''
+        );
+      }
+    }
+    this.focus();
+  }
+  updateCellValue(targetCell, newValue) {
+    const oldValue = this.getCellValue(targetCell);
+    if (newValue !== oldValue) {
+      targetCell.setState({cellValue: newValue, showPencils: false}, () => {
+        if (oldValue) {
+          if (this.selection.type === SELECTION.TYPES.SINGLE) {
+            this.unspotCellsByValue(oldValue);
+          }
+          this.uncheckConflicts(targetCell);
+          this.removeCellFromValueMap(targetCell, oldValue);
+        } 
+        if (newValue) {
+          this.setValueToCellsMapping(targetCell, newValue);
+          if (this.selection.type === SELECTION.TYPES.SINGLE) {
+            this.spotCellsByValue(newValue);
+          }
+          this.checkConflicts(targetCell);
+        //TODO: refactors into Cell?
+        } else if (targetCell.state.pencils.some(pencil => pencil)) {
+          targetCell.setState({showPencils: true});
+        }
       })
-    } else if (lastSelectedCell) {
-      this.unlitRelatives(lastSelectedCell);
-      let lastSelectedValue = this.getCellValue(lastSelectedCell);
-      if (lastSelectedValue !== '') {
-        this.uncheckConflicts();
-        this.unspotMatchedCells(lastSelectedValue);
+    }
+  }
+  clearCellsValue() {
+    for (const cell of this.selection.cells) {
+      if (this.getCellValue(cell)) {
+        this.updateCellValue(cell, '');
+      } else {
+        cell.setState({
+          showPencils: false,
+          pencils: (new Array(this.props.size)).fill(false),
+        })
       }
     }
-    this.selection.cells = [];
-    // this.selection.type = SELECTION.TYPES.SINGLE;
-    // this.selection.position = null;
+    this.focus();
+  }
+//-------------------------CONFLICTS------------------------------
+  checkConflicts(targetCell) {
+    const conflicts = [];
+    if (targetCell) {
+      const {row, col, subgrid} = targetCell.props;
+      const cells = this.getCellsByValue(this.getCellValue(targetCell));
+      let bitMask;
+      for (const cell of cells) {
+        bitMask = (
+          0 |
+          (cell.props.row === row) |
+          ((cell.props.col === col) << 1) |
+          ((cell.props.subgrid === subgrid) << 2)
+        );
+        if (bitMask && bitMask !== 7) {
+          conflicts.push([
+            {row, col},
+            {row: cell.props.row, col: cell.props.col}
+          ]);
+          cell.addConflict(targetCell);
+          cell.status = {conflicting: true};
+          targetCell.addConflict(cell);
+        }
+      }
+      if (conflicts.length > 0) {
+        targetCell.status = {conflicting: true};
+      }
+    } else {
+      let cells;
+      let cell;
+      for (const value of this.props.values) {
+        cells = [...this.valueToCellsMap.get(value)];
+        while (cells.length > 0) {
+          cell = cells.pop();
+          for (const other of cells) {
+            if (
+              cell.props.row === other.props.row ||
+              cell.props.col === other.props.col ||
+              cell.props.subgrid === other.props.subgrid
+            ) {
+              conflicts.push([
+                {row: cell.props.row, col: cell.props.col},
+                {row: other.props.row, col: other.props.col}
+              ]);
+              cell.addConflict(other);
+              cell.status = {conflicting: true};
+              other.addConflict(cell);
+              other.status = {conflicting: true};
+            }
+          }
+        }
+      }
+    }
+    this.conflicts.push(...conflicts);
+  }
+  uncheckConflicts(targetCell) {
+    const {row, col} = targetCell.props;
+    const matchedCells = [];
+    this.conflicts = this.conflicts.filter(([first, second]) => {
+      if (first.row === row && first.col === col) {
+        matchedCells.push(second);
+        return false;
+      }
+      if (second.row === row && second.col === col) {
+        matchedCells.push(first);
+        return false;
+      }
+      return true;
+    })
+    if (matchedCells.length > 0) {
+      for (let cell of matchedCells) {
+        cell = this.getCell(cell.row, cell.col);
+        cell.removeConflict(targetCell);
+        if (cell.conflicts.length === 0) {
+          cell.status = {conflicting: false};
+        }
+      }
+      targetCell.status = {conflicting: false};
+      targetCell.conflicts = [];
+    }
   }
 
+//-------------------------KEY NAVIGATION------------------------------
   keyNavigate(e) {
-    let {key, ctrlKey, shiftKey} = e;
+    e.preventDefault();
+    e.stopPropagation();
+    const {key, ctrlKey, shiftKey} = e;
+    const lastSelectedCell = this.selection.focus;
+    if (!lastSelectedCell) lastSelectedCell = this.getCell(0, 0);
+    const {row, col} = lastSelectedCell.props;
     let targetCell = null;
-    let lastSelectedCell = this.selection.focus;
-    let {row, col} = lastSelectedCell.props;
 
     switch(key) {
       case 'ArrowUp': 
@@ -476,234 +426,234 @@ class Grid extends React.Component {
     if (targetCell) {
       let isMultiSelection = this.selection.type === SELECTION.TYPES.MULTI;
       if ((ctrlKey|| shiftKey) && isMultiSelection) {
-        if (!targetCell.isSelected()) {
+        if (!targetCell.selected) {
           this.selectCell(targetCell);
         }
         this.focusCell(targetCell)
-        targetCell.input.focus();
       } else {
-        this.handleCellClick({ctrlKey, shiftKey}, targetCell);
+        this.handleCellClick(e, targetCell);
+      }
+    }
+  }
+//-----------------------SELECTION-----------------------------------
+  select(e, targetCell) {
+    const { ctrlKey, shiftKey } = e;
+    const lastSelectedCell = this.selection.focus;
+    if (!lastSelectedCell) {
+      this.singleSelectCell(targetCell);
+    } else if (!targetCell.isSameCell(lastSelectedCell)) {
+      if (this.selection.type === SELECTION.TYPES.SINGLE) {
+        if (ctrlKey) {
+          this.clearSelection();
+          this.selection.type = SELECTION.TYPES.MULTI;
+          this.selectCell(lastSelectedCell);
+          this.selectCell(targetCell);
+          this.focusCell(targetCell);
+        } else if (shiftKey) {
+          this.clearSelection();
+          this.selection.type = SELECTION.TYPES.MULTI;
+          this.shiftSelectCells(lastSelectedCell, targetCell);
+        } else {
+          this.unlitRelatives(lastSelectedCell);
+          const lastSelectedValue = this.getCellValue(lastSelectedCell);
+          const targetValue = this.getCellValue(targetCell);
+          if (lastSelectedValue !== targetValue) {
+            this.unspotCellsByValue(lastSelectedValue);
+          }
+          this.unselectCell(lastSelectedCell);
+          this.singleSelectCell(targetCell);
+        }
+      } else if (this.selection.type === SELECTION.TYPES.MULTI) {
+        if (ctrlKey) {
+          if (targetCell.selected) {
+            this.unselectCell(targetCell);
+          } else {
+            this.selectCell(targetCell);
+            this.focusCell(targetCell);
+          }
+        } else if (shiftKey) {
+          this.clearSelection();
+          this.shiftSelectCells(lastSelectedCell, targetCell);
+        } else {
+          this.clearSelection();
+          this.singleSelectCell(targetCell);
+        }
+      } else {
+        this.clearSelection();
+        this.singleSelectCell(targetCell);
+      }
+    } else {
+      if (ctrlKey) {
+        this.unselectCell(targetCell);
+      } else if (shiftKey) {
+        this.clearSelection();
+        this.singleSelectCell(targetCell);
       }
     }
   }
 
+  selectCell(targetCell) {
+    targetCell.status = {selected: true};
+    this.selection.cells.push(targetCell);
+  }
+
+  unselectCell(targetCell) {
+    targetCell.status = {selected: false};
+    if (this.selection.type !== SELECTION.TYPES.SINGLE) {
+      const selectedCells = this.selection.cells;
+      selectedCells.splice(selectedCells.indexOf(targetCell), 1);
+      if (selectedCells.length === 1) {
+        this.singleSelectCell(selectedCells[0]);
+      } else {
+        this.focusCell(selectedCells[selectedCells.length - 1]);
+      }
+    }
+  }
+
+  singleSelectCell(targetCell) {
+    this.litRelatives(targetCell);
+    this.spotCellsByValue(this.getCellValue(targetCell));
+    this.selection.cells = [];
+    this.selection.type = SELECTION.TYPES.SINGLE;
+    this.selection.position = null;
+    this.selectCell(targetCell);
+    this.focusCell(targetCell);
+  }
+
+  selectCellsByIndex(direction, targetIndex) {
+    const selectionType = SELECTION.TYPES[direction.toUpperCase()];
+    if (this.selection.type === selectionType && this.selection.position === targetIndex) {
+      this.singleSelectCell(this.selection.focus);
+    } else {
+      this.selection.type = selectionType
+      this.selection.position = targetIndex;
+      this.onCellsByIndex(direction, targetIndex, this.selectCell.bind(this));
+      this.focusCell(this.selection.focus);
+    }
+  }
+
+  selectCellsByValue(targetValue) {
+    if (this.selection.type === SELECTION.TYPES.VALUE && this.selection.position === targetValue) {
+      this.singleSelectCell(this.selection.focus);
+    } else if (targetValue) {
+      this.selection.type = SELECTION.TYPES.VALUE;
+      this.selection.position = targetValue;
+      this.onCellsByValue(targetValue, this.selectCell.bind(this));
+      this.focusCell(this.selection.focus);
+    }
+  }
+
+  selectCellsBySubgrid(targetSubgrid) {
+    if (this.selection.type === SELECTION.TYPES.SUBGRID && this.selection.position === targetSubgrid) {
+      this.singleSelectCell(this.selection.focus);
+    } else {
+      this.selection.type = SELECTION.TYPES.SUBGRID;
+      this.selection.position = targetSubgrid;
+      this.onCellsBySubgrid(targetSubgrid, this.selectCell.bind(this));
+      this.focusCell(this.selection.focus);
+    }
+  }
+
+  selectAllCells() {
+    if (this.selection.type === SELECTION.TYPES.ALL) {
+      this.singleSelectCell(this.selection.focus);
+    } else {
+      this.selection.type = SELECTION.TYPES.ALL;
+      this.selection.position = null;
+      for (let row = 0; row < this.props.size; row++) {
+        for (let col = 0; col < this.props.size; col++) {
+          this.selectCell(this.getCell(row, col));
+        }
+      }
+      this.focusCell(this.selection.focus);
+    }
+  }
+
+  shiftSelectCells(originCell, targetCell) {
+    let {row: originRow, col: originCol} = originCell.props;
+    let {row: targetRow, col: targetCol} = targetCell.props;
+    let rowIncrement = (originRow <= targetRow) ? 1 : -1;
+    let colIncrement = (originCol <= targetCol) ? 1 : -1;
+    targetRow += rowIncrement;
+    targetCol += colIncrement;
+    for (let row = originRow; row !== targetRow; row += rowIncrement) {
+      for (let col = originCol; col !== targetCol; col += colIncrement) {
+        this.selectCell(this.getCell(row, col));
+      }
+    }
+    this.focusCell(originCell);
+  }
+
+  clearSelection() {
+    const lastSelectedCell = this.selection.focus;
+    if (this.selection.type !== SELECTION.TYPES.SINGLE) {
+      for (const cell of this.selection.cells) {
+        cell.status = {selected: false};
+      }
+    } else if (lastSelectedCell) {
+      this.unselectCell(lastSelectedCell);
+      this.unlitRelatives(lastSelectedCell);
+      this.unspotCellsByValue(this.getCellValue(lastSelectedCell));
+    }
+    this.selection.cells = [];
+  }
+//--------------------------RELATIVES---------------------------------------
   litRelatives(targetCell) {
-    this.litRelativeDir(targetCell, DIRECTION.ROW);
-    this.litRelativeDir(targetCell, DIRECTION.COL);
-    this.litRelativeSubgrid(targetCell);
-    this.clearCellStyle(targetCell);
+    this.onRelatives(targetCell, (cell) => cell.status = {lit: true});
   }
-
   unlitRelatives(targetCell) {
-    this.unlitRelativeDir(targetCell, DIRECTION.ROW);
-    this.unlitRelativeDir(targetCell, DIRECTION.COL);
-    this.unlitRelativeSubgrid(targetCell);
+    this.onRelatives(targetCell, (cell) => cell.status = {lit: false});
   }
-
-  litRelativeDir(targetCell, direction) {
-    let coor = {
-      row: targetCell.props.row,
-      col: targetCell.props.col
+  onRelatives(targetCell, callback) {
+    this.onCellsByIndex(DIRECTION.ROW, targetCell.props.row, callback);
+    this.onCellsByIndex(DIRECTION.COL, targetCell.props.col, callback);
+    this.onCellsBySubgrid(targetCell.props.subgrid, callback)
+  }
+  onCellsByIndex(direction, index, callback) {
+    const coor = {
+      row: index,
+      col: index
     }
     let cursor = (direction === DIRECTION.ROW) ? DIRECTION.COL : DIRECTION.ROW;
-
-    let cell;
     for (coor[cursor] = 0; coor[cursor] < this.props.size; coor[cursor]++) {
-      cell = this.getCell(coor.row, coor.col);
-      this.setCellStyle(cell, STYLE_STATES.LIT);
+      callback(this.getCell(coor.row, coor.col));
     }
   }
-
-  unlitRelativeDir(targetCell, direction) {
-    let coor = {
-      row: targetCell.props.row,
-      col: targetCell.props.col
-    }
-    let cursor = (direction === DIRECTION.ROW) ? DIRECTION.COL : DIRECTION.ROW;
-
-    let cell;
-    for (coor[cursor] = 0; coor[cursor] < this.props.size; coor[cursor]++) {
-      cell = this.getCell(coor.row, coor.col);
-      this.clearCellStyle(cell); 
+  onCellsBySubgrid(targetSubgrid, callback) {
+    if (targetSubgrid) {
+      this.getCellsBySubgrid(targetSubgrid).forEach(callback);
     }
   }
-
-  litRelativeSubgrid(targetCell) {
-    let cells = this.getCellsBySubgrid(targetCell.props.subgrid);
-    cells.forEach((cell) => {
-      this.setCellStyle(cell, STYLE_STATES.LIT);
-    })
-  }
-
-  unlitRelativeSubgrid(targetCell) {
-    let cells = this.getCellsBySubgrid(targetCell.props.subgrid);
-    cells.forEach((cell) => {
-      this.clearCellStyle(cell);
-    })
-  }
-
-  spotMatchedCellsAndConflicts(targetCell) {
-    let targetValue = this.getCellValue(targetCell);
-    if (targetValue !== '') {
-      let cells = this.getCellsByValue(targetValue);
-      if (cells.length !== 0) {
-        let {conflicts, otherMatches} = this.checkConflicts(targetCell, targetValue);
-        if (conflicts) {
-          this.conflictCells = conflicts;
-          conflicts.forEach((cell) => this.setCellStyle(cell, STYLE_STATES.CONFLICTING));
-        }
-        if (otherMatches) {
-          otherMatches.forEach((cell) => this.setCellStyle(cell, STYLE_STATES.SPOTTED));
-        }
-      }
+//-----------------------------SPOTTING----------------------------------
+  spotCellsByValue(targetValue) {
+    if (targetValue) {
+      this.onCellsByValue(targetValue, (cell) => cell.status = {spotted: true});
     }
   }
-
-  spotMatchedCells(targetValue) {
-    if (targetValue !== '') {
-      this.clearSelection();
-      let cells = this.getCellsByValue(targetValue);
-      cells.forEach((cell) => this.setCellStyle(cell, STYLE_STATES.SPOTTED));
-      if (this.selection.focus) {
-        this.setCellStyle(this.selection.focus, STYLE_STATES.SELECTED);
-        this.selection.focus.input.focus();
-      }
+  unspotCellsByValue(targetValue) {
+    if (targetValue) {
+      this.onCellsByValue(targetValue, (cell) => cell.status = {spotted: false});
     }
   }
-
-  checkConflicts(targetCell, targetValue) {
-    let {row, col, subgrid} = targetCell.props;
-    let isConflicting;
-    let isSelf;
-    let matchedCells = this.getCellsByValue(targetValue);
-    let conflicts = [];
-    let otherMatches = [];
-    targetValue = (targetValue !== undefined) ? targetValue : this.getCellValue(targetCell);
-    matchedCells.forEach((cell) => {
-      isConflicting = (cell.props.row === row) || (cell.props.col === col || cell.props.subgrid === subgrid);
-      isSelf = cell.isSameCell(targetCell);
-      if (!isSelf) {
-        if (isConflicting) conflicts.push(cell);
-        else otherMatches.push(cell);
-      }
-    })
-    conflicts = (conflicts.length !== 0) ? conflicts : null;
-    otherMatches = (otherMatches.length !== 0) ? otherMatches : null;
-    return {conflicts, otherMatches};
-  }
-
-  uncheckConflicts(relativeCell) {
-    let cell, row, col, subgroup;
-    if (relativeCell !== undefined) {
-      row = relativeCell.props.row;
-      col = relativeCell.props.col;
-      subgroup = relativeCell.props.subgrid;
-    } else {
-      row = null;
-      col = null;
-      subgroup = null;
-    }
-    while (this.conflictCells.length !== 0) {
-      cell = this.conflictCells.pop();
-      if (cell.props.row === row || cell.props.col === col || cell.props.subgrid === subgroup) {
-        this.setCellStyle(cell, STYLE_STATES.LIT);
-      } else {
-        this.clearCellStyle(cell);
-      }
+  onCellsByValue(targetValue, callback) {
+    if (targetValue) {
+      this.getCellsByValue(targetValue).forEach(callback);
     }
   }
-
-  unspotMatchedCells(targetValue) {
-    this.getCellsByValue(targetValue).forEach((cell) => {
-      this.clearCellStyle(cell);
-    })
-  }
-
+//---------------------------FOCUS-------------------------------------
   focusCell(targetCell) {
-    if (this.selection.focus) {
-      this.selection.focus.setState({focused: false});
-    }
-    this.selection.focus = targetCell;
-    targetCell.setState({focused: true});
-  }
-
-  focus() {
-    if (this.selection.focus) {
-      this.selection.focus.input.focus();
+    if (targetCell.isSameCell(this.selection.focus)) {
+      targetCell.input.focus();
     } else {
-      let center = parseInt(this.props.size / 2);
-      let cell = this.getCell(center, center)
-      this.handleCellClick({}, cell);
+      if(this.selection.focus) {
+        this.selection.focus.status = {focused: false};
+      }
+      this.selection.focus = targetCell;
+      targetCell.status = {focused: true};
+      targetCell.input.focus();
     }
   }
-  isFocused() {
-    if (this.selection.focus) {
-      return document.activeElement.isSameNode(this.selection.focus.input);
-    } else
-      return false;
-  }
-
-  setCellStyle(targetCell, styleState) {
-    // if (targetCell.state.styleState !== styleState)
-    targetCell.setState({styleState});
-  }
-
-  clearCellStyle(targetCell) {
-    targetCell.setState({styleState: null})
-  }
-
-  getCell(row, col) {
-    return this.cells[row][col];
-  }
-
-  getCellValue(targetCell) {
-    return targetCell.state.cellValue;
-  }
-
-  getCellsByValue(targetValue) {
-    return this.valueToCellsMap.get(`${targetValue}`)
-  }
-
-  removeCellFromValueMap(targetCell, targetValue) {
-    let isSelf;
-    let cells = this.getCellsByValue(targetValue);
-    cells = cells.filter((cell) => {
-      isSelf = cell.isSameCell(targetCell);
-      return !isSelf;
-    });
-    this.valueToCellsMap.set(`${targetValue}`, cells);
-  }
-
-  setValueToCellsMapping(targetCell, targetValue) {
-    this.getCellsByValue(targetValue).push(targetCell);
-  }
-
-  getCellsBySubgrid(subgrid) {
-    return this.subgridToCellsMap.get(subgrid);
-  }
-  
-  setSubgridToCellsMapping(targetCell) {
-    this.getCellsBySubgrid(targetCell.props.subgrid).push(targetCell);
-  }
-
-  getCellsData() {
-    return this.cells.map(cellRow => cellRow.map(cell => this.getCellValue(cell)));
-  }
-  
-  // setCellValues(values) {
-  //   let cell, value;
-  //   for (let row = 0; row < this.props.size; row++) {
-  //     for (let col = 0; col < this.props.size; col++) {
-  //       cell = this.getCell(row, col);
-  //       value = values[row][col];
-  //       if (value !== '') {
-  //         cell.setState({cellValue: value});
-  //         this.setValueToCellsMapping(cell, value);
-  //       }
-  //     }
-  //   }
-  // }
-
+//-------------------------------------------------------------------
   static getSubgridNumber(row, col, gridSize) {
     const subgridSize = Math.sqrt(gridSize);
     const [subgridRow, subgridCol] = [Math.floor(row/subgridSize), Math.floor(col/subgridSize)];
@@ -717,63 +667,38 @@ class Grid extends React.Component {
       this.pencilMode = !this.pencilMode;
     }
   }
-
-  shouldComponentUpdate(nextProps, nextState) {
-    const newValues = nextProps.values;
-    const oldValues = this.props.values;
-    let newValue, oldValue;
-    let cells;
-    for (let i = 0; i < newValues.length; i++) {
-      newValue = newValues[i];
-      oldValue = oldValues[i];
-      if (newValue !== oldValue) {
-        cells = this.valueToCellsMap.get(oldValue);
-        // eslint-disable-next-line no-unused-vars
-        for (let cell of cells) {
-          cell.setState({cellValue: newValue});
-        }
-        this.valueToCellsMap.set(newValue, cells);
-        this.valueToCellsMap.delete(oldValue);
-        this.valueMap.set(valueKeyStrokes[i], newValue);
-        
-      }
+//-------------------------------------------------------------------
+  focus() {
+    if (this.selection.focus) {
+      this.selection.focus.input.focus();
+    } else {
+      const center = parseInt(this.props.size / 2);
+      this.singleSelectCell(this.getCell(center, center));
     }
-    return false;
   }
 
-  render() {
-    // console.log('Grid rendered!');
-    const { 
-      size,
-      initCellsData=(new Array(size)).fill((new Array(size)).fill('')), 
-    } = this.props;
-    let cells = [];
-    let subgrid;
-    for (let row = 0; row < size; row++) {
-      for (let col = 0; col < size; col++) {
-        subgrid = Grid.getSubgridNumber(row, col, size);
-        cells.push(
-          <Cell
-            gridsize={size}
-            ref={this.mapCellRef}
-            key={`${row}-${col}`}
-            row={row} col={col}
-            subgrid={subgrid}
-            initValue={initCellsData[row][col]}
-            handleCellClick={this.handleCellClick}
-            handleKeyPress={this.handleKeyPress}
-          />
-        );
+  getCellValues() {
+    return this.cells.map(cellRow => cellRow.map(cell => this.getCellValue(cell)));
+  }
+
+  getCellsData() {
+    const data = [];
+    for (const cellRow of this.cells) {
+      for (const cell of cellRow) {
+        const {row, col, subgrid} = cell.props;
+        data.push({
+          value: this.getCellValue(cell),
+          row, col, subgrid,
+        })
       }
     }
-    
-    return  (
-      <StyledGrid rows={size} cols={size}>
-        {cells}
-      </StyledGrid>
-    )
+    return data;
   }
+
 }
+
+export default Grid;
+
 
 export const StyledGrid = styled(({...props}) => <div {...props} />)(
   ({theme, rows, cols}) => ({
@@ -791,6 +716,3 @@ export const StyledGrid = styled(({...props}) => <div {...props} />)(
     boxShadow: `1px 1px 6px ${theme.sudoku.shadow[theme.palette.type]}`,
   })
 )
-
-
-export default Grid;
