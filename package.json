@@ -1,6 +1,6 @@
 {
   "name": "pq-sudoku",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "proxy": "http://localhost:3001/",
   "private": true,
   "dependencies": {
