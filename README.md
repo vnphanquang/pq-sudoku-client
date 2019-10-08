@@ -1,5 +1,5 @@
 
-#  <img src="./public/expanded-logo.svg" height="80px" alt="pqSudoku logo">
+#  <img src="./.github/expanded-logo.svg" height="80px" alt="pqSudoku logo">
 
 pqSudoku is an **editor** and playground for sudoku enthusiasts, an attempt to provide a platform for puzzle makers. The project is in early development stage
 and currently only support tools for creating sudokus, but potentially will extend
