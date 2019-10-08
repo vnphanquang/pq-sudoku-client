@@ -6,7 +6,6 @@ import {
   IconButton,
   Toolbar,
   Tooltip,
-  Typography,
 } from '@material-ui/core';
 import {
   Brightness3 as Brightness3Icon,
@@ -19,11 +18,11 @@ import { DrawerToggle } from '../../redux/actions/general';
 import { SudokuTabChange, SudokuClose, SudokuSave } from '../../redux/actions/sudokus';
 import { DialogAction, DialogSaveAsOnTabClose } from '../../redux/actions/dialogs';
 import { APPBAR_HEIGHT } from '../utils';
-import { pqSudoku } from '../../lang';
 import Drawer from './Drawer';
 import DrawerIcon from './DrawerIcon';
 import Tabs from './Tabs';
-
+import { ReactComponent as LogoIcon} from './navbrand.svg';
+import { ReactComponent as LogoText} from './pqSudoku.svg';
 
 const themeTypeIcon = {
   light: <WbSunnyIcon />,
@@ -73,10 +72,12 @@ class Navigator extends React.PureComponent {
               onClick={toggleDrawer}
             />
 
-            <Typography variant="h5" className={classes.brand}>
-              {pqSudoku}
-            </Typography>
-
+            <LogoIcon
+              className={classes.logoIcon}
+            />
+            <LogoText 
+              className={classes.logoText}
+            />
             <Tabs 
               tabs={sudokus}
               closeTab={this.closeTab}
@@ -110,11 +111,16 @@ const styles = theme => ({
     backgroundColor: theme.colors.appBar[theme.palette.type],
   },
 
-  brand: {
-    whiteSpace: 'nowrap',
+  logoText: {
+    height: 30,
     [theme.breakpoints.down('xs')]: {
       display: 'none',
     },
+    marginLeft: theme.spacing(2),
+  },
+
+  logoIcon: {
+    height: 45,
   },
 
   drawerBtn: {
