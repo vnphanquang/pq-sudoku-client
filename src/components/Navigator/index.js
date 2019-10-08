@@ -23,6 +23,7 @@ import DrawerIcon from './DrawerIcon';
 import Tabs from './Tabs';
 import { ReactComponent as LogoIcon} from './navbrand.svg';
 import { ReactComponent as LogoText} from './pqSudoku.svg';
+import { tooltips } from '../../lang';
 
 const themeTypeIcon = {
   light: <WbSunnyIcon />,
@@ -84,7 +85,7 @@ class Navigator extends React.PureComponent {
               changeTab={changeTab}
             />
 
-            <Tooltip title="Toggle light/dark theme">
+            <Tooltip title={tooltips.toggleThemeType} classes={{tooltip: classes.tooltip}}>
               <IconButton className={classes.themeTypeToggle} onClick={toggleThemeType}>
                 {themeTypeIcon[themeType]}
               </IconButton>
@@ -110,7 +111,6 @@ const styles = theme => ({
     height: APPBAR_HEIGHT,
     backgroundColor: theme.colors.appBar[theme.palette.type],
   },
-
   logoText: {
     height: 30,
     [theme.breakpoints.down('xs')]: {
@@ -118,18 +118,18 @@ const styles = theme => ({
     },
     marginLeft: theme.spacing(2),
   },
-
   logoIcon: {
     height: 45,
   },
-
   drawerBtn: {
     margin: theme.spacing(0, 1),
   },
-
   themeTypeToggle: {
     margin: theme.spacing(0, 2),
     color: theme.palette.type === 'light' ? 'white' : 'black',
+  },
+  tooltip: {
+    ...theme.typography.body2
   }
 })
 

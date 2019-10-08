@@ -13,51 +13,121 @@ import {
 } from '@material-ui/icons';
 
 import { valueKeyStrokes } from '../utils';
+import { dialogLabels, tooltips } from '../../lang';
+
+
+const activeTooltips = {
+  tTogglePencil: tooltips.togglePencil, 
+  tClearCells: tooltips.clearCells,
+  tPadKey: (index) => `${tooltips.press} "${valueKeyStrokes[index]}" key`,
+  tSolve: tooltips.solve,
+  tGenerate: tooltips.generate,
+}
 
 function Pad(props) {
   // console.log('Pad rendered!')
   const classes = useStyles(props);
-  const {togglePencilMode, inputValue, pencil, values, clearCells} = props;
+  const { 
+    onPencil, 
+    inputValue, 
+    pencil, 
+    values, 
+    onClear,
+    onSolve,
+    onGenerate,
+    fetching,
+  } = props;
+
+  let tTogglePencil, tClearCells, tPadKey, tSolve, tGenerate;
+  if (fetching) {
+    tTogglePencil = tClearCells = tPadKey = tSolve = tGenerate = tooltips.fetching;
+    tPadKey = () => tooltips.fetching;
+  } else {
+    ({tTogglePencil, tClearCells, tPadKey, tSolve, tGenerate} = activeTooltips);
+  }
+
   return (
     <div className={classes.container}>
       <div className={classes.buttons}>
-        <Tooltip title="Toggle pencil">
-          <Button
-            variant="outlined" 
-            onClick={togglePencilMode}
-          >
-            <CreateIcon/>
-            <Typography 
-              color={pencil ? "primary" : "secondary"} 
-              paragraph 
-              align="right"
-              style={{whiteSpace: 'pre'}}
+        <Tooltip title={tTogglePencil} classes={{tooltip: classes.tooltip}}>
+          <span>
+            <Button
+              variant="outlined" 
+              onClick={onPencil}
+              disabled={fetching}
             >
-              {pencil ? `ON  ` : 'OFF'}
-            </Typography>
-          </Button>
+              <CreateIcon/>
+              <Typography 
+                color={pencil ? "primary" : "secondary"} 
+                paragraph 
+                align="right"
+                style={{whiteSpace: 'pre'}}
+              >
+                {pencil ? `ON  ` : 'OFF'}
+              </Typography>
+            </Button>
+          </span>
         </Tooltip>
-        <Tooltip title="Clear cell(s)">
-          <Button 
-            variant="outlined" 
-            onClick={clearCells}
-          >
-            <DeleteSweepIcon/>
-          </Button>
+        <Tooltip title={tClearCells} classes={{tooltip: classes.tooltip}}>
+          <span>
+            <Button 
+              variant="outlined" 
+              onClick={onClear}
+              disabled={fetching}
+            >
+              <DeleteSweepIcon/>
+            </Button>
+          </span>
         </Tooltip>
       </div>
       <div className={classes.values}>
         {values.map((value, index) => (
-          <Button 
+          <Tooltip
             key={`valuePad-${value}`}
-            variant="outlined"
-            onClick={(e) => inputValue(valueKeyStrokes[index])}
+            title={tPadKey(index)}
+            classes={{tooltip: classes.tooltip}}
           >
-            <Typography variant="h4" style={{textTransform: 'none'}}>
-              {value}
-            </Typography>
-          </Button>
+            <span>
+              <Button 
+                variant="outlined"
+                disabled={fetching}
+                onClick={(e) => inputValue(valueKeyStrokes[index])}
+              >
+                <Typography variant="h4" style={{textTransform: 'none'}}>
+                  {value}
+                </Typography>
+              </Button>
+            </span>
+          </Tooltip>
         ))}
+      </div>
+      <div className={classes.buttons}>
+        <Tooltip title={tSolve} classes={{tooltip: classes.tooltip}}>
+          <span>
+            <Button 
+              variant="outlined" 
+              onClick={onSolve}
+              disabled={fetching}
+            >
+              <Typography>
+                {dialogLabels.solve.toUpperCase()}
+              </Typography>
+            </Button>
+          </span>
+          </Tooltip>
+          {/* <Tooltip title={tGenerate} classes={{tooltip: classes.tooltip}}>
+            <span>
+              <Button 
+                variant="outlined" 
+                onClick={onGenerate}
+                disabled={fetching}
+              >
+                <Typography>
+                  {dialogLabels.generate.toUpperCase()}
+                </Typography>
+              </Button>
+            </span>
+          </Tooltip> */}
       </div>
     </div>
   )
@@ -87,12 +157,18 @@ const useStyles = makeStyles(theme => ({
   buttons: {
     display: 'flex',
     fontSize: theme.typography.h5.fontSize,
+    '& span': {
+      flexBasis: 1,
+      flexGrow: 1,
+      display: 'flex'
+    },
     '& button': {
       flexBasis: 1,
       flexGrow: 1,
       '& svg': {
         fontSize: '1.75rem',
       },
+      height: 50,
       [theme.breakpoints.up('lg')]: {
         height: 80,
       },
@@ -102,7 +178,16 @@ const useStyles = makeStyles(theme => ({
     display: 'flex',
     flexWrap: 'wrap',
     justifyContent: 'space-around',
+    '& span': {
+      width: '100%',
+      height: '100%',
+      flexBasis: 1,
+      flexGrow: 1,
+      display: 'flex'
+    },
     '& button': {
+      width: '100%',
+      height: '100%',
       [theme.breakpoints.down('md')]: {
         //TODO: adjust dynamic wrapping?
         flexBasis: '11%',
@@ -118,6 +203,9 @@ const useStyles = makeStyles(theme => ({
       gridTemplateRows: ({values}) => `repeat(${Math.sqrt(values.length)}, 1fr)`,
       gridTemplateColumns: ({values}) => `repeat(${Math.sqrt(values.length)}, 1fr)`,
     }
+  },
+  tooltip: {
+    ...theme.typography.body2
   }
 }));
 

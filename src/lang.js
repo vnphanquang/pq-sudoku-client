@@ -11,6 +11,32 @@ export const drawerLabels = {
   about: 'About',
 }
 
+export const snackbarMessages = {
+  genericError: 'Something went wrong, try again later...',
+  feedbackReceived: 'Feedback received!',
+  largeGrid: 'For large grid, consider using devices with wider viewport.',
+  solutionRequest: 'Requesting solution from sever...',
+  solutionSuccess: 'Solution found, applying now...',
+  solutionTimeout: 'Taking too long. Solution request has closed!',
+  alreadySolved: 'Grid is already solved',
+  cellConflicts: 'Please check conflicts within grid!',
+}
+
+export const errorMessages = {
+  noActiveSudoku: 'No active sudoku!',
+}
+
+export const tooltips = {
+  toggleThemeType: 'Toggle light/dark theme',
+  fetching: 'Waiting for request...',
+  solve: 'Request solution',
+  generate: 'Fill in empty cells',
+  togglePencil: 'Toggle pencil',
+  press: 'Press',
+  clearCells: 'Clear cell(s)',
+}
+
+
 export const dialogLabels = {
   newTab: 'New Sudoku Tab',
   sudokuName: {
@@ -65,16 +91,10 @@ export const dialogLabels = {
   skip: 'Skip',
   getStarted: 'Get Started',
   tour: 'Tour',
+  solve: 'Solve',
+  generate: 'Generate',
 }
 
 export const pqSudoku = 'pqSudoku';
-
-export const messages = {
-  noSudoku: 'No active sudoku!',
-}
-
-export const errorMessages = {
-  noActiveSudoku: 'No active sudoku!',
-}
 
 //TODO: refactor & organize

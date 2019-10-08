@@ -34,7 +34,7 @@ class Grid extends React.Component {
     // selection
     this.selectedCells = [null];
     this.selection = {
-      type: SELECTION.TYPES.SINGLE,
+      type: SELECTION.TYPES.NONE,
       position: null,
       cells: [],
       focus: null
@@ -83,7 +83,7 @@ class Grid extends React.Component {
       oldValue = oldValues[i];
       if (newValue !== oldValue) {
         cells = this.valueToCellsMap.get(oldValue);
-        for (let cell of cells) {
+        for (const cell of cells) {
           cell.setState({cellValue: newValue});
         }
         this.valueToCellsMap.set(newValue, cells);
@@ -91,11 +91,15 @@ class Grid extends React.Component {
         this.valueMap.set(valueKeyStrokes[i], newValue);
       }
     }
-    return false;
+    if (this.props.hidden !== nextProps.hidden) {
+      return true;
+    } else {
+      return false;
+    }
   }
 
   render() {
-    const { size, initCellValues } = this.props;
+    const { size, initCellValues, hidden } = this.props;
     const cells = [];
     let subgrid;
     for (let row = 0; row < size; row++) {
@@ -116,7 +120,7 @@ class Grid extends React.Component {
     }
 
     return (
-      <StyledGrid rows={size} cols={size}>
+      <StyledGrid hidden={hidden} rows={size} cols={size}>
         {cells}
       </StyledGrid>
     )
@@ -207,6 +211,7 @@ class Grid extends React.Component {
                   this.selectCellsByValue(this.getCellValue(this.selection.focus));
                 }
               }
+              break;
             default:
               break;
           }
@@ -270,10 +275,10 @@ class Grid extends React.Component {
     }
     this.focus();
   }
-  updateCellValue(targetCell, newValue) {
+  updateCellValue(targetCell, targetValue) {
     const oldValue = this.getCellValue(targetCell);
-    if (newValue !== oldValue) {
-      targetCell.setState({cellValue: newValue, showPencils: false}, () => {
+    if (targetValue !== oldValue) {
+      targetCell.setState({cellValue: targetValue, showPencils: false}, () => {
         if (oldValue) {
           if (this.selection.type === SELECTION.TYPES.SINGLE) {
             this.unspotCellsByValue(oldValue);
@@ -281,10 +286,10 @@ class Grid extends React.Component {
           this.uncheckConflicts(targetCell);
           this.removeCellFromValueMap(targetCell, oldValue);
         } 
-        if (newValue) {
-          this.setValueToCellsMapping(targetCell, newValue);
+        if (targetValue) {
+          this.setValueToCellsMapping(targetCell, targetValue);
           if (this.selection.type === SELECTION.TYPES.SINGLE) {
-            this.spotCellsByValue(newValue);
+            this.spotCellsByValue(targetValue);
           }
           this.checkConflicts(targetCell);
         //TODO: refactors into Cell?
@@ -292,6 +297,22 @@ class Grid extends React.Component {
           targetCell.setState({showPencils: true});
         }
       })
+    }
+  }
+  updateCellValues(cellValues) {
+    const selectionType = this.selection.type;
+    this.selection.type = SELECTION.NONE;
+    let targetCell, targetValue;
+    for (let row = 0; row < this.props.size; row++) {
+      for (let col = 0; col < this.props.size; col++) {
+        targetCell = this.getCell(row, col);
+        targetValue = cellValues[row][col];
+        this.updateCellValue(targetCell, targetValue);
+      }
+    }
+    this.selection.type = selectionType;
+    if (this.selection.focus) {
+      this.focusCell(this.selection.focus);
     }
   }
   clearCellsValue() {
@@ -394,7 +415,7 @@ class Grid extends React.Component {
     e.preventDefault();
     e.stopPropagation();
     const {key, ctrlKey, shiftKey} = e;
-    const lastSelectedCell = this.selection.focus;
+    let lastSelectedCell = this.selection.focus;
     if (!lastSelectedCell) lastSelectedCell = this.getCell(0, 0);
     const {row, col} = lastSelectedCell.props;
     let targetCell = null;
@@ -701,11 +722,11 @@ export default Grid;
 
 
 export const StyledGrid = styled(({...props}) => <div {...props} />)(
-  ({theme, rows, cols}) => ({
+  ({hidden, theme, rows, cols}) => ({
     width: '100%',
     height: '100%',
     gridArea: 'sudoku-grid',
-    display: 'grid',
+    display: hidden ? 'none' : 'grid',
     justifyContent: 'center',
     gridTemplateColumns: `repeat(${cols}, 1fr)`,
     gridTemplateRows: `repeat(${rows}, 1fr)`,

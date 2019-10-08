@@ -6,6 +6,9 @@ import {
   SUDOKU_CLOSE,
   SUDOKU_PENCIL_TOGGLE,
   SUDOKU_VALUE_MAPPING,
+  SUDOKU_SOLUTION_REQUEST,
+  SUDOKU_SOLUTION_DISCARD,
+  SUDOKU_SOLUTION_APPLY,
   CURRENT_SUDOKU_SETTINGS,
 } 
 from '../actions/sudokus';
@@ -52,6 +55,25 @@ export default function sudokus(state = InitState, {type, payload}) {
       }
     case SUDOKU_VALUE_MAPPING:
       state.array[state.activeIndex].values = payload;
+      return {
+        ...state,
+        array: [...state.array]
+      }
+    case SUDOKU_SOLUTION_REQUEST:
+      state.array[state.activeIndex].fetching = true;
+      return {
+        ...state,
+        array: [...state.array]
+      }
+    case SUDOKU_SOLUTION_DISCARD:
+      state.array[payload].fetching = false;
+      return {
+        ...state,
+        array: [...state.array]
+      }
+    case SUDOKU_SOLUTION_APPLY:
+      state.array[payload.index].cellValues = payload.cellValues;
+      state.array[payload.index].fetching = false;
       return {
         ...state,
         array: [...state.array]

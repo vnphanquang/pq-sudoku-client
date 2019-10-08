@@ -10,6 +10,7 @@ import {
 } from '@material-ui/core';
 import {
   CheckCircle as CheckCircleIcon,
+  Check as CheckIcon,
   Close as CloseIcon,
   Error as ErrorIcon,
   Info as InfoIcon,
@@ -18,23 +19,49 @@ import {
 import { makeStyles } from '@material-ui/styles';
 
 import { useDispatch, useSelector } from 'react-redux';
-import { SnackbarClose } from '../../redux/actions/snackbar';
+import { 
+  SnackbarClose,
+  SNACKBAR_GENERIC_ERROR,
+  SNACKBAR_GENERIC_SUCCESS,
+  SNACKBAR_GENERIC_INFO,
+  SNACKBAR_SUDOKU_SOLUTION_REQUEST,
+  SNACKBAR_SUDOKU_SOLUTION_SUCCESS,
+} from '../../redux/actions/snackbar';
 
-const variantIcon = {
+const iconVariants = {
   success: CheckCircleIcon,
   warning: WarningIcon,
   error: ErrorIcon,
   info: InfoIcon,
 }
 
+const variants = {
+  [SNACKBAR_GENERIC_ERROR]: {
+    type: 'error',
+  },
+  [SNACKBAR_GENERIC_SUCCESS]: {
+    type: 'success',
+  },
+  [SNACKBAR_GENERIC_INFO]: {
+    type: 'info',
+  },
+  [SNACKBAR_SUDOKU_SOLUTION_REQUEST]: {
+    autoHideDuration: null,
+    type: 'info',
+  },
+  [SNACKBAR_SUDOKU_SOLUTION_SUCCESS]: {
+    type: 'success',
+  },
+}
+
 const SlideTransition = React.forwardRef(function Transition(props, ref) {
   return <Slide direction="right" ref={ref} {...props} />;
 });
 
-//TODO: refactor, use HoC & Connect
+//TODO: refactor, use HoC & Connect?
 function SnackbarPQS() {
   const classes = useStyles();
-  const {type, payload} = useSelector(state => state.snackbar);
+  const snackbar = useSelector(state => state.snackbar);
   const dispatch = useDispatch();
 
   function handleClose(e, reason) {
@@ -42,40 +69,57 @@ function SnackbarPQS() {
       dispatch(SnackbarClose());
     }
   }
-
-  const Icon = variantIcon[type];
-
-  if (type !== null) {
-    return (
-      <Snackbar
-        open={type !== null}
-        onClose={handleClose}
-        TransitionComponent={SlideTransition}
-        anchorOrigin={{
-          vertical: 'bottom',
-          horizontal: 'left',
-        }}
-        autoHideDuration={8000}
-      >
-        <SnackbarContent
-          className={clsx(classes[type], classes.content)}
-          message={
-            <span className={classes.message}>
-              {Icon && <Icon className={classes.icon}/>}
-              {payload.message}
-            </span>
-          }
-          action={[
-            <IconButton key="snackbarCloseBtn" onClick={handleClose}>
-              <CloseIcon className={classes.closeBtn}/>
-            </IconButton>
-          ]}
-        />
-      </Snackbar>
+  let content = null;
+  let type = null;
+  let autoHideDuration = null;
+  if (snackbar.type) {
+    const variant = variants[snackbar.type];
+    type = variant.type;
+    autoHideDuration = variant.autoHideDuration;
+    const apply = variant.apply;
+    const {message} = snackbar.payload;
+    const Icon = iconVariants[type];
+    const actions = [];
+    if (apply) {
+      actions.push(
+        <IconButton key="snackbarApplyBtn" onClick={apply(dispatch)}>
+          <CheckIcon className={classes.actions}/>
+        </IconButton>
+      )
+    }
+    actions.push(
+      <IconButton key="snackbarCloseBtn" onClick={handleClose}>
+        <CloseIcon className={classes.actions}/>
+      </IconButton>
     )
-  } else {
-    return null;
+    // TODO: content should persist!
+    content = (
+      <SnackbarContent
+        className={clsx(classes[type], classes.content)}
+        message={
+          <span className={classes.message}>
+            {Icon && <Icon className={classes.icon}/>}
+            {message}
+          </span>
+        }
+        action={actions}
+      />
+    )
   }
+  return (
+    <Snackbar
+      open={type !== null}
+      onClose={handleClose}
+      TransitionComponent={SlideTransition}
+      anchorOrigin={{
+        vertical: 'bottom',
+        horizontal: 'left',
+      }}
+      autoHideDuration={autoHideDuration !== null ? autoHideDuration : 8000}
+    >
+      {content}
+    </Snackbar>
+  )
 }
 
 const useStyles = makeStyles(theme => ({
@@ -110,10 +154,11 @@ const useStyles = makeStyles(theme => ({
     marginRight: theme.spacing(1),
   },
 
-  closeBtn: {
+  actions: {
     fontSize: 20,
   },
 }))
 
 export default SnackbarPQS;
+
 

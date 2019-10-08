@@ -16,6 +16,7 @@ export const SELECTION = {
     VALUE: 'value',
     ROW: DIRECTION.ROW,
     COL: DIRECTION.COL,
+    NONE: 'none',
   }
 }
 

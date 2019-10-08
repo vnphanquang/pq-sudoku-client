@@ -1,29 +1,34 @@
 import React from 'react';
-import {connect} from 'react-redux';
-import {SudokuPencilToggle} from '../../redux/actions/sudokus';
+import { connect, batch } from 'react-redux';
+import { SudokuPencilToggle, SudokuSolutionApply, SudokuSolutionRequest, SudokuSolutionDiscard } from '../../redux/actions/sudokus';
 
-import {styled} from '@material-ui/styles';
+import CircularProgress from '@material-ui/core/CircularProgress';
+import { styled } from '@material-ui/styles';
 
-import {APPBAR_HEIGHT} from '../utils';
+import { APPBAR_HEIGHT } from '../utils';
 import SudokuGrid from './Grid';
 import Pad from './Pad';
+import { SnackbarSudokuSolutionRequest, SnackbarSudokuSolutionSuccess, SnackbarGenericError } from '../../redux/actions/snackbar';
+import { snackbarMessages } from '../../lang';
 
 class Sudoku extends React.Component {
   constructor(props) {
     super(props);
     this.grid = null;
+    this.fetching = false;
     this.updateGridRef = this.updateGridRef.bind(this);
     this.clearCells = this.clearCells.bind(this);
     this.inputValue = this.inputValue.bind(this);
     this.handleKeyInput = this.handleKeyInput.bind(this);
+    this.requestSolution = this.requestSolution.bind(this);
   }
 
   componentDidMount() {
     window.sudokus = {
       ...window.sudokus,
       getCellValues: () => this.grid.getCellValues(),
-      getCellsData: () => this.grid.getCellsData(),
-      getConflicts: () => this.grid.conflicts,
+      // getCellsData: () => this.grid.getCellsData(),
+      // getConflicts: () => this.grid.conflicts,
     }
     this.componentDidUpdate();
   }
@@ -40,44 +45,110 @@ class Sudoku extends React.Component {
   }
 
   clearCells() {
-    this.grid.clearCellsValue();
+    if (this.grid && !this.fetching) {
+      this.grid.clearCellsValue();
+    }
   }
   
   inputValue(key) {
-    this.grid.inputCellsValue(key);
+    if (this.grid && !this.fetching) {
+      this.grid.inputCellsValue(key);
+    }
   }
 
   handleKeyInput(e) {
-    e.preventDefault();
-    e.stopPropagation();
-    this.grid.handleKeyInput(e);
+    if (this.grid && !this.fetching) {
+      e.preventDefault();
+      e.stopPropagation();
+      this.grid.handleKeyInput(e);
+    }
+  }
+
+  updateGrid(cellValues) {
+    if (this.grid) {
+      this.grid.updateCellValues(cellValues);
+    }
+  }
+
+  async requestSolution() {
+    const targetGrid = this.grid;
+    const targetGridIndex = this.props.sudokus.activeIndex;
+    try {
+      this.props.requestSolution();
+      const res = await fetch('/api/solution/sudoku/classic', {
+        method: 'POST',
+        credentials: 'same-origin',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          algorithm: 'backtracking',
+          values: targetGrid.props.values,
+          cellValues: targetGrid.getCellValues(),
+          timeout: 5,
+        })
+      })
+      const {error, solution} = await res.json();
+      switch(res.status) {
+        case 200:
+          targetGrid.updateCellValues(solution);
+          this.props.applySolution(targetGridIndex, solution);
+          break;
+        case 209:
+          this.props.discardSolution(targetGridIndex, {
+            message: snackbarMessages.alreadySolved
+          });
+          break;
+        case 400:
+          if (error) {
+            if (error.conflicts) {
+              this.props.discardSolution(targetGridIndex, { 
+                message: snackbarMessages.cellConflicts 
+              });
+            } else {
+              this.props.discardSolution(targetGridIndex, { 
+                message: error.message || snackbarMessages.genericError 
+              });
+            }
+          }
+          break;
+        case 408:
+          this.props.discardSolution(targetGridIndex, { 
+            message: snackbarMessages.solutionTimeout 
+          });
+          break;
+        default:
+          this.props.discardSolution(targetGridIndex, { 
+            message: (error && error.message) || snackbarMessages.genericError 
+          });
+      }
+    } catch (error) {
+      console.log(error);
+      this.props.discardSolution(targetGridIndex, { 
+        message: snackbarMessages.genericError 
+      });
+    }
   }
 
   render() {
     // console.log('Sudoku rendered');
-    const {sudokus: {array, pencil, activeIndex}, togglePencilMode} = this.props;
+    const {sudokus: {array, pencil, activeIndex},  togglePencilMode} = this.props;
     let pad = null;
     let sudokuArray = null;
     if (activeIndex !== null) {
-      pad = (
-        <Pad 
-          togglePencilMode={togglePencilMode}
-          pencil={pencil}
-          values={array[activeIndex].values}
-          inputValue={this.inputValue}
-          clearCells={this.clearCells}
-        />
-      )
-      
       let isActive;
-      sudokuArray = array.map(({id, size, values, cellValues}, index) => {
+      this.fetching = false;
+      sudokuArray = array.map(({id, size, values, cellValues, fetching}, index) => {
         isActive = activeIndex === index;
+        if (isActive && fetching) this.fetching = true;
         return (
           <SudokuContainer 
             hidden={!isActive} 
             key={`${id}-container}`}
           >
+            {fetching && <CircularProgress/>}
             <SudokuGrid 
+              hidden={fetching}
               {...isActive && {ref: this.updateGridRef}} 
               size={size} 
               values={values}
@@ -86,6 +157,19 @@ class Sudoku extends React.Component {
           </SudokuContainer>
         )
       })
+
+      pad = (
+        <Pad 
+          pencil={pencil}
+          values={array[activeIndex].values}
+          inputValue={this.inputValue}
+          onPencil={togglePencilMode}
+          onClear={this.clearCells}
+          onSolve={this.requestSolution}
+          onGenerate={() => console.log('generate...')}
+          fetching={this.fetching}
+        />
+      )
 
     }
     
@@ -100,8 +184,6 @@ class Sudoku extends React.Component {
 
 const RootContainer = styled((props) => <div {...props}/>)(
   ({theme}) => ({
-    // maxHeight: '700px',
-    // height: `calc(100vw - 10px)`,
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
@@ -117,17 +199,14 @@ const SudokuContainer = styled(({...props}) => <div {...props} />)(
     // overflow: 'hidden',
     display: hidden ? 'none' : 'flex',
     justifyContent: 'center',
+    alignItems: 'center',
     width: `calc(100vw - 10px)`,
     height: `calc(100vw - 10px)`,
     [theme.breakpoints.up('sm')]: {
-      // display: hidden ? 'none' : 'grid',
       width: `calc(100vh - ${APPBAR_HEIGHT}px - 125px)`,
       height: `calc(100vh - ${APPBAR_HEIGHT}px - 125px)`,
       maxWidth: '550px',
       maxHeight: '550px',
-      // gridTemplateColumns: `1fr ${size}fr`,
-      // gridTemplateRows: `1fr ${size}fr`,
-      // gridTemplateAreas: `". col-indices" "row-indices sudoku-grid"`,
     },
     [theme.breakpoints.up('lg')]: {
       maxHeight: 800,
@@ -138,83 +217,24 @@ const SudokuContainer = styled(({...props}) => <div {...props} />)(
 
 const mapStateToProps = (state) => ({
   sudokus: state.sudokus,
-  // sudoku: state.sudokus.activeIndex !== null ? state.sudokus.array[state.sudokus.activeIndex] : null,
-  // pencil: state.sudokus.pencil,
 })
 
 const mapDispatchToProps = dispatch => ({
-  togglePencilMode: () => dispatch(SudokuPencilToggle())
+  togglePencilMode: () => dispatch(SudokuPencilToggle()),
+  requestSolution: async () => batch(() => {
+    dispatch(SnackbarSudokuSolutionRequest());
+    dispatch(SudokuSolutionRequest());
+  }),
+  applySolution: (cellsValue) => batch(() => {
+    dispatch(SnackbarSudokuSolutionSuccess());
+    dispatch(SudokuSolutionApply(cellsValue));
+  }),
+  discardSolution: (index, error) => batch(() => {
+    dispatch(SudokuSolutionDiscard(index));
+    if (error) {
+      dispatch(SnackbarGenericError(error));
+    }
+  }),
 })
 
 export default connect(mapStateToProps, mapDispatchToProps)(Sudoku);
-
-
-// const Indices = styled(({...props}) => <div {...props}/>)(
-//   ({theme}) => ({
-//     display: 'grid',
-//     gridColumnGap: '1px',
-//     textAlign: 'center',
-//     justifyContent: 'stretch',
-//     '& :hover': {
-//       backgroundColor: theme.sudoku.cell.hoveredBg[theme.palette.type],
-//     },
-//     '& button': {
-//       textShadow: `2px 2px 3px ${theme.sudoku.shadow[theme.palette.type]}`,
-//       fontSize: '1.2rem',
-//     },
-//     [theme.breakpoints.down('xs')]: {
-//       display: 'none'
-//     },
-//   })
-// )
-
-// const RowIndices = styled(({...props}) => <Indices {...props} />)(
-//   ({size}) => ({
-//     gridArea: 'row-indices',
-//     gridTemplateRows: `repeat(${size}, 1fr)`,
-//     gridRowGap: '1px',
-//     padding: '4px 0 4px 2px',
-//     '& button': {
-//       borderRadius: '10% 50% 50% 10%',
-//       cursor: 'pointer',
-//     },
-//   })
-// )
-
-// const ColIndices = styled(({...props}) => <Indices {...props} />)(
-//   ({size}) => ({
-//     gridArea: 'col-indices',
-//     gridTemplateColumns: `repeat(${size}, 1fr)`,
-//     padding: '4px 2px 0 2px',
-//     '& button': {
-//       borderRadius: '10% 10% 50% 50%',
-//       cursor: 'pointer',
-//     },
-//   })
-// )
-
-
-    // const sudokusArray = sudokus.array.map(({id, size, values}, index) => {
-      // const colIndices = [];
-      // const rowIndices = [];
-      // for (let row = 0; row < size; row++) {
-      //   rowIndices.push(
-      //     <ButtonBase 
-      //       key={`${id}-row-index-${row+1}`} 
-      //       onClick={(e) => this.grid.handleCellSelectionByIndex(e, row, DIRECTION.ROW)}
-      //     >
-      //       {row+1}
-      //     </ButtonBase>
-      //   )
-      //   colIndices.push(
-      //     <ButtonBase 
-      //       key={`${id}-col-index-${row+1}`} 
-      //       onClick={(e) => this.grid.handleCellSelectionByIndex(e, row, DIRECTION.COL)}
-      //     >
-      //       {row+1}
-      //     </ButtonBase>
-      //   )
-      // }
-
-
-    // });

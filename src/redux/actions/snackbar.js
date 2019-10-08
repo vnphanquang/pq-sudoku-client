@@ -1,3 +1,5 @@
+import { snackbarMessages } from "../../lang";
+
 /* 
 * Initial State
 */
@@ -13,7 +15,16 @@ export const SNACKBAR_CLOSE = 'SNACKBAR_CLOSE';
 export const SNACKBAR_GENERIC_ERROR = 'SNACKBAR_GENERIC_ERROR';
 export const SNACKBAR_GENERIC_SUCCESS = 'SNACKBAR_GENERIC_SUCCESS';
 export const SNACKBAR_GENERIC_INFO = 'SNACKBAR_GENERIC_INFO';
+export const SNACKBAR_SUDOKU_SOLUTION_REQUEST = 'SNACKBAR_SUDOKU_SOLUTION_REQUEST';
+export const SNACKBAR_SUDOKU_SOLUTION_SUCCESS = 'SNACKBAR_GENERIC_INFO';
 
+export const SNACKBAR_ACTIONS = [
+  SNACKBAR_GENERIC_ERROR,
+  SNACKBAR_GENERIC_SUCCESS,
+  SNACKBAR_GENERIC_INFO,
+  SNACKBAR_SUDOKU_SOLUTION_REQUEST,
+  SNACKBAR_SUDOKU_SOLUTION_SUCCESS,
+];
 /* 
 * Action Creators
 */
@@ -23,23 +34,41 @@ export function SnackbarClose() {
   }
 }
 
-export function SnackbarGenericError(error) {
+export function SnackbarGenericError({message}) {
   return {
-    type: 'SNACKBAR_GENERIC_ERROR',
-    payload: error
+    type: SNACKBAR_GENERIC_ERROR,
+    payload: { message }
   }
 }
 
 export function SnackbarGenericSuccess({message}) {
   return {
-    type: 'SNACKBAR_GENERIC_SUCCESS',
-    payload: {message}
+    type: SNACKBAR_GENERIC_SUCCESS,
+    payload: { message }
   }
 }
 
 export function SnackbarGenericInfo({message}) {
   return {
-    type: 'SNACKBAR_GENERIC_INFO',
-    payload: {message}
+    type: SNACKBAR_GENERIC_INFO,
+    payload: { message }
+  }
+}
+
+export function SnackbarSudokuSolutionRequest() {
+  return {
+    type: SNACKBAR_SUDOKU_SOLUTION_REQUEST,
+    payload: {
+      message: snackbarMessages.solutionRequest
+    }
+  }
+}
+
+export function SnackbarSudokuSolutionSuccess() {
+  return {
+    type: SNACKBAR_SUDOKU_SOLUTION_REQUEST,
+    payload: {
+      message: snackbarMessages.solutionSuccess
+    }
   }
 }

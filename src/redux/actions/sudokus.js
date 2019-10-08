@@ -17,6 +17,9 @@ export const SUDOKU_CLOSE = 'SUDOKU_CLOSE';
 export const SUDOKU_PENCIL_TOGGLE = 'PENCIL_MODE_TOGGLE';
 export const SUDOKU_VALUE_MAPPING = 'SUDOKU_VALUE_MAPPING';
 export const SUDOKU_SAVE = 'SUDOKU_SAVE';
+export const SUDOKU_SOLUTION_REQUEST = 'SUDOKU_SOLUTION_REQUEST';
+export const SUDOKU_SOLUTION_APPLY = 'SUDOKU_SOLUTION_APPLY';
+export const SUDOKU_SOLUTION_DISCARD = 'SUDOKU_SOLUTION_DISCARD';
 export const CURRENT_SUDOKU_SETTINGS = 'CURRENT_SUDOKU_SETTINGS';
 
 /* 
@@ -35,12 +38,13 @@ export function SudokuAddition({
   size=9, 
   values=generateDefaultValues(size),
   cellValues,
+  fetching=false
 }) {
   return {
     type: SUDOKU_ADD,
     payload: {
       id: uuidv1(),
-      name, size, values, cellValues,
+      name, size, values, cellValues, fetching
     }
   }
 }
@@ -75,6 +79,30 @@ export function SudokuValueMapping(valueMap) {
   return {
     type: SUDOKU_VALUE_MAPPING,
     payload: valueMap
+  }
+}
+
+export function SudokuSolutionRequest(cellsData) {
+  return {
+    type: SUDOKU_SOLUTION_REQUEST,
+    payload: cellsData
+  }
+}
+
+export function SudokuSolutionDiscard(index) {
+  return {
+    type: SUDOKU_SOLUTION_DISCARD,
+    payload: index,
+  }
+}
+
+export function SudokuSolutionApply(index, cellValues) {
+  return {
+    type: SUDOKU_SOLUTION_APPLY,
+    payload: {
+      index,
+      cellValues
+    }
   }
 }
 

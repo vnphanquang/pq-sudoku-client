@@ -34,6 +34,7 @@ import FeedbackDialog from './FeedbackDialog';
 import SaveAsOnTabCloseDialog from './SaveAsOnTabCloseDialog';
 import HelpDialog from './HelpDialog';
 import WelcomeDialog from './WelcomeDialog';
+import { snackbarMessages } from '../../lang';
 
 const dialogVariants = {
   [DIALOG_ADD_TAB]: AddTabDialog,
@@ -114,7 +115,7 @@ class DialogPQS extends React.Component {
 
   async sendFeedback(data) {
     try {
-      const res = await fetch('/api/feedback', {
+      const res = await fetch('/feedback', {
         method: 'POST',
         credentials: 'same-origin',
         headers: {
@@ -122,18 +123,16 @@ class DialogPQS extends React.Component {
         },
         body: JSON.stringify(data),
       });
-      const {message} = await res.json();
+      const { error } = await res.json();
       switch(res.status) {
         case 200:
-          //TODO: refactors display texts into lang.js
-          this.props.snackbarGenericSuccess({message: message || 'Feedback received!'});
+          this.props.snackbarGenericSuccess({message: (error && error.message) || snackbarMessages.feedbackReceived});
           break;
         default:
-          this.props.snackbarGenericError({message: message || 'Something went wrong, try again later...'});
+          this.props.snackbarGenericError({message: (error && error.message) || snackbarMessages.genericError});
       }
     } catch (error) {
-      console.log(error);
-      this.props.snackbarGenericError({message: 'Something went wrong, try again later...'});
+      this.props.snackbarGenericError({message: snackbarMessages.genericError});
     }
   }
 
@@ -227,7 +226,7 @@ const mapDispatchToProps = dispatch => ({
     //TODO: discourage large grid on small device
     if (config.size > 9 && window.innerWidth <= 960) {
       dispatch(SnackbarGenericInfo({
-        message: 'For large grid, consider using devices with wider viewport.'
+        message: snackbarMessages.largeGrid
       }))
     }
     dispatch(DialogAction(DIALOG_CANCEL));
