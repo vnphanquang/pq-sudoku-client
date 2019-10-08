@@ -312,7 +312,7 @@ class Grid extends React.Component {
     }
     this.selection.type = selectionType;
     if (this.selection.focus) {
-      this.focusCell(this.selection.focus);
+      this.singleSelectCell(this.selection.focus);
     }
   }
   clearCellsValue() {
