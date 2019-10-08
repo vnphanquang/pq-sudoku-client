@@ -300,7 +300,8 @@ class Grid extends React.Component {
     }
   }
   updateCellValues(cellValues) {
-    this.selection.type = SELECTION.NONE;
+    const selectionType = this.selection.type;
+    this.selection.type = SELECTION.TYPES.NONE;
     let targetCell, targetValue;
     for (let row = 0; row < this.props.size; row++) {
       for (let col = 0; col < this.props.size; col++) {
@@ -309,9 +310,11 @@ class Grid extends React.Component {
         this.updateCellValue(targetCell, targetValue);
       }
     }
-    if (this.selection.focus) {
+    if (this.selection.focus && selectionType === SELECTION.TYPES.SINGLE) {
       this.clearSelection();
       this.singleSelectCell(this.selection.focus);
+    } else {
+      this.selection.type = selectionType;
     }
   }
   clearCellsValue() {
