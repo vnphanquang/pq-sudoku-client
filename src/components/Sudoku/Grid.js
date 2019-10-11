@@ -11,6 +11,11 @@ import {
   SubgridToCellsMap, ValueToCellsMap, ValueMap 
 } from '../utils';
 
+const CONFLICTS = {
+  RELATIVE: 'RELATIVE',
+  VALUE_LOCKED: 'VALUE_LOCKED',
+}
+
 class Grid extends React.Component {
   static propTypes = {
     // rows: PropTypes.number.isRequired,
@@ -332,81 +337,174 @@ class Grid extends React.Component {
   }
 //-------------------------CONFLICTS------------------------------
   checkConflicts(targetCell) {
-    const conflicts = [];
     if (targetCell) {
-      const {row, col, subgrid} = targetCell.props;
-      const cells = this.getCellsByValue(this.getCellValue(targetCell));
-      let bitMask;
-      for (const cell of cells) {
-        bitMask = (
-          0 |
-          (cell.props.row === row) |
-          ((cell.props.col === col) << 1) |
-          ((cell.props.subgrid === subgrid) << 2)
-        );
-        if (bitMask && bitMask !== 7) {
-          conflicts.push([
-            {row, col},
-            {row: cell.props.row, col: cell.props.col},
-          ]);
-          cell.addConflict(targetCell);
-          cell.status = {conflicting: true};
-          targetCell.addConflict(cell);
-        }
-      }
-      if (conflicts.length > 0) {
-        targetCell.status = { conflicting: true };
-      }
+      this.checkRelativeConflicts(targetCell);
+      this.checkValueLockingConflict(targetCell);
     } else {
-      let cells;
       let cell;
-      for (const value of this.props.values) {
-        cells = [...this.valueToCellsMap.get(value)];
-        while (cells.length > 0) {
-          cell = cells.pop();
-          for (const other of cells) {
-            if (
-              cell.props.row === other.props.row ||
-              cell.props.col === other.props.col ||
-              cell.props.subgrid === other.props.subgrid
-            ) {
-              conflicts.push([
-                {row: cell.props.row, col: cell.props.col},
-                {row: other.props.row, col: other.props.col}
-              ]);
-              cell.addConflict(other);
-              cell.status = {conflicting: true};
-              other.addConflict(cell);
-              other.status = {conflicting: true};
-            }
+      for (let row = 0; row < this.props.size; row++) {
+        for (let col = 0; col < this.props.size; col++) {
+          cell = this.getCell(row, col);
+          if (this.getCellValue(cell)) {
+            this.checkRelativeConflicts(cell);
+            this.checkValueLockingConflict(cell);
           }
         }
       }
     }
-    this.conflicts.push(...conflicts);
+  }
+  checkRelativeConflicts(targetCell) {
+    const conflicts = [];
+    const cells = this.getCellsByValue(this.getCellValue(targetCell));
+    const { row: targetRow, col: targetCol, subgrid: targetSubgrid } = targetCell.props;
+    let otherRow, otherCol, otherSubgrid;
+    let bitMask;
+    for (const cell of cells) {
+      ({ row: otherRow, col: otherCol, subgrid: otherSubgrid } = cell.props);
+      bitMask = (
+        (targetRow === otherRow) |
+        ((targetCol === otherCol) << 1) |
+        ((targetSubgrid === otherSubgrid) << 2)
+      );
+      if (bitMask && bitMask !== 7) {
+        conflicts.push({
+          coors: [
+            { row: targetRow, col: targetCol },
+            { row: otherRow, col: otherCol },
+          ],
+          reason: CONFLICTS.RELATIVE
+        });
+        cell.addConflict(targetCell);
+        cell.status = { conflicting: true };
+        targetCell.addConflict(cell);
+      } 
+    }
+    if (conflicts.length > 0) {
+      targetCell.status = { conflicting: true }
+      this.conflicts.push(...conflicts);
+    }
+    return conflicts;
+  }
+  calcValueLockingPos(targetCell) {
+    const { row: targetRow, col: targetCol } = targetCell.props;
+    const subgridSize = Math.sqrt(this.props.size);
+    let up = targetCell.props.row % subgridSize;
+    let down = subgridSize - 1 - up;
+    let left = targetCell.props.col % subgridSize;
+    let right = subgridSize - 1 - left;
+
+    up = (new Array(up)).fill(0).map((_, index) => targetRow - (index + 1));
+    down = (new Array(down)).fill(0).map((_, index) => targetRow + (index + 1));
+    left = (new Array(left)).fill(0).map((_, index) => targetCol - (index + 1));
+    right = (new Array(right)).fill(0).map((_, index) => targetCol + (index + 1));
+    return {
+      rows: [...up, ...down],
+      cols: [...left, ...right],
+    }
+  }
+  checkValueLockingConflict(targetCell) {
+    const { row: targetRow, col: targetCol } = targetCell.props;
+    const valueLockingPos = this.calcValueLockingPos(targetCell);
+    let conflict = false;
+    const targetValue = this.getCellValue(targetCell);
+    if (targetValue) {
+      const isRowSandwiched = valueLockingPos.rows.every( row => this.getCellValue(this.getCell(row, targetCol)) )
+      const isColSandwiched = valueLockingPos.cols.every( col => this.getCellValue(this.getCell(targetRow, col)) )
+      let rowLocks = [];
+      let colLocks = [];
+      let isRowLocked, isColLocked, subgridHasValue;
+      for (const value of this.props.values) {
+        subgridHasValue = false;
+        if (value !== targetValue) {
+          this.onCellsByValue(value, (cell) => {
+            if (cell.props.subgrid !== targetCell.props.subgrid) {
+              if (valueLockingPos.rows.includes(cell.props.row)) {
+                rowLocks.push(cell);
+              } else if (valueLockingPos.cols.includes(cell.props.col)) {
+                colLocks.push(cell);
+              }
+            } else {
+              subgridHasValue = true;
+            }
+          })
+          isRowLocked = rowLocks.length === valueLockingPos.rows.length;
+          isColLocked = colLocks.length === valueLockingPos.cols.length;
+          if (
+            (isRowLocked && isColSandwiched && !subgridHasValue) ||
+            (isColLocked && isRowSandwiched && !subgridHasValue) ||
+            (isRowLocked && isColLocked)
+          ) {
+            conflict = true;
+            break;
+          } else {
+            rowLocks = [];
+            colLocks = [];
+          }
+
+        }
+      }
+      if (conflict) {
+        const coors = [];
+        for (const cell of [...rowLocks, ...colLocks]) {
+          cell.addConflict(targetCell);
+          cell.status = { conflicting: true };
+          targetCell.addConflict(cell);
+          coors.push({
+            row: cell.props.row,
+            col: cell.props.col,
+          })
+        }
+        targetCell.status = { conflicting: true };
+        coors.push({row: targetRow, col: targetCol});
+        conflict = {
+          coors,
+          reason: CONFLICTS.VALUE_LOCKED
+        }
+        this.conflicts.push(conflict);
+      } 
+    }
+    return conflict;
   }
   uncheckConflicts(targetCell) {
     const {row, col} = targetCell.props;
-    const matchedCells = [];
-    this.conflicts = this.conflicts.filter(([first, second]) => {
-      if (first.row === row && first.col === col) {
-        matchedCells.push(second);
-        return false;
-      }
-      if (second.row === row && second.col === col) {
-        matchedCells.push(first);
-        return false;
-      }
-      return true;
-    })
-    if (matchedCells.length > 0) {
-      for (let cell of matchedCells) {
-        cell = this.getCell(cell.row, cell.col);
-        cell.removeConflict(targetCell);
-        if (cell.conflicts.length === 0) {
-          cell.status = {conflicting: false};
+    let first, second, cell;
+    let clearConflict = false;
+    this.conflicts = this.conflicts.filter((conflict) => {
+      cell = undefined;
+      if (conflict.reason === CONFLICTS.RELATIVE) {
+        [first, second] = conflict.coors;
+        if (first.row === row && first.col === col) {
+          cell = this.getCell(second.row, second.col);
         }
+        if (second.row === row && second.col === col) {
+          cell = this.getCell(first.row, first.col);
+        }
+        if (cell) {
+          clearConflict = true;
+          cell.removeConflict(targetCell);
+          return false;
+        } else {
+          return true;
+        }
+      } else if (conflict.reason === CONFLICTS.VALUE_LOCKED) {
+        let other;
+        if (conflict.coors.some(coor => coor.row === row && coor.col === col)) {
+          cell = conflict.coors.pop();
+          cell = this.getCell(cell.row, cell.col);
+          for (const coor of conflict.coors) {
+            other = this.getCell(coor.row, coor.col);
+            other.removeConflict(cell);
+            cell.removeConflict(other);
+          }
+          return false;
+        } else {
+          return true;
+        }
+      } else {
+        return true;
       }
+    });
+    if (clearConflict) {
       targetCell.status = {conflicting: false};
       targetCell.conflicts = [];
     }

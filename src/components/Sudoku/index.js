@@ -28,7 +28,7 @@ class Sudoku extends React.Component {
       ...window.sudokus,
       getCellValues: () => this.grid.getCellValues(),
       // getCellsData: () => this.grid.getCellsData(),
-      // getConflicts: () => this.grid.conflicts,
+      getConflicts: () => this.grid.conflicts,
     }
     this.componentDidUpdate();
   }

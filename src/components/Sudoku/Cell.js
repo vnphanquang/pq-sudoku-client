@@ -47,11 +47,16 @@ class Cell extends React.PureComponent {
   addConflict(cell) {
     if (this.conflicts.findIndex((c) => c.isSameCell(cell)) === -1) {
       this.conflicts.push(cell);
+      // cell.status = { conflicting: true };
     }
   }
 
   removeConflict(cell) {
     this.conflicts = this.conflicts.filter((c) => !c.isSameCell(cell));
+    if (this.conflicts.length === 0) {
+      this.status = { conflicting: false };
+    }
+    // cell.status = { conflicting: false };
   }
 
   set status(status) {
