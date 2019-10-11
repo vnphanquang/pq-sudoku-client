@@ -115,7 +115,7 @@ function Pad(props) {
             </Button>
           </span>
           </Tooltip>
-          {/* <Tooltip title={tGenerate} classes={{tooltip: classes.tooltip}}>
+          <Tooltip title={tGenerate} classes={{tooltip: classes.tooltip}}>
             <span>
               <Button 
                 variant="outlined" 
@@ -127,7 +127,7 @@ function Pad(props) {
                 </Typography>
               </Button>
             </span>
-          </Tooltip> */}
+          </Tooltip>
       </div>
     </div>
   )

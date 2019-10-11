@@ -15,9 +15,9 @@ export const snackbarMessages = {
   genericError: 'Something went wrong, try again later...',
   feedbackReceived: 'Feedback received!',
   largeGrid: 'For large grid, consider using devices with wider viewport.',
-  solutionRequest: 'Requesting solution from sever...',
-  solutionSuccess: 'Solution found, applying now...',
-  solutionTimeout: 'Taking too long. Solution request has closed!',
+  fetching: 'Requesting from sever...',
+  fetchSuccess: 'Request succeeded, applying changes....',
+  fetchTimeout: 'Taking too long. Request has closed!',
   alreadySolved: 'Grid is already solved',
   cellConflicts: 'Please check conflicts within grid!',
 }

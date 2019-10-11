@@ -24,8 +24,6 @@ import {
   SNACKBAR_GENERIC_ERROR,
   SNACKBAR_GENERIC_SUCCESS,
   SNACKBAR_GENERIC_INFO,
-  SNACKBAR_SUDOKU_SOLUTION_REQUEST,
-  SNACKBAR_SUDOKU_SOLUTION_SUCCESS,
 } from '../../redux/actions/snackbar';
 
 const iconVariants = {
@@ -44,13 +42,6 @@ const variants = {
   },
   [SNACKBAR_GENERIC_INFO]: {
     type: 'info',
-  },
-  [SNACKBAR_SUDOKU_SOLUTION_REQUEST]: {
-    autoHideDuration: null,
-    type: 'info',
-  },
-  [SNACKBAR_SUDOKU_SOLUTION_SUCCESS]: {
-    type: 'success',
   },
 }
 

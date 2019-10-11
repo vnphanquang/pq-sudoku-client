@@ -17,9 +17,9 @@ export const SUDOKU_CLOSE = 'SUDOKU_CLOSE';
 export const SUDOKU_PENCIL_TOGGLE = 'PENCIL_MODE_TOGGLE';
 export const SUDOKU_VALUE_MAPPING = 'SUDOKU_VALUE_MAPPING';
 export const SUDOKU_SAVE = 'SUDOKU_SAVE';
-export const SUDOKU_SOLUTION_REQUEST = 'SUDOKU_SOLUTION_REQUEST';
-export const SUDOKU_SOLUTION_APPLY = 'SUDOKU_SOLUTION_APPLY';
-export const SUDOKU_SOLUTION_DISCARD = 'SUDOKU_SOLUTION_DISCARD';
+export const SUDOKU_FETCH_START = 'SUDOKU_FETCH_START';
+export const SUDOKU_FETCH_APPLY = 'SUDOKU_FETCH_APPLY';
+export const SUDOKU_FETCH_END = 'SUDOKU_FETCH_END';
 export const CURRENT_SUDOKU_SETTINGS = 'CURRENT_SUDOKU_SETTINGS';
 
 /* 
@@ -82,23 +82,23 @@ export function SudokuValueMapping(valueMap) {
   }
 }
 
-export function SudokuSolutionRequest(cellsData) {
+export function SudokuFetchStart(cellValues) {
   return {
-    type: SUDOKU_SOLUTION_REQUEST,
-    payload: cellsData
+    type: SUDOKU_FETCH_START,
+    payload: cellValues
   }
 }
 
-export function SudokuSolutionDiscard(index) {
+export function SudokuFetchEnd(index) {
   return {
-    type: SUDOKU_SOLUTION_DISCARD,
+    type: SUDOKU_FETCH_END,
     payload: index,
   }
 }
 
-export function SudokuSolutionApply(index, cellValues) {
+export function SudokuFetchApply(index, cellValues) {
   return {
-    type: SUDOKU_SOLUTION_APPLY,
+    type: SUDOKU_FETCH_APPLY,
     payload: {
       index,
       cellValues

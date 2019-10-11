@@ -347,7 +347,7 @@ class Grid extends React.Component {
         if (bitMask && bitMask !== 7) {
           conflicts.push([
             {row, col},
-            {row: cell.props.row, col: cell.props.col}
+            {row: cell.props.row, col: cell.props.col},
           ]);
           cell.addConflict(targetCell);
           cell.status = {conflicting: true};
@@ -355,7 +355,7 @@ class Grid extends React.Component {
         }
       }
       if (conflicts.length > 0) {
-        targetCell.status = {conflicting: true};
+        targetCell.status = { conflicting: true };
       }
     } else {
       let cells;

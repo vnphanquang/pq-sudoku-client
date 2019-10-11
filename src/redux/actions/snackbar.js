@@ -1,5 +1,3 @@
-import { snackbarMessages } from "../../lang";
-
 /* 
 * Initial State
 */
@@ -22,8 +20,6 @@ export const SNACKBAR_ACTIONS = [
   SNACKBAR_GENERIC_ERROR,
   SNACKBAR_GENERIC_SUCCESS,
   SNACKBAR_GENERIC_INFO,
-  SNACKBAR_SUDOKU_SOLUTION_REQUEST,
-  SNACKBAR_SUDOKU_SOLUTION_SUCCESS,
 ];
 /* 
 * Action Creators
@@ -52,23 +48,5 @@ export function SnackbarGenericInfo({message}) {
   return {
     type: SNACKBAR_GENERIC_INFO,
     payload: { message }
-  }
-}
-
-export function SnackbarSudokuSolutionRequest() {
-  return {
-    type: SNACKBAR_SUDOKU_SOLUTION_REQUEST,
-    payload: {
-      message: snackbarMessages.solutionRequest
-    }
-  }
-}
-
-export function SnackbarSudokuSolutionSuccess() {
-  return {
-    type: SNACKBAR_SUDOKU_SOLUTION_REQUEST,
-    payload: {
-      message: snackbarMessages.solutionSuccess
-    }
   }
 }

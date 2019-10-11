@@ -1,6 +1,6 @@
 import React from 'react';
 import { connect, batch } from 'react-redux';
-import { SudokuPencilToggle, SudokuSolutionApply, SudokuSolutionRequest, SudokuSolutionDiscard } from '../../redux/actions/sudokus';
+import { SudokuPencilToggle, SudokuFetchApply, SudokuFetchStart, SudokuFetchEnd } from '../../redux/actions/sudokus';
 
 import CircularProgress from '@material-ui/core/CircularProgress';
 import { styled } from '@material-ui/styles';
@@ -8,7 +8,7 @@ import { styled } from '@material-ui/styles';
 import { APPBAR_HEIGHT } from '../utils';
 import SudokuGrid from './Grid';
 import Pad from './Pad';
-import { SnackbarSudokuSolutionRequest, SnackbarSudokuSolutionSuccess, SnackbarGenericError } from '../../redux/actions/snackbar';
+import { SnackbarGenericInfo, SnackbarGenericSuccess, SnackbarGenericError } from '../../redux/actions/snackbar';
 import { snackbarMessages } from '../../lang';
 
 class Sudoku extends React.Component {
@@ -20,7 +20,7 @@ class Sudoku extends React.Component {
     this.clearCells = this.clearCells.bind(this);
     this.inputValue = this.inputValue.bind(this);
     this.handleKeyInput = this.handleKeyInput.bind(this);
-    this.requestSolution = this.requestSolution.bind(this);
+    this.fetch = this.fetch.bind(this);
   }
 
   componentDidMount() {
@@ -70,61 +70,80 @@ class Sudoku extends React.Component {
     }
   }
 
-  async requestSolution() {
+  async fetch(type) {
     const targetGrid = this.grid;
     const targetGridIndex = this.props.sudokus.activeIndex;
     try {
-      this.props.requestSolution();
-      const res = await fetch('/api/solution/sudoku/classic', {
-        method: 'POST',
-        credentials: 'same-origin',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          algorithm: 'backtracking',
-          values: targetGrid.props.values,
-          cellValues: targetGrid.getCellValues(),
-          timeout: 5,
-        })
-      })
-      const {error, solution} = await res.json();
+      let cellValues = targetGrid.getCellValues();
+      this.props.startFetch(cellValues);
+      let res, error;
+      if (type === 'solution') {
+        res = await fetch('/api/solver/sudoku/classic', {
+          method: 'POST',
+          credentials: 'same-origin',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            algorithm: 'backtracking',
+            values: targetGrid.props.values,
+            cellValues,
+            timeout: 5,
+          })
+        });
+
+        ({ solution: cellValues, error } = await res.json());
+      } else if (type === 'generation') {
+        res = await fetch('/api/generator/sudoku/classic', {
+          method: 'POST',
+          credentials: 'same-origin',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            values: targetGrid.props.values,
+            cellValues,
+          })
+        });
+        
+        ({ clues: cellValues, error } = await res.json());
+      }
       switch(res.status) {
         case 200:
-          targetGrid.updateCellValues(solution);
-          this.props.applySolution(targetGridIndex, solution);
+          targetGrid.updateCellValues(cellValues);
+          this.props.applyFetch(targetGridIndex, cellValues);
           break;
         case 209:
-          this.props.discardSolution(targetGridIndex, {
+          this.props.endFetch(targetGridIndex, {
             message: snackbarMessages.alreadySolved
           });
           break;
         case 400:
           if (error) {
             if (error.conflicts) {
-              this.props.discardSolution(targetGridIndex, { 
+              this.props.endFetch(targetGridIndex, { 
                 message: snackbarMessages.cellConflicts 
               });
             } else {
-              this.props.discardSolution(targetGridIndex, { 
+              this.props.endFetch(targetGridIndex, { 
                 message: error.message || snackbarMessages.genericError 
               });
             }
           }
           break;
         case 408:
-          this.props.discardSolution(targetGridIndex, { 
-            message: snackbarMessages.solutionTimeout 
+          this.props.endFetch(targetGridIndex, { 
+            message: snackbarMessages.fetchTimeout 
           });
           break;
         default:
-          this.props.discardSolution(targetGridIndex, { 
+          this.props.endFetch(targetGridIndex, { 
             message: (error && error.message) || snackbarMessages.genericError 
           });
       }
     } catch (error) {
       console.log(error);
-      this.props.discardSolution(targetGridIndex, { 
+      this.props.endFetch(targetGridIndex, { 
         message: snackbarMessages.genericError 
       });
     }
@@ -165,8 +184,8 @@ class Sudoku extends React.Component {
           inputValue={this.inputValue}
           onPencil={togglePencilMode}
           onClear={this.clearCells}
-          onSolve={this.requestSolution}
-          onGenerate={() => console.log('generate...')}
+          onSolve={() => this.fetch('solution')}
+          onGenerate={() => this.fetch('generation')}
           fetching={this.fetching}
         />
       )
@@ -221,16 +240,16 @@ const mapStateToProps = (state) => ({
 
 const mapDispatchToProps = dispatch => ({
   togglePencilMode: () => dispatch(SudokuPencilToggle()),
-  requestSolution: async () => batch(() => {
-    dispatch(SnackbarSudokuSolutionRequest());
-    dispatch(SudokuSolutionRequest());
+  startFetch: async (cellValues) => batch(() => {
+    dispatch(SnackbarGenericInfo({ message: snackbarMessages.fetching }));
+    dispatch(SudokuFetchStart(cellValues));
   }),
-  applySolution: (cellsValue) => batch(() => {
-    dispatch(SnackbarSudokuSolutionSuccess());
-    dispatch(SudokuSolutionApply(cellsValue));
+  applyFetch: (cellValues) => batch(() => {
+    dispatch(SnackbarGenericSuccess({ message: snackbarMessages.fetchSuccess }));
+    dispatch(SudokuFetchApply(cellValues));
   }),
-  discardSolution: (index, error) => batch(() => {
-    dispatch(SudokuSolutionDiscard(index));
+  endFetch: (index, error) => batch(() => {
+    dispatch(SudokuFetchEnd(index));
     if (error) {
       dispatch(SnackbarGenericError(error));
     }
