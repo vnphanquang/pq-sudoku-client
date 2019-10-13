@@ -224,6 +224,10 @@ const SudokuContainer = styled(({...props}) => <div {...props} />)(
     [theme.breakpoints.up('sm')]: {
       width: `calc(100vh - ${APPBAR_HEIGHT}px - 125px)`,
       height: `calc(100vh - ${APPBAR_HEIGHT}px - 125px)`,
+      maxWidth: '520px',
+      maxHeight: '520px',
+    },
+    [theme.breakpoints.up('lg')]: {
       maxWidth: '550px',
       maxHeight: '550px',
     },

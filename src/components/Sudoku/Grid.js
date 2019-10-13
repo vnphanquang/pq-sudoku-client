@@ -385,7 +385,7 @@ class Grid extends React.Component {
     }
     return conflicts;
   }
-  calcValueLockingPos(targetCell) {
+  getDirectRelativeIndices(targetCell) {
     const { row: targetRow, col: targetCol } = targetCell.props;
     const subgridSize = Math.sqrt(this.props.size);
     let up = targetCell.props.row % subgridSize;
@@ -404,66 +404,170 @@ class Grid extends React.Component {
   }
   checkValueLockingConflict(targetCell) {
     const { row: targetRow, col: targetCol } = targetCell.props;
-    const valueLockingPos = this.calcValueLockingPos(targetCell);
-    let conflict = false;
+    const directRelativeIndices = this.getDirectRelativeIndices(targetCell);
     const targetValue = this.getCellValue(targetCell);
     if (targetValue) {
-      const isRowSandwiched = valueLockingPos.rows.every( row => this.getCellValue(this.getCell(row, targetCol)) )
-      const isColSandwiched = valueLockingPos.cols.every( col => this.getCellValue(this.getCell(targetRow, col)) )
-      let rowLocks = [];
-      let colLocks = [];
-      let isRowLocked, isColLocked, subgridHasValue;
-      for (const value of this.props.values) {
-        subgridHasValue = false;
-        if (value !== targetValue) {
-          this.onCellsByValue(value, (cell) => {
-            if (cell.props.subgrid !== targetCell.props.subgrid) {
-              if (valueLockingPos.rows.includes(cell.props.row)) {
-                rowLocks.push(cell);
-              } else if (valueLockingPos.cols.includes(cell.props.col)) {
-                colLocks.push(cell);
-              }
-            } else {
-              subgridHasValue = true;
-            }
-          })
-          isRowLocked = rowLocks.length === valueLockingPos.rows.length;
-          isColLocked = colLocks.length === valueLockingPos.cols.length;
-          if (
-            (isRowLocked && isColSandwiched && !subgridHasValue) ||
-            (isColLocked && isRowSandwiched && !subgridHasValue) ||
-            (isRowLocked && isColLocked)
-          ) {
-            conflict = true;
-            break;
-          } else {
-            rowLocks = [];
-            colLocks = [];
-          }
+      const conflicts = [];
+      let cell, value, i, subgridHasValue;
+      let row, col;
+      let directRelativeCols, directRelativeRows;
+      // let lockingCells;
+      let rowLockingCells, colLockingCells;
+      let blockingCells;
+      // let rowBlockingCells, colBlockingCells, otherBlockingCells;
+      let valueLocked;
 
+      for (value of this.props.values) {
+        if (value !== targetValue) {
+          directRelativeRows = [...directRelativeIndices.rows];
+          directRelativeCols = [...directRelativeIndices.cols];
+          rowLockingCells = [];
+          colLockingCells = [];
+          // lockingCells = [];
+          subgridHasValue = false;
+
+          for (cell of this.getCellsByValue(value)) {
+            if (cell.props.subgrid === targetCell.props.subgrid) {
+              subgridHasValue = true;
+              break;
+            } 
+            for (i = 0; i < directRelativeRows.length; i++) {
+              if (directRelativeRows[i] === cell.props.row) {
+                directRelativeRows.splice(i, 1);
+                rowLockingCells.push(cell);
+                // lockingCells.push(cell);
+                break;
+              }
+            }
+            for (i = 0; i < directRelativeCols.length; i++) {
+              if (directRelativeCols[i] === cell.props.col) {
+                directRelativeCols.splice(i, 1);
+                colLockingCells.push(cell);
+                // lockingCells.push(cell);
+                break;
+              }
+            }
+          }
+          if (subgridHasValue) continue;
+
+          valueLocked = true;
+
+          blockingCells = [];
+          // rowBlockingCells = [];
+          for (row of directRelativeRows) {
+            cell = this.getCell(row, targetCol);
+            if (!this.getCellValue(cell)) {
+              blockingCells = [];
+              // rowBlockingCells = [];
+              valueLocked = false;
+              break;
+            } else {
+              // rowBlockingCells.push(cell);
+              blockingCells.push(cell);
+            }
+          }
+          // colBlockingCells = [];
+          if (valueLocked) {
+            for (col of directRelativeCols) {
+              cell = this.getCell(targetRow, col);
+              if (!this.getCellValue(cell)) {
+                // colBlockingCells = [];
+                blockingCells = [];
+                valueLocked = false;
+                break;
+              } else {
+                // colBlockingCells.push(cell);
+                blockingCells.push(cell);
+              }
+            }
+          }
+          // otherBlockingCells = [];
+          if (valueLocked) {
+            for (row of directRelativeRows) {
+              for (col of directRelativeCols) {
+                cell = this.getCell(row, col);
+                if (!this.getCellValue(cell)) {
+                  // otherBlockingCells = [];
+                  blockingCells = [];
+                  valueLocked = false;
+                  break;
+                } else {
+                  // otherBlockingCells.push(cell);
+                  blockingCells.push(cell);
+                }
+              }
+            }
+          }
+          if (valueLocked) {
+            let lockingEscaped
+            directRelativeRows.push(targetRow);
+            colLockingCells = colLockingCells.filter(cell => {
+              col = cell.props.col;
+              lockingEscaped = true;
+              for (row of directRelativeRows) {
+                cell = this.getCell(row, col);
+                if (!this.getCellValue(cell)) {
+                  lockingEscaped = false;
+                  break;
+                }
+              }
+              return !lockingEscaped;
+            });
+
+            directRelativeCols.push(targetCol);
+            rowLockingCells = rowLockingCells.filter(cell => {
+              row = cell.props.row;
+              lockingEscaped = true;
+              for (col of directRelativeCols) {
+                cell = this.getCell(row, col);
+                if (!this.getCellValue(cell)) {
+                  lockingEscaped = false;
+                  break;
+                }
+              }
+              return !lockingEscaped;
+            });
+  
+            const coors = [];
+            // for (cell of lockingCells) {
+            for (cell of [...rowLockingCells, ...colLockingCells]) {
+              cell.addConflict(targetCell);
+              cell.status = { conflicting: true };
+              targetCell.addConflict(cell);
+              coors.push({
+                row: cell.props.row,
+                col: cell.props.col
+              })
+            }
+            coors.push({ row: targetRow, col: targetCol });
+
+            const indirectCoors = [];
+            for (cell of blockingCells) {
+            // for (cell of [...rowBlockingCells, ...colBlockingCells, ...otherBlockingCells]) {
+              indirectCoors.push({
+                row: cell.props.row,
+                col: cell.props.col
+              })
+            }
+            conflicts.push({
+              coors,
+              indirectCoors,
+              reason: CONFLICTS.VALUE_LOCKED
+            })
+            break;
+          }
         }
       }
-      if (conflict) {
-        const coors = [];
-        for (const cell of [...rowLocks, ...colLocks]) {
-          cell.addConflict(targetCell);
-          cell.status = { conflicting: true };
-          targetCell.addConflict(cell);
-          coors.push({
-            row: cell.props.row,
-            col: cell.props.col,
-          })
-        }
+      if (conflicts.length > 0) {
         targetCell.status = { conflicting: true };
-        coors.push({row: targetRow, col: targetCol});
-        conflict = {
-          coors,
-          reason: CONFLICTS.VALUE_LOCKED
-        }
-        this.conflicts.push(conflict);
-      } 
+        this.conflicts.push(...conflicts);
+        return conflicts;
+      } else {
+        return false;
+      }
+    } else {
+      return false;
     }
-    return conflict;
   }
   uncheckConflicts(targetCell) {
     const {row, col} = targetCell.props;
@@ -488,7 +592,10 @@ class Grid extends React.Component {
         }
       } else if (conflict.reason === CONFLICTS.VALUE_LOCKED) {
         let other;
-        if (conflict.coors.some(coor => coor.row === row && coor.col === col)) {
+        if (
+          conflict.coors.some(coor => coor.row === row && coor.col === col) ||
+          conflict.indirectCoors.some(coor => coor.row === row && coor.col === col)
+        ) {
           cell = conflict.coors.pop();
           cell = this.getCell(cell.row, cell.col);
           for (const coor of conflict.coors) {
