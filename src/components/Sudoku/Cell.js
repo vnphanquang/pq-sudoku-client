@@ -44,19 +44,20 @@ class Cell extends React.PureComponent {
     this.handleClick = this.handleClick.bind(this);
   }
 
-  addConflict(cell) {
-    if (this.conflicts.findIndex((c) => c.isSameCell(cell)) === -1) {
-      this.conflicts.push(cell);
-      // cell.status = { conflicting: true };
+  addConflict(conflict) {
+    if (this.conflicts.findIndex(c => c.id === conflict.id) === -1) {
+      this.conflicts.push(conflict);
+      if (this.conflicts.length === 1) {
+        this.status = { conflicting: true };
+      }
     }
   }
 
-  removeConflict(cell) {
-    this.conflicts = this.conflicts.filter((c) => !c.isSameCell(cell));
+  removeConflict(conflict) {
+    this.conflicts = this.conflicts.filter((c) => c.id !== conflict.id);
     if (this.conflicts.length === 0) {
       this.status = { conflicting: false };
     }
-    // cell.status = { conflicting: false };
   }
 
   set status(status) {
@@ -90,6 +91,7 @@ class Cell extends React.PureComponent {
   
   render() {
     // console.log('Cell rendered');
+    // TODO: add tooltip when conflict
     return (
       <StyledCell
         gridsize={this.props.gridsize}

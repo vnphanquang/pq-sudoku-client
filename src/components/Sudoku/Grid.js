@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-
+import uuidv1 from 'uuid/v1';
 import { styled } from '@material-ui/styles';
 
 import Cell from './Cell';
@@ -339,7 +339,8 @@ class Grid extends React.Component {
   checkConflicts(targetCell) {
     if (targetCell) {
       this.checkRelativeConflicts(targetCell);
-      this.checkValueLockingConflict(targetCell);
+      this.checkValueLockingConflictAt(targetCell);
+      // this.checkValueLockingConflictFrom(targetCell);
     } else {
       let cell;
       for (let row = 0; row < this.props.size; row++) {
@@ -347,7 +348,7 @@ class Grid extends React.Component {
           cell = this.getCell(row, col);
           if (this.getCellValue(cell)) {
             this.checkRelativeConflicts(cell);
-            this.checkValueLockingConflict(cell);
+            this.checkValueLockingConflictAt(cell);
           }
         }
       }
@@ -355,6 +356,7 @@ class Grid extends React.Component {
   }
   checkRelativeConflicts(targetCell) {
     const conflicts = [];
+    let conflict;
     const cells = this.getCellsByValue(this.getCellValue(targetCell));
     const { row: targetRow, col: targetCol, subgrid: targetSubgrid } = targetCell.props;
     let otherRow, otherCol, otherSubgrid;
@@ -367,20 +369,20 @@ class Grid extends React.Component {
         ((targetSubgrid === otherSubgrid) << 2)
       );
       if (bitMask && bitMask !== 7) {
-        conflicts.push({
+        conflict = {
+          id: uuidv1(),
           coors: [
             { row: targetRow, col: targetCol },
             { row: otherRow, col: otherCol },
           ],
           reason: CONFLICTS.RELATIVE
-        });
-        cell.addConflict(targetCell);
-        cell.status = { conflicting: true };
-        targetCell.addConflict(cell);
-      } 
+        };
+        cell.addConflict(conflict);
+        targetCell.addConflict(conflict);
+        conflicts.push(conflict);
+      }
     }
     if (conflicts.length > 0) {
-      targetCell.status = { conflicting: true }
       this.conflicts.push(...conflicts);
     }
     return conflicts;
@@ -402,12 +404,32 @@ class Grid extends React.Component {
       cols: [...left, ...right],
     }
   }
-  checkValueLockingConflict(targetCell) {
-    const { row: targetRow, col: targetCol } = targetCell.props;
-    const directRelativeIndices = this.getDirectRelativeIndices(targetCell);
+  // checkValueLockingConflictFrom(targetCell) {
+    
+  //   const targetValue = this.getCellValue(targetCell);
+  //   if (targetValue) {
+  //     const {row: targetRow, col: targetCol} = targetCell.props;
+  //     const directRelativeIndices = this.getDirectRelativeIndices(targetCell);
+  //     const conflicts = [];
+  //     let cell;
+  //     let rowLockingCells, colLockingCells;
+  //     for (cell of this.getCellsByValue(targetValue)) {
+  //       if (directRelativeIndices.rows.includes(targetRow)) {
+  //         rowLockingCells.push(cell);
+  //       } else if (directRelativeIndices.cols.includes(targetCol)) {
+  //         colLockingCells.push(cell);
+  //       }
+  //     }
+
+            
+  //   }
+  // }
+  checkValueLockingConflictAt(targetCell) {
     const targetValue = this.getCellValue(targetCell);
     if (targetValue) {
-      const conflicts = [];
+      let conflict;
+      const { row: targetRow, col: targetCol } = targetCell.props;
+      const directRelativeIndices = this.getDirectRelativeIndices(targetCell);
       let cell, value, i, subgridHasValue;
       let row, col;
       let directRelativeCols, directRelativeRows;
@@ -499,7 +521,7 @@ class Grid extends React.Component {
             }
           }
           if (valueLocked) {
-            let lockingEscaped
+            let lockingEscaped;
             directRelativeRows.push(targetRow);
             colLockingCells = colLockingCells.filter(cell => {
               col = cell.props.col;
@@ -528,41 +550,36 @@ class Grid extends React.Component {
               return !lockingEscaped;
             });
   
-            const coors = [];
+            conflict = {
+              id: uuidv1(),
+              coors: [],
+              indirectCoors: [],
+              reason: CONFLICTS.VALUE_LOCKED
+            }
             // for (cell of lockingCells) {
             for (cell of [...rowLockingCells, ...colLockingCells]) {
-              cell.addConflict(targetCell);
-              cell.status = { conflicting: true };
-              targetCell.addConflict(cell);
-              coors.push({
+              cell.addConflict(conflict);
+              conflict.coors.push({
                 row: cell.props.row,
                 col: cell.props.col
               })
             }
-            coors.push({ row: targetRow, col: targetCol });
-
-            const indirectCoors = [];
+            conflict.coors.push({ row: targetRow, col: targetCol });
+            
             for (cell of blockingCells) {
-            // for (cell of [...rowBlockingCells, ...colBlockingCells, ...otherBlockingCells]) {
-              indirectCoors.push({
+              // for (cell of [...rowBlockingCells, ...colBlockingCells, ...otherBlockingCells]) {
+              conflict.indirectCoors.push({
                 row: cell.props.row,
                 col: cell.props.col
               })
             }
-            conflicts.push({
-              coors,
-              indirectCoors,
-              reason: CONFLICTS.VALUE_LOCKED
-            })
-            break;
+            targetCell.addConflict(conflict);
+            this.conflicts.push(conflict);
+            return conflict;
           }
         }
       }
-      if (conflicts.length > 0) {
-        targetCell.status = { conflicting: true };
-        this.conflicts.push(...conflicts);
-        return conflicts;
-      } else {
+      if (!conflict) {
         return false;
       }
     } else {
@@ -571,37 +588,24 @@ class Grid extends React.Component {
   }
   uncheckConflicts(targetCell) {
     const {row, col} = targetCell.props;
-    let first, second, cell;
-    let clearConflict = false;
+    let coor;
     this.conflicts = this.conflicts.filter((conflict) => {
-      cell = undefined;
       if (conflict.reason === CONFLICTS.RELATIVE) {
-        [first, second] = conflict.coors;
-        if (first.row === row && first.col === col) {
-          cell = this.getCell(second.row, second.col);
-        }
-        if (second.row === row && second.col === col) {
-          cell = this.getCell(first.row, first.col);
-        }
-        if (cell) {
-          clearConflict = true;
-          cell.removeConflict(targetCell);
+        if (conflict.coors.some(coor => coor.row === row && coor.col === col)) {
+          for (coor of conflict.coors) {
+            this.getCell(coor.row, coor.col).removeConflict(conflict);
+          }
           return false;
         } else {
           return true;
         }
       } else if (conflict.reason === CONFLICTS.VALUE_LOCKED) {
-        let other;
         if (
           conflict.coors.some(coor => coor.row === row && coor.col === col) ||
           conflict.indirectCoors.some(coor => coor.row === row && coor.col === col)
         ) {
-          cell = conflict.coors.pop();
-          cell = this.getCell(cell.row, cell.col);
-          for (const coor of conflict.coors) {
-            other = this.getCell(coor.row, coor.col);
-            other.removeConflict(cell);
-            cell.removeConflict(other);
+          for (coor of conflict.coors) {
+            this.getCell(coor.row, coor.col).removeConflict(conflict);;
           }
           return false;
         } else {
@@ -611,10 +615,6 @@ class Grid extends React.Component {
         return true;
       }
     });
-    if (clearConflict) {
-      targetCell.status = {conflicting: false};
-      targetCell.conflicts = [];
-    }
   }
 
 //-------------------------KEY NAVIGATION------------------------------
@@ -882,12 +882,21 @@ class Grid extends React.Component {
     }
   }
 //-------------------------------------------------------------------
-  static getSubgridNumber(row, col, gridSize) {
+  static getSubgridIndices(targetSubgrid, gridSize) {
     const subgridSize = Math.sqrt(gridSize);
-    const [subgridRow, subgridCol] = [Math.floor(row/subgridSize), Math.floor(col/subgridSize)];
-    return subgridRow + subgridCol * subgridSize;
+    let startCol = (targetSubgrid % subgridSize) * subgridSize;
+    let startRow = (Math.floor(targetSubgrid / subgridSize)) * subgridSize;
+    return {
+      rows: [startRow, ++startRow, ++startRow],
+      cols: [startCol, ++startCol, ++startCol]
+    }
   }
-
+  static getSubgridNumber(targetRow, targetCol, gridSize) {
+    const subgridSize = Math.sqrt(gridSize);
+    const subgridRow = Math.floor(targetRow/subgridSize);
+    const subgridCol = Math.floor(targetCol/subgridSize);
+    return subgridRow * subgridSize + subgridCol ;
+  }
   togglePencilMode(state) {
     if (state !== undefined) {
       this.pencilMode = state;
