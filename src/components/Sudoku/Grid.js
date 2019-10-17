@@ -14,6 +14,7 @@ import {
 const CONFLICTS = {
   RELATIVE: 'RELATIVE',
   VALUE_LOCKED: 'VALUE_LOCKED',
+  VALUE_BLOCKING: 'VALUE_BLOCKING',
 }
 
 class Grid extends React.Component {
@@ -339,8 +340,8 @@ class Grid extends React.Component {
   checkConflicts(targetCell) {
     if (targetCell) {
       this.checkRelativeConflicts(targetCell);
-      this.checkValueLockingConflictAt(targetCell);
-      // this.checkValueLockingConflictFrom(targetCell);
+      this.checkValueLockedConflict(targetCell);
+      this.checkValueBlockingConflict(targetCell);
     } else {
       let cell;
       for (let row = 0; row < this.props.size; row++) {
@@ -348,7 +349,7 @@ class Grid extends React.Component {
           cell = this.getCell(row, col);
           if (this.getCellValue(cell)) {
             this.checkRelativeConflicts(cell);
-            this.checkValueLockingConflictAt(cell);
+            this.checkValueLockedConflict(cell);
           }
         }
       }
@@ -372,8 +373,8 @@ class Grid extends React.Component {
         conflict = {
           id: uuidv1(),
           coors: [
-            { row: targetRow, col: targetCol },
             { row: otherRow, col: otherCol },
+            { row: targetRow, col: targetCol },
           ],
           reason: CONFLICTS.RELATIVE
         };
@@ -404,27 +405,204 @@ class Grid extends React.Component {
       cols: [...left, ...right],
     }
   }
-  // checkValueLockingConflictFrom(targetCell) {
+  checkValueBlockingConflict(targetCell) {
     
-  //   const targetValue = this.getCellValue(targetCell);
-  //   if (targetValue) {
-  //     const {row: targetRow, col: targetCol} = targetCell.props;
-  //     const directRelativeIndices = this.getDirectRelativeIndices(targetCell);
-  //     const conflicts = [];
-  //     let cell;
-  //     let rowLockingCells, colLockingCells;
-  //     for (cell of this.getCellsByValue(targetValue)) {
-  //       if (directRelativeIndices.rows.includes(targetRow)) {
-  //         rowLockingCells.push(cell);
-  //       } else if (directRelativeIndices.cols.includes(targetCol)) {
-  //         colLockingCells.push(cell);
-  //       }
-  //     }
+    const targetValue = this.getCellValue(targetCell);
+    if (targetValue) {
+      const {row: targetRow, col: targetCol} = targetCell.props;
+      const directRelativeIndices = this.getDirectRelativeIndices(targetCell);
+      const directRelativeRows = directRelativeIndices.rows;
+      const directRelativeCols = directRelativeIndices.cols;
+      const conflicts = [];
+      let cell, i;
+      const rowLockingCells = [];
+      const colLockingCells = [];
+      const potentialLockingCells = [];
+      let relativeConflictWithinSubgrid = false;
+      let matched = false;
+      for (cell of this.getCellsByValue(targetValue)) {
+        matched = false;
+        if (cell.props.subgrid !== targetCell.props.subgrid) {
+          for (i = 0; i < directRelativeRows.length; i++) {
+            if (directRelativeRows[i] === cell.props.row) {
+              rowLockingCells.push(cell);
+              directRelativeRows.splice(i, 1);
+              matched = true;
+              break;
+            }
+          }
+          if (matched) continue;
+          for (i = 0; i < directRelativeCols.length; i++) {
+            if (directRelativeCols[i] === cell.props.col) {
+              colLockingCells.push(cell);
+              directRelativeCols.splice(i, 1);
+              matched = true;
+              break;
+            }
+          }
+          if (matched) continue;
+          potentialLockingCells.push(cell);
+        } else if (!cell.isSameCell(targetCell)) {
+          relativeConflictWithinSubgrid = true;
+          break;
+        }
+      }
+      if (!relativeConflictWithinSubgrid) {
+        const subgridSize = Math.sqrt(this.props.size);
+        
+        let rows, cols;
+        let row, col, subgrid;
+        let valueBlocked;
+        let blockingCells;
+        let conflict;
+        let startSubgrid;
+        let subgrids;
+        if (rowLockingCells.length < subgridSize) {
+          startSubgrid = Math.floor(targetCell.props.subgrid / subgridSize) * subgridSize;
+          subgrids = [];
+          for (i = 0; i < subgridSize; i++) {
+            subgrid = startSubgrid + i;
+            if (
+              rowLockingCells.some(cell => cell.props.subgrid === subgrid) ||
+              targetCell.props.subgrid === subgrid
+            ) {
+              continue;
+            } else {
+              subgrids.push(subgrid);
+            }
+          }
+          for (subgrid of subgrids) {
+            valueBlocked = true;
+            blockingCells = [];
 
-            
-  //   }
-  // }
-  checkValueLockingConflictAt(targetCell) {
+            ({ cols, rows } = Grid.getSubgridIndices(subgrid, this.props.size));
+
+            for (i = 0; i < cols.length; i++) {
+              for (cell of potentialLockingCells) {
+                if (
+                  cols[i] === cell.props.col &&
+                  directRelativeRows.some(row => !this.getCellValue(this.getCell(row, cols[i])))
+                ) {
+                  blockingCells.push(cell);
+                  cols.splice(i, 1);
+                  i--;
+                  break;
+                }
+              }
+            }
+
+            for (row of directRelativeRows) {
+              for (col of cols) {
+
+                // for (cell of potentialLockingCells) {
+                //   if (cell.props.)
+                // }
+
+                cell = this.getCell(row, col);
+                if (!this.getCellValue(cell)) {
+                  valueBlocked = false;
+                  break;
+                } else {
+                  blockingCells.push(cell);
+                }
+
+
+
+              }
+            }
+
+            if (valueBlocked) {
+              conflict = {
+                id: uuidv1(),
+                coors: [],
+                reason: CONFLICTS.VALUE_BLOCKING
+              }
+              for (cell of [...blockingCells, ...rowLockingCells]) {
+                cell.addConflict(conflict);
+                conflict.coors.push({
+                  row: cell.props.row,
+                  col: cell.props.col,
+                });
+              }
+              conflict.coors.push({ row: targetRow, col: targetCol })
+              targetCell.addConflict(conflict);
+              conflicts.push(conflict);
+            }
+          }
+        }
+
+        if (colLockingCells.length < subgridSize) {
+          startSubgrid = targetCell.props.subgrid % subgridSize;
+          subgrids = [];
+          for (i = 0; i < subgridSize; i++) {
+            subgrid = startSubgrid + i * 3;
+            if (
+              colLockingCells.some(cell => cell.props.subgrid === subgrid) ||
+              targetCell.props.subgrid === subgrid
+            ) {
+              continue;
+            } else {
+              subgrids.push(subgrid)
+            }
+          }
+          for (subgrid of subgrids) {
+            valueBlocked = true;
+            blockingCells = [];
+            ({ rows } = Grid.getSubgridIndices(subgrid, this.props.size));
+
+            for (i = 0; i < rows.length; i++) {
+              for (cell of potentialLockingCells) {
+                if (
+                  rows[i] === cell.props.row &&
+                  directRelativeCols.some(col => !this.getCellValue(this.getCell(rows[i], col)))
+                ) {
+                  blockingCells.push(cell);
+                  rows.splice(i, 1);
+                  i--;
+                  break;
+                }
+              }
+            }
+
+            for (row of rows) {
+              for (col of directRelativeCols) {
+                cell = this.getCell(row, col);
+                if (!this.getCellValue(cell)) {
+                  valueBlocked = false;
+                  break;
+                } else {
+                  blockingCells.push(cell);
+                }
+              }
+            }
+
+            if (valueBlocked) {
+              conflict = {
+                id: uuidv1(),
+                coors: [],
+                reason: CONFLICTS.VALUE_BLOCKING
+              }
+              for (cell of [...blockingCells, ...colLockingCells]) {
+                cell.addConflict(conflict);
+                conflict.coors.push({
+                  row: cell.props.row,
+                  col: cell.props.col
+                });
+              }
+              conflict.coors.push({ row: targetRow, col: targetCol });
+              targetCell.addConflict(conflict);
+              conflicts.push(conflict);
+            }
+          }
+        }
+
+        this.conflicts.push(...conflicts);
+        return conflict;
+      } 
+    } 
+    return false;
+  }
+  checkValueLockedConflict(targetCell) {
     const targetValue = this.getCellValue(targetCell);
     if (targetValue) {
       let conflict;
@@ -438,7 +616,7 @@ class Grid extends React.Component {
       let blockingCells;
       // let rowBlockingCells, colBlockingCells, otherBlockingCells;
       let valueLocked;
-
+      let matched;
       for (value of this.props.values) {
         if (value !== targetValue) {
           directRelativeRows = [...directRelativeIndices.rows];
@@ -449,6 +627,7 @@ class Grid extends React.Component {
           subgridHasValue = false;
 
           for (cell of this.getCellsByValue(value)) {
+            matched = false;
             if (cell.props.subgrid === targetCell.props.subgrid) {
               subgridHasValue = true;
               break;
@@ -457,10 +636,12 @@ class Grid extends React.Component {
               if (directRelativeRows[i] === cell.props.row) {
                 directRelativeRows.splice(i, 1);
                 rowLockingCells.push(cell);
+                matched = true;
                 // lockingCells.push(cell);
                 break;
               }
             }
+            if (matched) continue;
             for (i = 0; i < directRelativeCols.length; i++) {
               if (directRelativeCols[i] === cell.props.col) {
                 directRelativeCols.splice(i, 1);
@@ -562,7 +743,7 @@ class Grid extends React.Component {
               conflict.coors.push({
                 row: cell.props.row,
                 col: cell.props.col
-              })
+              });
             }
             conflict.coors.push({ row: targetRow, col: targetCol });
             
@@ -571,7 +752,7 @@ class Grid extends React.Component {
               conflict.indirectCoors.push({
                 row: cell.props.row,
                 col: cell.props.col
-              })
+              });
             }
             targetCell.addConflict(conflict);
             this.conflicts.push(conflict);
@@ -579,40 +760,39 @@ class Grid extends React.Component {
           }
         }
       }
-      if (!conflict) {
-        return false;
-      }
-    } else {
-      return false;
     }
+    return false;
   }
   uncheckConflicts(targetCell) {
     const {row, col} = targetCell.props;
     let coor;
     this.conflicts = this.conflicts.filter((conflict) => {
-      if (conflict.reason === CONFLICTS.RELATIVE) {
-        if (conflict.coors.some(coor => coor.row === row && coor.col === col)) {
-          for (coor of conflict.coors) {
-            this.getCell(coor.row, coor.col).removeConflict(conflict);
+      switch(conflict.reason) {
+        case CONFLICTS.RELATIVE:
+        case CONFLICTS.VALUE_BLOCKING:
+          if (conflict.coors.some(coor => coor.row === row && coor.col === col)) {
+            for (coor of conflict.coors) {
+              this.getCell(coor.row, coor.col).removeConflict(conflict);
+            }
+            return false;
+          } else {
+            return true;
           }
-          return false;
-        } else {
-          return true;
-        }
-      } else if (conflict.reason === CONFLICTS.VALUE_LOCKED) {
-        if (
-          conflict.coors.some(coor => coor.row === row && coor.col === col) ||
-          conflict.indirectCoors.some(coor => coor.row === row && coor.col === col)
-        ) {
-          for (coor of conflict.coors) {
-            this.getCell(coor.row, coor.col).removeConflict(conflict);;
+        case CONFLICTS.VALUE_LOCKED:
+          if (
+            conflict.coors.some(coor => coor.row === row && coor.col === col) ||
+            conflict.indirectCoors.some(coor => coor.row === row && coor.col === col)
+          ) {
+            for (coor of conflict.coors) {
+              this.getCell(coor.row, coor.col).removeConflict(conflict);
+            }
+            return false;
+          } else {
+            return true;
           }
-          return false;
-        } else {
+        default:
           return true;
-        }
-      } else {
-        return true;
+
       }
     });
   }
@@ -884,12 +1064,15 @@ class Grid extends React.Component {
 //-------------------------------------------------------------------
   static getSubgridIndices(targetSubgrid, gridSize) {
     const subgridSize = Math.sqrt(gridSize);
-    let startCol = (targetSubgrid % subgridSize) * subgridSize;
-    let startRow = (Math.floor(targetSubgrid / subgridSize)) * subgridSize;
-    return {
-      rows: [startRow, ++startRow, ++startRow],
-      cols: [startCol, ++startCol, ++startCol]
-    }
+    const startCol = targetSubgrid % subgridSize * subgridSize;
+    const startRow = Math.floor(targetSubgrid / subgridSize) * subgridSize;
+    const rows = [];
+    const cols = [];
+    for (let i = 0; i < subgridSize; i++) {
+      rows.push(startRow + i);
+      cols.push(startCol + i);
+    }    
+    return { rows, cols }
   }
   static getSubgridNumber(targetRow, targetCol, gridSize) {
     const subgridSize = Math.sqrt(gridSize);
@@ -926,7 +1109,7 @@ class Grid extends React.Component {
         data.push({
           value: this.getCellValue(cell),
           row, col, subgrid,
-        })
+        });
       }
     }
     return data;
