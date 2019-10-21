@@ -12,7 +12,7 @@ import {
 } from '../utils';
 
 const CONFLICTS = {
-  RELATIVE: 'RELATIVE',
+  RELATIVE_DUPLICATE: 'RELATIVE_DUPLICATE',
   VALUE_LOCKED: 'VALUE_LOCKED',
   VALUE_BLOCKING: 'VALUE_BLOCKING',
 }
@@ -289,8 +289,8 @@ class Grid extends React.Component {
           if (this.selection.type === SELECTION.TYPES.SINGLE) {
             this.unspotCellsByValue(oldValue);
           }
-          this.uncheckConflicts(targetCell);
           this.removeCellFromValueMap(targetCell, oldValue);
+          this.uncheckConflicts(targetCell);
         } 
         if (targetValue) {
           this.setValueToCellsMapping(targetCell, targetValue);
@@ -339,23 +339,23 @@ class Grid extends React.Component {
 //-------------------------CONFLICTS------------------------------
   checkConflicts(targetCell) {
     if (targetCell) {
-      this.checkRelativeConflicts(targetCell);
-      this.checkValueLockedConflict(targetCell);
-      this.checkValueBlockingConflict(targetCell);
+      this.checkRelativeDuplicates(targetCell);
+      this.checkValueLockedAt(targetCell);
+      this.checkValueBlockingFrom(targetCell);
     } else {
       let cell;
       for (let row = 0; row < this.props.size; row++) {
         for (let col = 0; col < this.props.size; col++) {
           cell = this.getCell(row, col);
           if (this.getCellValue(cell)) {
-            this.checkRelativeConflicts(cell);
-            this.checkValueLockedConflict(cell);
+            this.checkRelativeDuplicates(cell);
+            this.checkValueLockedAt(cell);
           }
         }
       }
     }
   }
-  checkRelativeConflicts(targetCell) {
+  checkRelativeDuplicates(targetCell) {
     const conflicts = [];
     let conflict;
     const cells = this.getCellsByValue(this.getCellValue(targetCell));
@@ -372,11 +372,11 @@ class Grid extends React.Component {
       if (bitMask && bitMask !== 7) {
         conflict = {
           id: uuidv1(),
-          coors: [
+          origin: { row: targetRow, col: targetCol },
+          direct: [
             { row: otherRow, col: otherCol },
-            { row: targetRow, col: targetCol },
           ],
-          reason: CONFLICTS.RELATIVE
+          reason: CONFLICTS.RELATIVE_DUPLICATE
         };
         cell.addConflict(conflict);
         targetCell.addConflict(conflict);
@@ -405,7 +405,7 @@ class Grid extends React.Component {
       cols: [...left, ...right],
     }
   }
-  checkValueBlockingConflict(targetCell) {
+  checkValueBlockingFrom(targetCell) {
     
     const targetValue = this.getCellValue(targetCell);
     if (targetValue) {
@@ -493,11 +493,6 @@ class Grid extends React.Component {
 
             for (row of directRelativeRows) {
               for (col of cols) {
-
-                // for (cell of potentialLockingCells) {
-                //   if (cell.props.)
-                // }
-
                 cell = this.getCell(row, col);
                 if (!this.getCellValue(cell)) {
                   valueBlocked = false;
@@ -505,26 +500,23 @@ class Grid extends React.Component {
                 } else {
                   blockingCells.push(cell);
                 }
-
-
-
               }
             }
 
             if (valueBlocked) {
               conflict = {
                 id: uuidv1(),
-                coors: [],
+                origin: { row: targetRow, col: targetCol },
+                direct: [],
                 reason: CONFLICTS.VALUE_BLOCKING
               }
               for (cell of [...blockingCells, ...rowLockingCells]) {
                 cell.addConflict(conflict);
-                conflict.coors.push({
+                conflict.direct.push({
                   row: cell.props.row,
                   col: cell.props.col,
                 });
               }
-              conflict.coors.push({ row: targetRow, col: targetCol })
               targetCell.addConflict(conflict);
               conflicts.push(conflict);
             }
@@ -579,17 +571,17 @@ class Grid extends React.Component {
             if (valueBlocked) {
               conflict = {
                 id: uuidv1(),
-                coors: [],
+                origin: { row: targetRow, col: targetCol },
+                direct: [],
                 reason: CONFLICTS.VALUE_BLOCKING
               }
               for (cell of [...blockingCells, ...colLockingCells]) {
                 cell.addConflict(conflict);
-                conflict.coors.push({
+                conflict.direct.push({
                   row: cell.props.row,
                   col: cell.props.col
                 });
               }
-              conflict.coors.push({ row: targetRow, col: targetCol });
               targetCell.addConflict(conflict);
               conflicts.push(conflict);
             }
@@ -602,15 +594,15 @@ class Grid extends React.Component {
     } 
     return false;
   }
-  checkValueLockedConflict(targetCell) {
+  checkValueLockedAt(targetCell) {
     const targetValue = this.getCellValue(targetCell);
     if (targetValue) {
       let conflict;
       const { row: targetRow, col: targetCol } = targetCell.props;
       const directRelativeIndices = this.getDirectRelativeIndices(targetCell);
-      let cell, value, i, subgridHasValue;
-      let row, col;
       let directRelativeCols, directRelativeRows;
+      let cell, value, i, row, col;
+      let subgridHasValue;
       // let lockingCells;
       let rowLockingCells, colLockingCells;
       let blockingCells;
@@ -702,54 +694,53 @@ class Grid extends React.Component {
             }
           }
           if (valueLocked) {
-            let lockingEscaped;
-            directRelativeRows.push(targetRow);
-            colLockingCells = colLockingCells.filter(cell => {
-              col = cell.props.col;
-              lockingEscaped = true;
-              for (row of directRelativeRows) {
-                cell = this.getCell(row, col);
-                if (!this.getCellValue(cell)) {
-                  lockingEscaped = false;
-                  break;
-                }
-              }
-              return !lockingEscaped;
-            });
+            // let lockingEscaped;
+            // directRelativeRows.push(targetRow);
+            // colLockingCells = colLockingCells.filter(cell => {
+            //   col = cell.props.col;
+            //   lockingEscaped = true;
+            //   for (row of directRelativeRows) {
+            //     cell = this.getCell(row, col);
+            //     if (!this.getCellValue(cell)) {
+            //       lockingEscaped = false;
+            //       break;
+            //     }
+            //   }
+            //   return !lockingEscaped;
+            // });
 
-            directRelativeCols.push(targetCol);
-            rowLockingCells = rowLockingCells.filter(cell => {
-              row = cell.props.row;
-              lockingEscaped = true;
-              for (col of directRelativeCols) {
-                cell = this.getCell(row, col);
-                if (!this.getCellValue(cell)) {
-                  lockingEscaped = false;
-                  break;
-                }
-              }
-              return !lockingEscaped;
-            });
-  
+            // directRelativeCols.push(targetCol);
+            // rowLockingCells = rowLockingCells.filter(cell => {
+            //   row = cell.props.row;
+            //   lockingEscaped = true;
+            //   for (col of directRelativeCols) {
+            //     cell = this.getCell(row, col);
+            //     if (!this.getCellValue(cell)) {
+            //       lockingEscaped = false;
+            //       break;
+            //     }
+            //   }
+            //   return !lockingEscaped;
+            // });
+            
             conflict = {
               id: uuidv1(),
-              coors: [],
-              indirectCoors: [],
+              origin: { row: targetRow, col: targetCol },
+              direct: [],
+              indirect: [],
               reason: CONFLICTS.VALUE_LOCKED
             }
             // for (cell of lockingCells) {
             for (cell of [...rowLockingCells, ...colLockingCells]) {
               cell.addConflict(conflict);
-              conflict.coors.push({
+              conflict.direct.push({
                 row: cell.props.row,
                 col: cell.props.col
               });
             }
-            conflict.coors.push({ row: targetRow, col: targetCol });
-            
             for (cell of blockingCells) {
               // for (cell of [...rowBlockingCells, ...colBlockingCells, ...otherBlockingCells]) {
-              conflict.indirectCoors.push({
+              conflict.indirect.push({
                 row: cell.props.row,
                 col: cell.props.col
               });
@@ -764,37 +755,59 @@ class Grid extends React.Component {
     return false;
   }
   uncheckConflicts(targetCell) {
-    const {row, col} = targetCell.props;
-    let coor;
+    const {row: targetRow, col: targetCol} = targetCell.props;
+    let coor, row, col;
+    let recheck = false;
     this.conflicts = this.conflicts.filter((conflict) => {
+      ({ row, col } = conflict.origin);
+      if (row === targetRow && col === targetCol) {
+        for (coor of conflict.direct) {
+          this.getCell(coor.row, coor.col).removeConflict(conflict);
+        }
+        targetCell.removeConflict(conflict);
+        return false;
+      }
+
       switch(conflict.reason) {
-        case CONFLICTS.RELATIVE:
+        case CONFLICTS.RELATIVE_DUPLICATE:
         case CONFLICTS.VALUE_BLOCKING:
-          if (conflict.coors.some(coor => coor.row === row && coor.col === col)) {
-            for (coor of conflict.coors) {
+          if (conflict.direct.some(coor => coor.row === targetRow && coor.col === targetCol)) {
+            for (coor of conflict.direct) {
               this.getCell(coor.row, coor.col).removeConflict(conflict);
             }
+            ({ row, col } = conflict.origin);
+            this.getCell(row, col).removeConflict(conflict);
             return false;
           } else {
             return true;
           }
         case CONFLICTS.VALUE_LOCKED:
-          if (
-            conflict.coors.some(coor => coor.row === row && coor.col === col) ||
-            conflict.indirectCoors.some(coor => coor.row === row && coor.col === col)
-          ) {
-            for (coor of conflict.coors) {
+          if (conflict.indirect.some(coor => coor.row === targetRow && coor.col === targetCol)) {
+            for (coor of conflict.direct) {
               this.getCell(coor.row, coor.col).removeConflict(conflict);
             }
+            ({row, col} = conflict.origin);
+            this.getCell(row, col).removeConflict(conflict);
+            return false;
+          } else if (conflict.direct.some(coor => coor.row === targetRow && coor.col === targetCol)) {
+            for (coor of conflict.direct) {
+              this.getCell(coor.row, coor.col).removeConflict(conflict);
+            }
+            ({ row, col } = conflict.origin);
+            const originCell = this.getCell(row, col);
+            originCell.removeConflict(conflict);
+            recheck = () => this.checkValueLockedAt(originCell);
             return false;
           } else {
             return true;
           }
         default:
-          return true;
-
+            return true;
       }
     });
+    if (recheck) {
+      recheck();
+    }
   }
 
 //-------------------------KEY NAVIGATION------------------------------
