@@ -418,180 +418,178 @@ class Grid extends React.Component {
       const rowLockingCells = [];
       const colLockingCells = [];
       const potentialLockingCells = [];
-      let relativeConflictWithinSubgrid = false;
       let matched = false;
       for (cell of this.getCellsByValue(targetValue)) {
         matched = false;
-        if (cell.props.subgrid !== targetCell.props.subgrid) {
-          for (i = 0; i < directRelativeRows.length; i++) {
-            if (directRelativeRows[i] === cell.props.row) {
-              rowLockingCells.push(cell);
-              directRelativeRows.splice(i, 1);
-              matched = true;
-              break;
+        if (
+          targetCell.props.subgrid === cell.props.subgrid ||
+          targetRow === cell.props.row ||
+          targetCol === cell.props.col
+        ) continue;
+        for (i = 0; i < directRelativeRows.length; i++) {
+          if (directRelativeRows[i] === cell.props.row) {
+            rowLockingCells.push(cell);
+            directRelativeRows.splice(i, 1);
+            matched = true;
+            break;
+          }
+        }
+        if (matched) continue;
+        for (i = 0; i < directRelativeCols.length; i++) {
+          if (directRelativeCols[i] === cell.props.col) {
+            colLockingCells.push(cell);
+            directRelativeCols.splice(i, 1);
+            matched = true;
+            break;
+          }
+        }
+        if (matched) continue;
+        potentialLockingCells.push(cell);
+    }
+      const subgridSize = Math.sqrt(this.props.size);
+      
+      let rows, cols;
+      let row, col, subgrid;
+      let valueBlocked;
+      let blockingCells;
+      let conflict;
+      let startSubgrid;
+      let subgrids;
+      if (rowLockingCells.length < subgridSize) {
+        startSubgrid = Math.floor(targetCell.props.subgrid / subgridSize) * subgridSize;
+        subgrids = [];
+        for (i = 0; i < subgridSize; i++) {
+          subgrid = startSubgrid + i;
+          if (
+            rowLockingCells.some(cell => cell.props.subgrid === subgrid) ||
+            targetCell.props.subgrid === subgrid
+          ) {
+            continue;
+          } else {
+            subgrids.push(subgrid);
+          }
+        }
+        
+        for (subgrid of subgrids) {
+          valueBlocked = true;
+          blockingCells = [];
+
+          ({ cols, rows } = Grid.getSubgridIndices(subgrid, this.props.size));
+
+          for (i = 0; i < cols.length; i++) {
+            for (cell of potentialLockingCells) {
+              if (
+                cols[i] === cell.props.col &&
+                directRelativeRows.some(row => !this.getCellValue(this.getCell(row, cols[i])))
+              ) {
+                blockingCells.push(cell);
+                cols.splice(i, 1);
+                i--;
+                break;
+              }
             }
           }
-          if (matched) continue;
-          for (i = 0; i < directRelativeCols.length; i++) {
-            if (directRelativeCols[i] === cell.props.col) {
-              colLockingCells.push(cell);
-              directRelativeCols.splice(i, 1);
-              matched = true;
-              break;
+          
+          for (row of directRelativeRows) {
+            for (col of cols) {
+              cell = this.getCell(row, col);
+              if (!this.getCellValue(cell)) {
+                valueBlocked = false;
+                break;
+              } else {
+                blockingCells.push(cell);
+              }
             }
           }
-          if (matched) continue;
-          potentialLockingCells.push(cell);
-        } else if (!cell.isSameCell(targetCell)) {
-          relativeConflictWithinSubgrid = true;
-          break;
+
+          if (valueBlocked) {
+            conflict = {
+              id: uuidv1(),
+              origin: { row: targetRow, col: targetCol },
+              direct: [],
+              reason: CONFLICTS.VALUE_BLOCKING
+            }
+            for (cell of [...blockingCells, ...rowLockingCells]) {
+              cell.addConflict(conflict);
+              conflict.direct.push({
+                row: cell.props.row,
+                col: cell.props.col,
+              });
+            }
+            targetCell.addConflict(conflict);
+            conflicts.push(conflict);
+          }
         }
       }
-      if (!relativeConflictWithinSubgrid) {
-        const subgridSize = Math.sqrt(this.props.size);
-        
-        let rows, cols;
-        let row, col, subgrid;
-        let valueBlocked;
-        let blockingCells;
-        let conflict;
-        let startSubgrid;
-        let subgrids;
-        if (rowLockingCells.length < subgridSize) {
-          startSubgrid = Math.floor(targetCell.props.subgrid / subgridSize) * subgridSize;
-          subgrids = [];
-          for (i = 0; i < subgridSize; i++) {
-            subgrid = startSubgrid + i;
-            if (
-              rowLockingCells.some(cell => cell.props.subgrid === subgrid) ||
-              targetCell.props.subgrid === subgrid
-            ) {
-              continue;
-            } else {
-              subgrids.push(subgrid);
-            }
-          }
-          for (subgrid of subgrids) {
-            valueBlocked = true;
-            blockingCells = [];
 
-            ({ cols, rows } = Grid.getSubgridIndices(subgrid, this.props.size));
-
-            for (i = 0; i < cols.length; i++) {
-              for (cell of potentialLockingCells) {
-                if (
-                  cols[i] === cell.props.col &&
-                  directRelativeRows.some(row => !this.getCellValue(this.getCell(row, cols[i])))
-                ) {
-                  blockingCells.push(cell);
-                  cols.splice(i, 1);
-                  i--;
-                  break;
-                }
-              }
-            }
-
-            for (row of directRelativeRows) {
-              for (col of cols) {
-                cell = this.getCell(row, col);
-                if (!this.getCellValue(cell)) {
-                  valueBlocked = false;
-                  break;
-                } else {
-                  blockingCells.push(cell);
-                }
-              }
-            }
-
-            if (valueBlocked) {
-              conflict = {
-                id: uuidv1(),
-                origin: { row: targetRow, col: targetCol },
-                direct: [],
-                reason: CONFLICTS.VALUE_BLOCKING
-              }
-              for (cell of [...blockingCells, ...rowLockingCells]) {
-                cell.addConflict(conflict);
-                conflict.direct.push({
-                  row: cell.props.row,
-                  col: cell.props.col,
-                });
-              }
-              targetCell.addConflict(conflict);
-              conflicts.push(conflict);
-            }
+      if (colLockingCells.length < subgridSize) {
+        startSubgrid = targetCell.props.subgrid % subgridSize;
+        subgrids = [];
+        for (i = 0; i < subgridSize; i++) {
+          subgrid = startSubgrid + i * 3;
+          if (
+            colLockingCells.some(cell => cell.props.subgrid === subgrid) ||
+            targetCell.props.subgrid === subgrid
+          ) {
+            continue;
+          } else {
+            subgrids.push(subgrid)
           }
         }
+        for (subgrid of subgrids) {
+          valueBlocked = true;
+          blockingCells = [];
+          ({ rows } = Grid.getSubgridIndices(subgrid, this.props.size));
 
-        if (colLockingCells.length < subgridSize) {
-          startSubgrid = targetCell.props.subgrid % subgridSize;
-          subgrids = [];
-          for (i = 0; i < subgridSize; i++) {
-            subgrid = startSubgrid + i * 3;
-            if (
-              colLockingCells.some(cell => cell.props.subgrid === subgrid) ||
-              targetCell.props.subgrid === subgrid
-            ) {
-              continue;
-            } else {
-              subgrids.push(subgrid)
+          for (i = 0; i < rows.length; i++) {
+            for (cell of potentialLockingCells) {
+              if (
+                rows[i] === cell.props.row &&
+                directRelativeCols.some(col => !this.getCellValue(this.getCell(rows[i], col)))
+              ) {
+                blockingCells.push(cell);
+                rows.splice(i, 1);
+                i--;
+                break;
+              }
             }
           }
-          for (subgrid of subgrids) {
-            valueBlocked = true;
-            blockingCells = [];
-            ({ rows } = Grid.getSubgridIndices(subgrid, this.props.size));
 
-            for (i = 0; i < rows.length; i++) {
-              for (cell of potentialLockingCells) {
-                if (
-                  rows[i] === cell.props.row &&
-                  directRelativeCols.some(col => !this.getCellValue(this.getCell(rows[i], col)))
-                ) {
-                  blockingCells.push(cell);
-                  rows.splice(i, 1);
-                  i--;
-                  break;
-                }
+          for (row of rows) {
+            for (col of directRelativeCols) {
+              cell = this.getCell(row, col);
+              if (!this.getCellValue(cell)) {
+                valueBlocked = false;
+                break;
+              } else {
+                blockingCells.push(cell);
               }
             }
+          }
 
-            for (row of rows) {
-              for (col of directRelativeCols) {
-                cell = this.getCell(row, col);
-                if (!this.getCellValue(cell)) {
-                  valueBlocked = false;
-                  break;
-                } else {
-                  blockingCells.push(cell);
-                }
-              }
+          if (valueBlocked) {
+            conflict = {
+              id: uuidv1(),
+              origin: { row: targetRow, col: targetCol },
+              direct: [],
+              reason: CONFLICTS.VALUE_BLOCKING
             }
-
-            if (valueBlocked) {
-              conflict = {
-                id: uuidv1(),
-                origin: { row: targetRow, col: targetCol },
-                direct: [],
-                reason: CONFLICTS.VALUE_BLOCKING
-              }
-              for (cell of [...blockingCells, ...colLockingCells]) {
-                cell.addConflict(conflict);
-                conflict.direct.push({
-                  row: cell.props.row,
-                  col: cell.props.col
-                });
-              }
-              targetCell.addConflict(conflict);
-              conflicts.push(conflict);
+            for (cell of [...blockingCells, ...colLockingCells]) {
+              cell.addConflict(conflict);
+              conflict.direct.push({
+                row: cell.props.row,
+                col: cell.props.col
+              });
             }
+            targetCell.addConflict(conflict);
+            conflicts.push(conflict);
           }
         }
+      }
 
-        this.conflicts.push(...conflicts);
-        return conflict;
-      } 
-    } 
+      this.conflicts.push(...conflicts);
+      return conflict;
+  } 
     return false;
   }
   checkValueLockedAt(targetCell) {
@@ -651,7 +649,8 @@ class Grid extends React.Component {
           // rowBlockingCells = [];
           for (row of directRelativeRows) {
             cell = this.getCell(row, targetCol);
-            if (!this.getCellValue(cell)) {
+            value = this.getCellValue(cell);
+            if (!value || value === targetValue) {
               blockingCells = [];
               // rowBlockingCells = [];
               valueLocked = false;
@@ -694,35 +693,6 @@ class Grid extends React.Component {
             }
           }
           if (valueLocked) {
-            // let lockingEscaped;
-            // directRelativeRows.push(targetRow);
-            // colLockingCells = colLockingCells.filter(cell => {
-            //   col = cell.props.col;
-            //   lockingEscaped = true;
-            //   for (row of directRelativeRows) {
-            //     cell = this.getCell(row, col);
-            //     if (!this.getCellValue(cell)) {
-            //       lockingEscaped = false;
-            //       break;
-            //     }
-            //   }
-            //   return !lockingEscaped;
-            // });
-
-            // directRelativeCols.push(targetCol);
-            // rowLockingCells = rowLockingCells.filter(cell => {
-            //   row = cell.props.row;
-            //   lockingEscaped = true;
-            //   for (col of directRelativeCols) {
-            //     cell = this.getCell(row, col);
-            //     if (!this.getCellValue(cell)) {
-            //       lockingEscaped = false;
-            //       break;
-            //     }
-            //   }
-            //   return !lockingEscaped;
-            // });
-            
             conflict = {
               id: uuidv1(),
               origin: { row: targetRow, col: targetCol },
