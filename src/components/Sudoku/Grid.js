@@ -83,13 +83,13 @@ class Grid extends React.Component {
   shouldComponentUpdate(nextProps) {
     const newValues = nextProps.values;
     const oldValues = this.props.values;
-    let newValue, oldValue, cells;
+    let newValue, oldValue, cells, cell;
     for (let i = 0; i < newValues.length; i++) {
       newValue = newValues[i];
       oldValue = oldValues[i];
       if (newValue !== oldValue) {
         cells = this.valueToCellsMap.get(oldValue);
-        for (const cell of cells) {
+        for (cell of cells) {
           cell.setState({cellValue: newValue});
         }
         this.valueToCellsMap.set(newValue, cells);
@@ -248,9 +248,10 @@ class Grid extends React.Component {
 //-------------------------KEY CELL VALUE INPUT------------------------------
   inputCellsValue(key) {
     const inputValue = this.valueMap.get(key);
+    let cell;
     if (this.pencilMode) {
       let oldValue;
-      for (const cell of this.selection.cells) {
+      for (cell of this.selection.cells) {
         oldValue = this.getCellValue(cell);
         if (oldValue) {
           this.removeCellFromValueMap(cell, oldValue);
@@ -272,7 +273,7 @@ class Grid extends React.Component {
         }));
       }
     } else {
-      for (const cell of this.selection.cells) {
+      for (cell of this.selection.cells) {
         this.updateCellValue(
           cell, 
           inputValue !== this.getCellValue(cell) ? inputValue : ''
@@ -324,7 +325,8 @@ class Grid extends React.Component {
     }
   }
   clearCellsValue() {
-    for (const cell of this.selection.cells) {
+    let cell;
+    for (cell of this.selection.cells) {
       if (this.getCellValue(cell)) {
         this.updateCellValue(cell, '');
       } else {
@@ -361,8 +363,8 @@ class Grid extends React.Component {
     const cells = this.getCellsByValue(this.getCellValue(targetCell));
     const { row: targetRow, col: targetCol, subgrid: targetSubgrid } = targetCell.props;
     let otherRow, otherCol, otherSubgrid;
-    let bitMask;
-    for (const cell of cells) {
+    let cell, bitMask;
+    for (cell of cells) {
       ({ row: otherRow, col: otherCol, subgrid: otherSubgrid } = cell.props);
       bitMask = (
         (targetRow === otherRow) |
@@ -977,8 +979,9 @@ class Grid extends React.Component {
 
   clearSelection() {
     const lastSelectedCell = this.selection.focus;
+    let cell;
     if (this.selection.type !== SELECTION.TYPES.SINGLE) {
-      for (const cell of this.selection.cells) {
+      for (cell of this.selection.cells) {
         cell.status = {selected: false};
       }
     } else if (lastSelectedCell) {
@@ -1086,8 +1089,9 @@ class Grid extends React.Component {
 
   getCellsData() {
     const data = [];
-    for (const cellRow of this.cells) {
-      for (const cell of cellRow) {
+    let cellRow, cell;
+    for (cellRow of this.cells) {
+      for (cell of cellRow) {
         const {row, col, subgrid} = cell.props;
         data.push({
           value: this.getCellValue(cell),
