@@ -75,9 +75,9 @@ class Sudoku extends React.Component {
     const targetGridIndex = this.props.sudokus.activeIndex;
     try {
       let cellValues = targetGrid.getCellValues();
-      this.props.startFetch(cellValues);
       let res, error;
       if (type === 'solution') {
+        this.props.startFetch(cellValues);
         res = await fetch('/api/solver/sudoku/classic', {
           method: 'POST',
           credentials: 'same-origin',
@@ -94,6 +94,8 @@ class Sudoku extends React.Component {
 
         ({ solution: cellValues, error } = await res.json());
       } else if (type === 'generation') {
+        // TODO: remove early development notice
+        this.props.startFetch(cellValues, '(Early development) Generator configurations will be available soon!');
         res = await fetch('/api/generator/sudoku/classic', {
           method: 'POST',
           credentials: 'same-origin',
@@ -111,7 +113,12 @@ class Sudoku extends React.Component {
       switch(res.status) {
         case 200:
           targetGrid.updateCellValues(cellValues);
-          this.props.applyFetch(targetGridIndex, cellValues);
+          // TODO: remove early development notice
+          if (type === 'generation') {
+            this.props.applyFetch(targetGridIndex, cellValues, '(Early development) Generator configurations will be available soon!');
+          } else {
+            this.props.applyFetch(targetGridIndex, cellValues);
+          }
           break;
         case 209:
           this.props.endFetch(targetGridIndex, {
@@ -244,13 +251,21 @@ const mapStateToProps = (state) => ({
 
 const mapDispatchToProps = dispatch => ({
   togglePencilMode: () => dispatch(SudokuPencilToggle()),
-  startFetch: async (cellValues) => batch(() => {
-    dispatch(SnackbarGenericInfo({ message: snackbarMessages.fetching }));
+  startFetch: async (cellValues, customMessage) => batch(() => {
+    if (customMessage) {
+      dispatch(SnackbarGenericInfo({ message: customMessage }));
+    } else {
+      dispatch(SnackbarGenericInfo({ message: snackbarMessages.fetching }));
+    }
     dispatch(SudokuFetchStart(cellValues));
   }),
-  applyFetch: (cellValues) => batch(() => {
-    dispatch(SnackbarGenericSuccess({ message: snackbarMessages.fetchSuccess }));
-    dispatch(SudokuFetchApply(cellValues));
+  applyFetch: (index, cellValues, customMessage) => batch(() => {
+    if (customMessage) {
+      dispatch(SnackbarGenericInfo({ message: customMessage }));
+    } else {
+      dispatch(SnackbarGenericSuccess({ message: snackbarMessages.fetchSuccess }));
+    }
+    dispatch(SudokuFetchApply(index, cellValues));
   }),
   endFetch: (index, error) => batch(() => {
     dispatch(SudokuFetchEnd(index));

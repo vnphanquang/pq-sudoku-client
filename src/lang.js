@@ -17,7 +17,7 @@ export const snackbarMessages = {
   largeGrid: 'For large grid, consider using devices with wider viewport.',
   fetching: 'Requesting from sever...',
   fetchSuccess: 'Request succeeded, applying changes....',
-  fetchTimeout: 'Taking too long. Request has closed!',
+  fetchTimeout: 'Timeout! Please try again at another time!',
   alreadySolved: 'Grid is already solved',
   cellConflicts: 'Please check conflicts within grid!',
 }
